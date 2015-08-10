@@ -94,8 +94,8 @@ if (!defined("IN_ESOTALK")) exit;
 				font-style: normal;
 			}
 			span.highlight {
-				background: #fdef34; 
-				padding: 1px 4px; 
+				background: #fdef34;
+				padding: 1px 4px;
 				border-radius: 3px;
 			}
 
@@ -157,7 +157,7 @@ if (!defined("IN_ESOTALK")) exit;
 				padding: 15px 25px;
 				-webkit-appearance: none;
 			}
-			.button:hover, 
+			.button:hover,
 			.button:active {
 				border-color: #ddd;
 			}
@@ -202,7 +202,6 @@ if (!defined("IN_ESOTALK")) exit;
 				font-size: 90%;
 			}
 			.warning strong {
-				display:block;
 				font-weight: 600;
 				color: #666;
 			}
