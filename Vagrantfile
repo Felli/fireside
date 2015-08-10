@@ -24,11 +24,11 @@ Vagrant.configure(2) do |config|
         end
 
         app.vm.provision "setup", type:"shell" do |sh|
-            sh.path = "container/setup.sh"
+            sh.path = "vagrant/setup.sh"
         end
 
         app.vm.provision "compose", type: "shell", run: "always" do |sh|
-            sh.path = "container/compose.sh"
+            sh.path = "vagrant/compose.sh"
         end
 
     end
