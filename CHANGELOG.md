@@ -6,6 +6,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
 - This changelog
 - Vagrant development environment
+### Fixed
+- Small formatting bug on installer messages showing unwritable directories
 
 ## 1.0.0 - 2014-08-01
 ### Added
