@@ -5,6 +5,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ## [Unreleased][unreleased]
 ### Added
 - This changelog
+- Vagrant development environment
 
 ## 1.0.0 - 2014-08-01
 ### Added
