@@ -13,6 +13,7 @@ robots.txt
 
 addons/plugins/*
 addons/languages/*
+addons/languages/English/*
 addons/skins/*
 addons/libraries/*
 !addons/plugins/BBCode
@@ -20,6 +21,7 @@ addons/libraries/*
 !addons/plugins/Emoticons
 !addons/plugins/SMTP
 !addons/plugins/index.html
+!addons/languages/English/
 !addons/languages/English/definitions.php
 !addons/languages/English/definitions.BBCode.php
 !addons/languages/English/definitions.Debug.php
