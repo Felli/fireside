@@ -8,6 +8,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
 - This changelog
 - Vagrant development environment
+
 ### Fixed
 - English translation files added that were missing from 1.0.0 release
 - Small formatting bug on installer messages showing unwritable directories
