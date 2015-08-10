@@ -20,7 +20,7 @@ Vagrant.configure(2) do |config|
         app.vm.provision "docker" do |d|
             d.pull_images "cogniteev/echo:latest"
             d.pull_images "mariadb:latest"
-            d.build_image "/var/www/container/"
+            d.build_image "/var/www/docker/"
         end
 
         app.vm.provision "setup", type:"shell" do |sh|
