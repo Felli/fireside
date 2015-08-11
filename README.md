@@ -20,7 +20,7 @@ Installing Fireside is super easy. In brief, simply:
 
 Fireside provides a Vagrant developer environment that uses Docker and Compose behind the scenes.
 
-To run a local copy of Fireside, [install Vagrant](https://docs.vagrantup.com/v2/installation/index.html) and run
+To run a local copy of Fireside, [install Vagrant](https://docs.vagrantup.com/v2/installation/index.html) and run:
 
 ```
 $ vagrant up
