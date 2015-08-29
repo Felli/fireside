@@ -316,11 +316,13 @@ public function init()
 		$this->addJSFile("core/js/lib/jquery.misc.js", true);
 		$this->addJSFile("core/js/lib/jquery.history.js", true);
 		$this->addJSFile("core/js/lib/jquery.scrollTo.js", true);
+		// https://github.com/ceesvanegmond/minify
 		$this->addJSFile("core/js/lib/underscore-min.js", true);
 		$this->addJSFile("core/js/lib/backbone-min.js", true);
 		$this->addJSFile("core/js/lib/tether.min.js", true);
 		$this->addJSFile("core/js/lib/drop.min.js", true);
 		$this->addJSFile("core/js/global.js", true);
+		$this->addJSFile("core/js/global/dropdown.js", true);
 		$this->addJSLanguage("message.ajaxRequestPending", "message.ajaxDisconnected", "Loading...", "Notifications");
 		$this->addJSVar("notificationCheckInterval", C("esoTalk.notificationCheckInterval"));
 
