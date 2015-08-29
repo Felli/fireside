@@ -322,7 +322,7 @@ public function init()
 		$this->addJSFile("core/js/lib/tether.min.js", true);
 		$this->addJSFile("core/js/lib/drop.min.js", true);
 		$this->addJSFile("core/js/global.js", true);
-		$this->addJSFile("core/js/global/dropdown.js", true);
+		$this->addJSFile("core/js/global/popup.js", true);
 		$this->addJSLanguage("message.ajaxRequestPending", "message.ajaxDisconnected", "Loading...", "Notifications");
 		$this->addJSVar("notificationCheckInterval", C("esoTalk.notificationCheckInterval"));
 
