@@ -2,6 +2,8 @@
 // Copyright 2011 Toby Zerner, Simon Zerner
 // This file is part of esoTalk. Please see the included license file for usage information.
 
+use MatthiasMullie\Minify;
+
 if (!defined("IN_ESOTALK")) exit;
 
 /**
@@ -238,7 +240,7 @@ public function notificationMessages($notifications)
 {
 	// Only show the first 3 notifications.
 	$notifications = array_slice($notifications, 0, 3);
-	
+
 	foreach ($notifications as $notification) {
 
 		// If we've already shown this notification as a message before, don't show it again.
@@ -403,7 +405,7 @@ public function render($view = "")
 	$this->trigger("renderBefore");
 
 	if ($this->responseType == RESPONSE_TYPE_DEFAULT and ET::$session->user) {
-		
+
 		// Fetch all unread notifications so we have a count for the notifications button.
 		$notifications = ET::activityModel()->getNotifications(-1);
 		$count = count($notifications);
@@ -411,7 +413,7 @@ public function render($view = "")
 
 		// Show messages with these notifications.
 		$this->notificationMessages($notifications);
-		
+
 	}
 
 	// Set up the master view, content type, and other stuff depending on the response type.
@@ -734,7 +736,6 @@ public function addToHead($string)
 	$this->head .= "\n$string";
 }
 
-
 /**
  * Take a collection of CSS or JS files and create and return the filename of an aggregation file which
  * contains all of their individual contents.
@@ -745,6 +746,16 @@ public function addToHead($string)
  */
 protected function aggregateFiles($files, $type)
 {
+
+	require_once PATH_LIBRARY."/vendor/converter/Converter.php";
+	require_once PATH_LIBRARY."/vendor/minify/src/Minify.php";
+	require_once PATH_LIBRARY."/vendor/minify/src/JS.php";
+	require_once PATH_LIBRARY."/vendor/minify/src/CSS.php";
+	require_once PATH_LIBRARY."/vendor/minify/src/Exception.php";
+
+	$jsmin = new Minify\JS();
+	$cssmin = new Minify\CSS();
+
 	// Construct an array of filenames, and get the maximum last modifiction time of all the files.
 	$filenames = array();
 	$lastModTime = 0;
@@ -758,17 +769,28 @@ protected function aggregateFiles($files, $type)
 
 	// If this file doesn't exist, or if it is out of date, generate and write it.
 	if (!file_exists($file) or filemtime($file) < $lastModTime) {
-		$contents = "";
 
 		// Get the contents of each of the files, fixing up image URL paths for CSS files.
 		foreach ($files as $f) {
-			$content = file_get_contents(PATH_ROOT."/".$f);
+			if ($type == "css") {
+				$cssmin->add(PATH_ROOT."/".$f);
+			}
+			else if ($type == "js") {
+				$jsmin->add(PATH_ROOT."/".$f);
+			}
+			/*$content = file_get_contents(PATH_ROOT."/".$f);
 			if ($type == "css") $content = preg_replace("/url\(('?)/i", "url($1".getResource(pathinfo($f, PATHINFO_DIRNAME)."/"), $content);
-			$contents .= $content." ";
+			$contents .= $content." ";*/
 		}
 
 		// Minify and write the contents.
-		file_force_contents($file, $type == "css" ? minifyCSS($contents) : minifyJS($contents));
+		if ($type == "css") {
+			$cssmin->minify($file);
+		}
+		else if ($type == "js") {
+			$jsmin->minify($file);
+		}
+		//file_force_contents($file, $type == "css" ? minifyCSS($contents) : minifyJS($contents));
 	}
 
 	return array($file);
