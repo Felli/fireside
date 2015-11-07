@@ -3,7 +3,7 @@ MAINTAINER Jason Nall <jason@dreamhearth.org>
 
 # System setup & requirements
 RUN apk update && \
-    apk add nginx supervisor php php-fpm php-mysql php-gd php-pdo php-pdo_mysql php-apcu php-intl php-imap php-mcrypt php-pspell php-pear php-phar php-openssl php-json gzip curl && \
+    apk add nginx supervisor php php-fpm php-mysql php-gd php-pdo php-pdo_mysql php-apcu php-intl php-imap php-mcrypt php-pspell php-pear php-phar php-openssl php-json gzip curl git && \
     rm -rf /var/cache/apk/* /etc/init.d/nginx /etc/init.d/php-fpm
 
 # Install composer
