@@ -22,7 +22,7 @@ class ETConversationsController extends ETController {
 public function action_index($channelSlug = false)
 {
 	if (!$this->allowed()) return;
-	
+
 	list($channelInfo, $currentChannels, $channelIds, $includeDescendants) = $this->getSelectedChannels($channelSlug);
 
 	// Now we need to construct some arrays to determine which channel "tabs" to show in the view.
@@ -347,7 +347,7 @@ public function action_markAllAsRead()
 public function action_markAsRead($channelSlug = false)
 {
 	// We simply let the index method handle this, because we want to perform a search like normal
-	// but then mark the results as read before we display them. The index method will check if the 
+	// but then mark the results as read before we display them. The index method will check if the
 	// original method called on the controller was "markAsRead" and if it is, mark the results as
 	// read.
 	$this->action_index($channelSlug);
@@ -429,7 +429,7 @@ public function action_update($channelSlug = "", $query = "")
 
 /**
  * Add fulltext keywords to be highlighted. Make sure we keep ones "in quotes" together.
- * 
+ *
  * @param array $terms An array of words to highlight.
  * @return void
  */

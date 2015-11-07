@@ -4,8 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "89ea8f88887ddff69a932f9da6d7b826",
-    "content-hash": "85c88a68fb6d21fad47d0b35dad4c241",
+    "hash": "5b40f64f217f91b514e6f229ea403bbd",
+    "content-hash": "c6567becbbdd836c104c7a7af6d6aada",
     "packages": [
         {
             "name": "matthiasmullie/minify",
@@ -113,12 +113,61 @@
                 "relative"
             ],
             "time": "2015-06-01 15:20:30"
+        },
+        {
+            "name": "zordius/lightncandy",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/zordius/lightncandy.git",
+                "reference": "5753dec40ddaf8b5c70a1837bf0ff4d8e8647506"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/zordius/lightncandy/zipball/5753dec40ddaf8b5c70a1837bf0ff4d8e8647506",
+                "reference": "5753dec40ddaf8b5c70a1837bf0ff4d8e8647506",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3.0"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "4.0.17"
+            },
+            "type": "library",
+            "autoload": {
+                "classmap": [
+                    "src/lightncandy.php"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Zordius Chen",
+                    "email": "zordius@yahoo-inc.com"
+                }
+            ],
+            "description": "An extremely fast PHP implementation of handlebars ( http://handlebarsjs.com/ ) and mustache ( http://mustache.github.io/ ).",
+            "homepage": "https://github.com/zordius/lightncandy",
+            "keywords": [
+                "handlebars",
+                "logicless",
+                "mustache",
+                "php",
+                "template"
+            ],
+            "time": "2015-11-05 07:14:57"
         }
     ],
     "packages-dev": [],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": [],
+    "stability-flags": {
+        "zordius/lightncandy": 20
+    },
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": [],

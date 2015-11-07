@@ -37,6 +37,7 @@ if (!defined("PATH_CONTROLLERS")) define("PATH_CONTROLLERS", PATH_CORE."/control
 if (!defined("PATH_LIBRARY")) define("PATH_LIBRARY", PATH_CORE."/lib");
 if (!defined("PATH_MODELS")) define("PATH_MODELS", PATH_CORE."/models");
 if (!defined("PATH_VIEWS")) define("PATH_VIEWS", PATH_CORE."/views");
+if (!defined("PATH_TEMPLATES")) define("PATH_TEMPLATES", PATH_CORE."/templates");
 
 // Require composer packages
 require PATH_VENDOR."/autoload.php";

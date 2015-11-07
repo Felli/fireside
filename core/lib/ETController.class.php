@@ -441,7 +441,7 @@ public function render($view = "")
 
 	// If we're just outputting the view on its own, do that now.
 	if ($this->responseType === RESPONSE_TYPE_VIEW) {
-		$this->renderView($view, $this->data);
+		$this->renderTemplate($view, $this->data);
 	}
 
 	// Otherwise, set up the master view and render it.
@@ -490,8 +490,7 @@ public function render($view = "")
 
 		}
 
-		$this->renderView($this->masterView, $data);
-
+        $this->renderTemplate($this->masterView, $data);
 	}
 
 	$this->trigger("renderAfter");
@@ -601,7 +600,7 @@ public function allowed($key = "esoTalk.visibleToGuests")
 public function getViewContents($view, $data = array())
 {
 	ob_start();
-	$this->renderView($view, $data);
+	$this->renderTemplate($view, $data);
 	$content = ob_get_clean();
 	return $content;
 }
@@ -627,6 +626,63 @@ public function renderView($view, $data = array())
 
 
 /**
+ * Renders a view with the corresponding handlebars template.
+ *
+ * @param string $view The name of the template to render.
+ * @param array $data An array of data to pass to the template.
+ * @return void
+ */
+public function renderTemplate($template, $data = array())
+{
+	ob_start();
+
+    require_once(PATH_VENDOR."/zordius/lightncandy/src/lightncandy.php");
+
+    // Get the filename
+    $file = $this->getTemplatePath($template);
+
+	// Get the maximum last modifiction time of the file.
+    $lastModTime = 0;
+    $lastModTime = max($lastModTime, filemtime($file));
+
+	// Construct a filename for the compiled template.
+	$compiled = PATH_ROOT."/cache/templates/".str_replace('/','_',$template).".php";
+
+	// If this file doesn't exist, or if it is out of date, generate and write it.
+	if (!file_exists($compiled) or filemtime($compiled) < $lastModTime) {
+
+		// Get the contents of each of the files, fixing up image URL paths for CSS files.
+        $handlebars = file_get_contents($file);
+
+        if ($handlebars) {
+            $phpStr = '<?php if (!defined("IN_ESOTALK")) exit; ?>';
+            $phpStr = $phpStr . LightnCandy::compile($handlebars, Array(
+                'basedir' => Array(
+                    PATH_TEMPLATES.'/partials'
+                ),
+                'fileext' => Array(
+                    '.hbs'
+                )
+            ));
+            file_put_contents($compiled, $phpStr);
+        }
+
+		// Minify and write the contents.
+
+	}
+
+    $renderer = include($compiled);
+    echo $renderer($data);
+
+    $content = ob_get_clean();
+
+	$this->trigger("renderView", array($template, &$content, $data));
+
+    echo $content;
+}
+
+
+/**
  * Gets the full filepath to the specified view.
  *
  * @param string $view The name of the view to get the filepath of.
@@ -647,6 +703,32 @@ public function getViewPath($view)
 
 	// Otherwise, just return the default view.
 	return PATH_VIEWS."/$view.php";
+}
+
+
+/**
+ * Gets the full filepath to the specified template.
+ *
+ * @param string $view The name of the template to get the filepath of.
+ * @return string The filepath of the template.
+ */
+public function getTemplatePath($template)
+{
+	// If the view has a file extension, assume it contains the full file path and use it as is.
+	if (pathinfo($template, PATHINFO_EXTENSION) == "hbs") return $template;
+
+	// Check the skin to see if it contains this view.
+	// TODO(jsonnull): uncomment
+    // if (file_exists($skinView = ET::$skin->view($view))) return $skinView;
+
+	// Check loaded plugins to see if one of them contains the view.
+    // TODO(jsonnull): uncomment
+	/*foreach (ET::$plugins as $k => $v) {
+		if (file_exists($pluginView = $v->view($view))) return $pluginView;
+	}*/
+
+	// Otherwise, just return the default template.
+	return PATH_TEMPLATES."/$template.hbs";
 }
 
 
