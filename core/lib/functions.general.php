@@ -185,21 +185,6 @@ function minifyCSS($css)
 
 
 /**
- * Minify a JavaScript string using JSMin.
- *
- * @param string $js The JavaScript to minify.
- * @return string The minified result.
- *
- * @package esoTalk
- */
-function minifyJS($js)
-{
-	require_once PATH_LIBRARY."/vendor/jsmin.php";
-	return JSMin::minify($js);
-}
-
-
-/**
  * Send an email with proper headers.
  *
  * @param string $to The address to send the email to.
@@ -415,13 +400,13 @@ function slug($string)
 {
 	// If there are any characters other than basic alphanumeric, space, punctuation, then we need to attempt transliteration.
 	if (preg_match("/[^\x20-\x7f]/", $string)) {
-	
+
 		// Thanks to krakos for this code! http://esotalk.org/forum/582-unicode-in-usernames-and-url-s
 		if (function_exists('transliterator_transliterate')) {
 
 			// Unicode decomposition rules states that these cannot be decomposed, hence
 			// we have to deal with them manually. Note: even though “scharfes s” is commonly
-			// transliterated as “sz”, in this context “ss” is preferred, as it's the most popular 
+			// transliterated as “sz”, in this context “ss” is preferred, as it's the most popular
 			// method among German speakers.
 			$src = array('œ', 'æ', 'đ', 'ø', 'ł', 'ß', 'Œ', 'Æ', 'Đ', 'Ø', 'Ł');
 			$dst = array('oe','ae','d', 'o', 'l', 'ss', 'OE', 'AE', 'D', 'O', 'L');
@@ -430,7 +415,7 @@ function slug($string)
 			// Using transliterator to get rid of accents and convert non-Latin to Latin
 			$string = transliterator_transliterate("Any-Latin; NFD; [:Nonspacing Mark:] Remove; NFC; [:Punctuation:] Remove; Lower();", $string);
 
-		} 
+		}
 		else {
 
 			// A fallback to old method.
@@ -713,7 +698,7 @@ function json_decode($json)
 function URL($url = "", $absolute = false)
 {
 	if (preg_match('/^(https?\:)?\/\//', $url)) return $url;
-	
+
 	// Strip off the hash.
 	$hash = strstr($url, "#");
 	if ($hash) $url = substr($url, 0, -strlen($hash));

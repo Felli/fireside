@@ -778,9 +778,6 @@ protected function aggregateFiles($files, $type)
 			else if ($type == "js") {
 				$jsmin->add(PATH_ROOT."/".$f);
 			}
-			/*$content = file_get_contents(PATH_ROOT."/".$f);
-			if ($type == "css") $content = preg_replace("/url\(('?)/i", "url($1".getResource(pathinfo($f, PATHINFO_DIRNAME)."/"), $content);
-			$contents .= $content." ";*/
 		}
 
 		// Minify and write the contents.
@@ -790,7 +787,6 @@ protected function aggregateFiles($files, $type)
 		else if ($type == "js") {
 			$jsmin->minify($file);
 		}
-		//file_force_contents($file, $type == "css" ? minifyCSS($contents) : minifyJS($contents));
 	}
 
 	return array($file);
