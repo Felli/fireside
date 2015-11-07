@@ -11,6 +11,8 @@ uploads/*
 
 robots.txt
 
+vendor
+
 addons/plugins/*
 addons/languages/*
 addons/languages/English/*

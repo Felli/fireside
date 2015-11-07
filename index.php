@@ -15,5 +15,6 @@ define("PATH_LANGUAGES", PATH_ROOT."/addons/languages");
 define("PATH_PLUGINS", PATH_ROOT."/addons/plugins");
 define("PATH_SKINS", PATH_ROOT."/addons/skins");
 define("PATH_UPLOADS", PATH_ROOT."/uploads");
+define("PATH_VENDOR", PATH_ROOT."/vendor");
 
 require PATH_CORE."/bootstrap.php";

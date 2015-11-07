@@ -38,6 +38,9 @@ if (!defined("PATH_LIBRARY")) define("PATH_LIBRARY", PATH_CORE."/lib");
 if (!defined("PATH_MODELS")) define("PATH_MODELS", PATH_CORE."/models");
 if (!defined("PATH_VIEWS")) define("PATH_VIEWS", PATH_CORE."/views");
 
+// Require composer packages
+require PATH_VENDOR."/autoload.php";
+
 // Include some essential files.
 require PATH_LIBRARY."/functions.general.php";
 require PATH_LIBRARY."/ET.class.php"; // phone home!
@@ -260,7 +263,7 @@ if (C("esoTalk.installed")) {
 	if (file_exists($file = PATH_SKINS."/$skinName/skin.php")) include_once $file;
 	$skinClass = "ETSkin_".$skinName;
 	if (class_exists($skinClass)) ET::$skin = new $skinClass("addons/skins/".$skinName);
-	
+
 }
 
 // If we haven't got a working skin, just use the base class. It'll be ugly, but it'll do.

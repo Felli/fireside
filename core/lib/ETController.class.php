@@ -747,11 +747,11 @@ public function addToHead($string)
 protected function aggregateFiles($files, $type)
 {
 
-	require_once PATH_LIBRARY."/vendor/converter/Converter.php";
-	require_once PATH_LIBRARY."/vendor/minify/src/Minify.php";
-	require_once PATH_LIBRARY."/vendor/minify/src/JS.php";
-	require_once PATH_LIBRARY."/vendor/minify/src/CSS.php";
-	require_once PATH_LIBRARY."/vendor/minify/src/Exception.php";
+	/*require_once PATH_VENDOR."/vendor/converter/Converter.php";
+	require_once PATH_VENDOR."/vendor/minify/src/Minify.php";
+	require_once PATH_VENDOR."/vendor/minify/src/JS.php";
+	require_once PATH_VENDOR."/vendor/minify/src/CSS.php";
+	require_once PATH_VENDOR."/vendor/minify/src/Exception.php";*/
 
 	$jsmin = new Minify\JS();
 	$cssmin = new Minify\CSS();

@@ -27,7 +27,7 @@ Vagrant.configure(2) do |config|
             d.build_image "/var/www/docker/"
         end
 
-        # Use the shell to install docker
+        # Use the shell to install docker and composer
         app.vm.provision "setup", type:"shell", inline: <<-SHELL
             curl -s -L https://github.com/docker/compose/releases/download/1.3.3/docker-compose-`uname -s`-`uname -m` > /usr/local/bin/docker-compose
             chmod +x /usr/local/bin/docker-compose
@@ -36,6 +36,11 @@ Vagrant.configure(2) do |config|
         # Run compose every time the machine is brought up
         app.vm.provision "compose", type: "shell", run: "always", inline: <<-SHELL
             cd /var/www/docker && docker-compose up -d
+        SHELL
+
+        # Every time the machine is brought up, install composer dependencies
+        app.vm.provision "composer", type: "shell", run: "always", inline: <<-SHELL
+            cd /var/www/docker && docker-compose run web sh -c "cd /var/www/ && composer install --no-progress"
         SHELL
 
     end
