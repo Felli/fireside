@@ -123,6 +123,7 @@ ETFactory::register("form", "ETForm", PATH_LIBRARY."/ETForm.class.php");
 ETFactory::register("format", "ETFormat", PATH_LIBRARY."/ETFormat.class.php");
 ETFactory::register("upload", "ETUpload", PATH_LIBRARY."/ETUpload.class.php");
 ETFactory::register("menu", "ETMenu", PATH_LIBRARY."/ETMenu.class.php");
+ETFactory::register("renderer", "FSRenderer", PATH_LIBRARY."/FSRenderer.class.php");
 
 // Register models.
 ETFactory::register("searchModel", "ETSearchModel", PATH_MODELS."/ETSearchModel.class.php");
@@ -197,6 +198,9 @@ ET::$database->init(C("esoTalk.database.host"), C("esoTalk.database.user"), C("e
 
 // Initialize the session.
 ET::$session = ETFactory::make("session");
+
+// Initialize the renderer.
+ET::$renderer = ETFactory::make("renderer");
 
 // Check if any plugins need upgrading by comparing the versions in ET::$pluginInfo with the versions in
 // ET::$config.

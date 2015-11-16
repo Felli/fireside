@@ -499,6 +499,9 @@ public function getResults($conversationIDs, $checkForPermission = false)
 		$row["labels"] = $model->expandLabels($row["labels"]);
 
 		$row["replies"] = max(0, $row["countPosts"] - 1);
+
+        // Add conversation URL to data
+        $row["url"] = conversationURL($row["conversationId"], $row["title"]);
 		$results[] = $row;
 
 	}
@@ -521,7 +524,7 @@ public function areMoreResults()
 
 
 /**
- * Strip a gambit from a search string. This is useful when constructing the 'view more' link in 
+ * Strip a gambit from a search string. This is useful when constructing the 'view more' link in
  * the results, where we need to remove the existing #limit gambit and add a new one.
  *
  * @param string $searchString The search string.

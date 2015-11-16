@@ -99,6 +99,13 @@ public static $database;
 
 
 /**
+ * An instance of the FSRenderer class.
+ * @var FSRenderer
+ */
+public static $renderer;
+
+
+/**
  * An instance of the ETCache class.
  * @var ETCache
  */

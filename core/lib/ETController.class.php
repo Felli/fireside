@@ -144,11 +144,11 @@ private $messages = array();
  */
 public function __construct()
 {
-	// Pull any messages stored into the session into the controller's $messages property.
-	$messages = ET::$session->get("messages");
-	if (is_array($messages)) $this->messages = $messages;
+    // Pull any messages stored into the session into the controller's $messages property.
+    $messages = ET::$session->get("messages");
+    if (is_array($messages)) $this->messages = $messages;
 
-	if (ET::$session->errorCount()) $this->messages(ET::$session->errors(), "warning");
+    if (ET::$session->errorCount()) $this->messages(ET::$session->errors(), "warning");
 }
 
 
@@ -161,29 +161,29 @@ public function __construct()
  */
 public function dispatch($method, $arguments)
 {
-	// Create an array of arguments where the first item is $this.
-	$eventArguments = array_merge(array(&$this), $arguments);
-	$eventName = $this->className."_".$method;
+    // Create an array of arguments where the first item is $this.
+    $eventArguments = array_merge(array(&$this), $arguments);
+    $eventName = $this->className."_".$method;
 
-	// Trigger a "before" event for this method.
-	ET::trigger($eventName."_before", $eventArguments);
+    // Trigger a "before" event for this method.
+    ET::trigger($eventName."_before", $eventArguments);
 
-	// Go through plugins and look for a handler for this controller/method.
-	$called = false;
-	foreach (ET::$plugins as $plugin) {
-		$actionName = "action_".$eventName;
-		if (method_exists($plugin, $actionName)) {
-			call_user_func_array(array($plugin, $actionName), $eventArguments);
-			$called = true;
-			break;
-		}
-	}
+    // Go through plugins and look for a handler for this controller/method.
+    $called = false;
+    foreach (ET::$plugins as $plugin) {
+        $actionName = "action_".$eventName;
+        if (method_exists($plugin, $actionName)) {
+            call_user_func_array(array($plugin, $actionName), $eventArguments);
+            $called = true;
+            break;
+        }
+    }
 
-	// If one wasn't found, call the method on $this.
-	if (!$called) call_user_func_array(array($this, "action_".$method), $arguments);
+    // If one wasn't found, call the method on $this.
+    if (!$called) call_user_func_array(array($this, "action_".$method), $arguments);
 
-	// Trigger an "after" event for this method.
-	ET::trigger($eventName."_after", $eventArguments);
+    // Trigger an "after" event for this method.
+    ET::trigger($eventName."_after", $eventArguments);
 }
 
 
@@ -202,11 +202,11 @@ public function dispatch($method, $arguments)
  */
 public function message($message, $options = "")
 {
-	if (!is_array($options)) $options = array("className" => $options);
-	$options["message"] = $message;
-	if (!empty($options["id"])) $this->messages[$options["id"]] = $options;
-	else $this->messages[] = $options;
-	ET::$session->store("messages", $this->messages);
+    if (!is_array($options)) $options = array("className" => $options);
+    $options["message"] = $message;
+    if (!empty($options["id"])) $this->messages[$options["id"]] = $options;
+    else $this->messages[] = $options;
+    ET::$session->store("messages", $this->messages);
 }
 
 
@@ -221,11 +221,11 @@ public function message($message, $options = "")
  */
 public function messages($messages, $options = "")
 {
-	if (!is_array($options)) $options = array("className" => $options);
-	foreach ($messages as $id => $message) {
-		$options["id"] = !is_numeric($id) ? $id : null;
-		$this->message(T("message.$message", $message), $options);
-	}
+    if (!is_array($options)) $options = array("className" => $options);
+    foreach ($messages as $id => $message) {
+        $options["id"] = !is_numeric($id) ? $id : null;
+        $this->message(T("message.$message", $message), $options);
+    }
 }
 
 
@@ -238,24 +238,24 @@ public function messages($messages, $options = "")
  */
 public function notificationMessages($notifications)
 {
-	// Only show the first 3 notifications.
-	$notifications = array_slice($notifications, 0, 3);
+    // Only show the first 3 notifications.
+    $notifications = array_slice($notifications, 0, 3);
 
-	foreach ($notifications as $notification) {
+    foreach ($notifications as $notification) {
 
-		// If we've already shown this notification as a message before, don't show it again.
-		if ($notification["time"] <= ET::$session->preference("notificationCheckTime")) continue;
+        // If we've already shown this notification as a message before, don't show it again.
+        if ($notification["time"] <= ET::$session->preference("notificationCheckTime")) continue;
 
-		$avatar = avatar(array(
-			"memberId" => $notification["fromMemberId"],
-			"avatarFormat" => $notification["avatarFormat"],
-			"email" => $notification["email"]
-		), "thumb");
-		$this->message("<a href='".$notification["link"]."' class='messageLink'><span class='action'>".$avatar.$notification["body"]."</span></a>", "popup notificationMessage autoDismiss hasSprite");
-	}
+        $avatar = avatar(array(
+            "memberId" => $notification["fromMemberId"],
+            "avatarFormat" => $notification["avatarFormat"],
+            "email" => $notification["email"]
+        ), "thumb");
+        $this->message("<a href='".$notification["link"]."' class='messageLink'><span class='action'>".$avatar.$notification["body"]."</span></a>", "popup notificationMessage autoDismiss hasSprite");
+    }
 
-	// Update the user's "notificationCheckTime" preference so these notifications won't be shown again.
-	ET::$session->setPreferences(array("notificationCheckTime" => time()));
+    // Update the user's "notificationCheckTime" preference so these notifications won't be shown again.
+    ET::$session->setPreferences(array("notificationCheckTime" => time()));
 }
 
 
@@ -269,60 +269,60 @@ public function notificationMessages($notifications)
  */
 public function init()
 {
-	// Check for updates to the esoTalk software, but only if we're the root admin and we haven't checked in
-	// a while.
-	if (ET::$session->userId == C("esoTalk.rootAdmin") and C("esoTalk.admin.lastUpdateCheckTime") + C("esoTalk.updateCheckInterval") < time())
-		ET::upgradeModel()->checkForUpdates();
+    // Check for updates to the esoTalk software, but only if we're the root admin and we haven't checked in
+    // a while.
+    if (ET::$session->userId == C("esoTalk.rootAdmin") and C("esoTalk.admin.lastUpdateCheckTime") + C("esoTalk.updateCheckInterval") < time())
+        ET::upgradeModel()->checkForUpdates();
 
-	if ($this->responseType === RESPONSE_TYPE_DEFAULT) {
+    if ($this->responseType === RESPONSE_TYPE_DEFAULT) {
 
-		// If the user IS NOT logged in, add the 'login' and 'sign up' links to the bar.
-		if (!ET::$session->user) {
-			$this->addToMenu("user", "join", "<a href='".URL("user/join?return=".urlencode($this->selfURL))."' class='link-join'>".T("Sign Up")."</a>");
-			$this->addToMenu("user", "login", "<a href='".URL("user/login?return=".urlencode($this->selfURL))."' class='link-login'>".T("Log In")."</a>");
-		}
+        // If the user IS NOT logged in, add the 'login' and 'sign up' links to the bar.
+        if (!ET::$session->user) {
+            $this->addToMenu("user", "join", "<a href='".URL("user/join?return=".urlencode($this->selfURL))."' class='link-join'>".T("Sign Up")."</a>");
+            $this->addToMenu("user", "login", "<a href='".URL("user/login?return=".urlencode($this->selfURL))."' class='link-login'>".T("Log In")."</a>");
+        }
 
-		// If the user IS logged in, we want to display their name and appropriate links.
-		else {
-			$this->addToMenu("user", "user", "<a href='".URL("member/me")."'>".avatar(ET::$session->user, "thumb").name(ET::$session->user["username"])."</a>");
+        // If the user IS logged in, we want to display their name and appropriate links.
+        else {
+            $this->addToMenu("user", "user", "<a href='".URL("member/me")."'>".avatar(ET::$session->user, "thumb").name(ET::$session->user["username"])."</a>");
 
-			$this->addToMenu("user", "settings", "<a href='".URL("settings")."' class='link-settings'>".T("Settings")."</a>");
+            $this->addToMenu("user", "settings", "<a href='".URL("settings")."' class='link-settings'>".T("Settings")."</a>");
 
-			if (ET::$session->isAdmin())
-				$this->addToMenu("user", "administration", "<a href='".URL("admin")."' class='link-administration'>".T("Administration")."</a>");
+            if (ET::$session->isAdmin())
+                $this->addToMenu("user", "administration", "<a href='".URL("admin")."' class='link-administration'>".T("Administration")."</a>");
 
-			$this->addToMenu("user", "logout", "<a href='".URL("user/logout?token=".ET::$session->token)."' class='link-logout'>".T("Log Out")."</a>");
-		}
+            $this->addToMenu("user", "logout", "<a href='".URL("user/logout?token=".ET::$session->token)."' class='link-logout'>".T("Log Out")."</a>");
+        }
 
-		// Get the number of members currently online and add it as a statistic.
-		if (C("esoTalk.members.visibleToGuests") or ET::$session->user) {
-			$online = ET::SQL()
-				->select("COUNT(*)")
-				->from("member")
-				->where("UNIX_TIMESTAMP()-:seconds<lastActionTime")
-				->bind(":seconds", C("esoTalk.userOnlineExpire"))
-				->exec()
-				->result();
-			$stat = Ts("statistic.online", "statistic.online.plural", number_format($online));
-			$stat = "<a href='".URL("members/online")."' class='link-membersOnline'>$stat</a>";
-			$this->addToMenu("statistics", "statistic-online", $stat);
-		}
+        // Get the number of members currently online and add it as a statistic.
+        if (C("esoTalk.members.visibleToGuests") or ET::$session->user) {
+            $online = ET::SQL()
+                ->select("COUNT(*)")
+                ->from("member")
+                ->where("UNIX_TIMESTAMP()-:seconds<lastActionTime")
+                ->bind(":seconds", C("esoTalk.userOnlineExpire"))
+                ->exec()
+                ->result();
+            $stat = Ts("statistic.online", "statistic.online.plural", number_format($online));
+            $stat = "<a href='".URL("members/online")."' class='link-membersOnline'>$stat</a>";
+            $this->addToMenu("statistics", "statistic-online", $stat);
+        }
 
-		$this->addToMenu("meta", "copyright", "<a href='http://esotalk.org/' target='_blank'>".T("Powered by")." esoTalk</a>");
+        $this->addToMenu("meta", "copyright", "<a href='http://esotalk.org/' target='_blank'>".T("Powered by")." esoTalk</a>");
 
-		// Set up some default JavaScript files and language definitions.
-		$this->addJSFile("core/js/lib/jquery.js", true);
-		$this->addJSFile("core/js/lib/jquery.migrate.js", true);
-		$this->addJSFile("core/js/lib/jquery.misc.js", true);
-		$this->addJSFile("core/js/lib/jquery.history.js", true);
-		$this->addJSFile("core/js/lib/jquery.scrollTo.js", true);
-		$this->addJSFile("core/js/global.js", true);
-		$this->addJSLanguage("message.ajaxRequestPending", "message.ajaxDisconnected", "Loading...", "Notifications");
-		$this->addJSVar("notificationCheckInterval", C("esoTalk.notificationCheckInterval"));
+        // Set up some default JavaScript files and language definitions.
+        $this->addJSFile("core/js/lib/jquery.js", true);
+        $this->addJSFile("core/js/lib/jquery.migrate.js", true);
+        $this->addJSFile("core/js/lib/jquery.misc.js", true);
+        $this->addJSFile("core/js/lib/jquery.history.js", true);
+        $this->addJSFile("core/js/lib/jquery.scrollTo.js", true);
+        $this->addJSFile("core/js/global.js", true);
+        $this->addJSLanguage("message.ajaxRequestPending", "message.ajaxDisconnected", "Loading...", "Notifications");
+        $this->addJSVar("notificationCheckInterval", C("esoTalk.notificationCheckInterval"));
 
-	}
+    }
 
-	$this->trigger("init");
+    $this->trigger("init");
 }
 
 
@@ -338,13 +338,13 @@ public function init()
  */
 public function redirect($url, $code = 302)
 {
-	if ($this->responseType === RESPONSE_TYPE_AJAX or $this->responseType === RESPONSE_TYPE_JSON or $this->responseType === RESPONSE_TYPE_VIEW) {
-		if ($this->responseType === RESPONSE_TYPE_VIEW) $this->responseType = RESPONSE_TYPE_AJAX;
-		$this->json("redirect", $url);
-		$this->render();
-		exit;
-	}
-	else redirect($url, $code);
+    if ($this->responseType === RESPONSE_TYPE_AJAX or $this->responseType === RESPONSE_TYPE_JSON or $this->responseType === RESPONSE_TYPE_VIEW) {
+        if ($this->responseType === RESPONSE_TYPE_VIEW) $this->responseType = RESPONSE_TYPE_AJAX;
+        $this->json("redirect", $url);
+        $this->render();
+        exit;
+    }
+    else redirect($url, $code);
 }
 
 
@@ -362,8 +362,8 @@ public function redirect($url, $code = 302)
  */
 public function pushNavigation($id, $type, $url)
 {
-	$this->navigationId = $id;
-	ET::$session->pushNavigation($id, $type, $url);
+    $this->navigationId = $id;
+    ET::$session->pushNavigation($id, $type, $url);
 }
 
 
@@ -376,7 +376,7 @@ public function pushNavigation($id, $type, $url)
  */
 public function json($key, $value)
 {
-	$this->json[$key] = $value;
+    $this->json[$key] = $value;
 }
 
 
@@ -389,7 +389,7 @@ public function json($key, $value)
  */
 public function data($key, $value)
 {
-	$this->data[$key] = $value;
+    $this->data[$key] = $value;
 }
 
 
@@ -402,98 +402,95 @@ public function data($key, $value)
  */
 public function render($view = "")
 {
-	$this->trigger("renderBefore");
+    // Trigger the renderBefore hook
+    $this->trigger("renderBefore");
 
-	if ($this->responseType == RESPONSE_TYPE_DEFAULT and ET::$session->user) {
+    // Set up the master view, content type, and other stuff depending on the response type.
+    switch ($this->responseType) {
 
-		// Fetch all unread notifications so we have a count for the notifications button.
-		$notifications = ET::activityModel()->getNotifications(-1);
-		$count = count($notifications);
-		$this->addToMenu("user", "notifications", "<a href='".URL("settings/notifications")."' id='notifications' class='button popupButton ".($count ? "new" : "")."'><span>$count</span></a>");
+        // For an ATOM response, set the master view and the content type.
+        case RESPONSE_TYPE_ATOM:
+            $this->masterView = "atom.master";
+            $this->contentType = "application/atom+xml";
+            break;
 
-		// Show messages with these notifications.
-		$this->notificationMessages($notifications);
+        // For an AJAX or JSON response, set the master view and the content type.
+        // If it's an AJAX response, set one of the JSON parameters to the specified view's contents.
+        case RESPONSE_TYPE_AJAX:
+            if ($view) $this->json("view", $this->getViewContents($view, $this->data));
+        case RESPONSE_TYPE_JSON:
+            $this->masterView = "json.master";
+            $this->contentType = "application/json";
+            break;
+    }
 
-	}
+    // Set a content-type header.
+    header("Content-type: ".$this->contentType."; charset=".T("charset", "utf-8"));
 
-	// Set up the master view, content type, and other stuff depending on the response type.
-	switch ($this->responseType) {
+    // If we're just outputting the view on its own, do that now.
+    if ($this->responseType === RESPONSE_TYPE_VIEW) {
+        $this->renderTemplate($view, $this->data);
+    }
+    // Otherwise, if we're outputting the json, do that now.
+    else if ($this->responseType === RESPONSE_TYPE_JSON) {
+        // TODO(jsonnull): is this line necessary?
+        //$this->data("messages", $this->getMessages());
+        echo json_encode($this->data);
+    }
 
-		// For an ATOM response, set the master view and the content type.
-		case RESPONSE_TYPE_ATOM:
-			$this->masterView = "atom.master";
-			$this->contentType = "application/atom+xml";
-			break;
+    // Otherwise, set up the master view and render it.
+    else {
 
-		// For an AJAX or JSON response, set the master view and the content type.
-		// If it's an AJAX response, set one of the JSON parameters to the specified view's contents.
-		case RESPONSE_TYPE_AJAX:
-			if ($view) $this->json("view", $this->getViewContents($view, $this->data));
+        // Make a new data array for the master view.
+        $pageData = array();
 
-		case RESPONSE_TYPE_JSON:
-			$this->masterView = "json.master";
-			$this->contentType = "application/json";
+        // For any master views but the JSON and ATOM ones, give the view some data that will be useful in
+        // rendering a HTML page.
+        if ($this->masterView != "json.master" and $this->masterView != "atom.master") {
 
-	}
+            // Fetch the content of the view, passing the data collected in the controller.
+            if ($view) $pageData["content"] = $this->getViewContents($view, $this->data);
 
-	// Set a content-type header.
-	header("Content-type: ".$this->contentType."; charset=".T("charset", "utf-8"));
+            // If config/custom.css contains something, add it to be included in the page.
+            if (file_exists($file = PATH_CONFIG."/custom.css") and filesize($file) > 0) {
+                $this->addCSSFile("config/custom.css", true);
+            }
 
-	// If we're just outputting the view on its own, do that now.
-	if ($this->responseType === RESPONSE_TYPE_VIEW) {
-		$this->renderTemplate($view, $this->data);
-	}
+            // Add the <head> contents and the page title.
+            $pageData["head"] = $this->head();
+            $titleParts = array();
+            if ($this->title) $titleParts[] = $this->title;
+            if ($t = C("esoTalk.forumTitle")) $titleParts[] = $t;
+            $pageData["pageTitle"] = implode(" - ", $titleParts);
 
-	// Otherwise, set up the master view and render it.
-	else {
+            // Add the forum title, or logo if the forum has one.
+            $logo = C("esoTalk.forumLogo");
+            $title = C("esoTalk.forumTitle");
+            if ($logo) $size = getimagesize($logo);
+            $pageData["forumTitle"] = $logo ? "<img src='".getWebPath($logo)."' {$size[3]} alt='$title'/>" : $title;
 
-		// Make a new data array for the master view.
-		$data = array();
+            // Add the details for the "back" button.
+            $pageData["backButton"] = ET::$session->getNavigation($this->navigationId);
 
-		// For any master views but the JSON and ATOM ones, give the view some data that will be useful in
-		// rendering a HTML page.
-		if ($this->masterView != "json.master" and $this->masterView != "atom.master") {
+            // Fetch the current session
+            $pageData["session"] = ET::$session;
 
-			// Fetch the content of the view, passing the data collected in the controller.
-			if ($view) $data["content"] = $this->getViewContents($view, $this->data);
+            // Get common menu items.
+            foreach ($this->menus as $menu => $items)
+                $pageData[$menu."MenuItems"] = $items->getContents();
 
-			// If config/custom.css contains something, add it to be included in the page.
-			if (file_exists($file = PATH_CONFIG."/custom.css") and filesize($file) > 0) {
-				$this->addCSSFile("config/custom.css", true);
-			}
+            // Add the body class.
+            $pageData["bodyClass"] = $this->bodyClass;
 
-			// Add the <head> contents and the page title.
-			$data["head"] = $this->head();
-			$titleParts = array();
-			if ($this->title) $titleParts[] = $this->title;
-			if ($t = C("esoTalk.forumTitle")) $titleParts[] = $t;
-			$data["pageTitle"] = implode(" - ", $titleParts);
+            // Get messages.
+            $pageData["messages"] = $this->getMessages();
 
-			// Add the forum title, or logo if the forum has one.
-			$logo = C("esoTalk.forumLogo");
-			$title = C("esoTalk.forumTitle");
-			if ($logo) $size = getimagesize($logo);
-			$data["forumTitle"] = $logo ? "<img src='".getWebPath($logo)."' {$size[3]} alt='$title'/>" : $title;
+        }
 
-			// Add the details for the "back" button.
-			$data["backButton"] = ET::$session->getNavigation($this->navigationId);
+        $this->renderTemplate($this->masterView, $pageData);
+    }
 
-			// Get common menu items.
-			foreach ($this->menus as $menu => $items)
-				$data[$menu."MenuItems"] = $items->getContents();
-
-			// Add the body class.
-			$data["bodyClass"] = $this->bodyClass;
-
-			// Get messages.
-			$data["messages"] = $this->getMessages();
-
-		}
-
-        $this->renderTemplate($this->masterView, $data);
-	}
-
-	$this->trigger("renderAfter");
+    $this->trigger("renderAfter");
 }
 
 
@@ -507,18 +504,18 @@ public function render($view = "")
  */
 public function renderMessage($title, $message)
 {
-	// Add the title and message to be passed to the view.
-	$this->data("title", $title);
-	$this->data("message", $message);
+    // Add the title and message to be passed to the view.
+    $this->data("title", $title);
+    $this->data("message", $message);
 
-	// If the response type is anything other than default, just make it an AJAX response and set a JSON
-	// parameter so the esoTalk JavaScript knows to display a modal message sheet.
-	if ($this->responseType !== RESPONSE_TYPE_DEFAULT) {
-		$this->responseType = RESPONSE_TYPE_AJAX;
-		$this->json("modalMessage", true);
-	}
+    // If the response type is anything other than default, just make it an AJAX response and set a JSON
+    // parameter so the esoTalk JavaScript knows to display a modal message sheet.
+    if ($this->responseType !== RESPONSE_TYPE_DEFAULT) {
+        $this->responseType = RESPONSE_TYPE_AJAX;
+        $this->json("modalMessage", true);
+    }
 
-	$this->render("message");
+    $this->render("message");
 }
 
 
@@ -531,23 +528,23 @@ public function renderMessage($title, $message)
  */
 public function render404($message = "", $showLogin = false)
 {
-	header("HTTP/1.1 404 Not Found");
+    header("HTTP/1.1 404 Not Found");
 
-	// If the user isn't logged in, we might want to show a login form to them.
-	// To do this, we create an ETUserController instance, set a message to display on the login form,
-	// and then run the "login" method.
-	if (!ET::$session->user and $showLogin) {
-		$_GET["return"] = $this->selfURL;
-		$controller = ETFactory::make("userController");
-		$controller->init();
-		$controller->loginMessage = $message;
-		$controller->dispatch("login", array());
-	}
+    // If the user isn't logged in, we might want to show a login form to them.
+    // To do this, we create an ETUserController instance, set a message to display on the login form,
+    // and then run the "login" method.
+    if (!ET::$session->user and $showLogin) {
+        $_GET["return"] = $this->selfURL;
+        $controller = ETFactory::make("userController");
+        $controller->init();
+        $controller->loginMessage = $message;
+        $controller->dispatch("login", array());
+    }
 
-	// If they are logged in, however, we'll just show a page not found message.
-	else {
-		$this->renderMessage(T("Page Not Found"), $message);
-	}
+    // If they are logged in, however, we'll just show a page not found message.
+    else {
+        $this->renderMessage(T("Page Not Found"), $message);
+    }
 }
 
 
@@ -560,13 +557,13 @@ public function render404($message = "", $showLogin = false)
  */
 public function validateToken($token = false)
 {
-	if ($token === false) $token = R("token");
+    if ($token === false) $token = R("token");
 
-	if (!ET::$session->validateToken($token)) {
-		$this->renderMessage(T("Error"), T("message.noPermission"));
-		return false;
-	}
-	return true;
+    if (!ET::$session->validateToken($token)) {
+        $this->renderMessage(T("Error"), T("message.noPermission"));
+        return false;
+    }
+    return true;
 }
 
 
@@ -582,11 +579,11 @@ public function validateToken($token = false)
  */
 public function allowed($key = "esoTalk.visibleToGuests")
 {
-	if (ET::$session->user or C($key)) return true;
+    if (ET::$session->user or C($key)) return true;
 
-	$url = ltrim($this->selfURL, "/");
-	$this->redirect(URL("user/login".($url ? "?return=$url" : "")));
-	return false;
+    $url = ltrim($this->selfURL, "/");
+    $this->redirect(URL("user/login".($url ? "?return=$url" : "")));
+    return false;
 }
 
 
@@ -599,10 +596,10 @@ public function allowed($key = "esoTalk.visibleToGuests")
  */
 public function getViewContents($view, $data = array())
 {
-	ob_start();
-	$this->renderTemplate($view, $data);
-	$content = ob_get_clean();
-	return $content;
+    ob_start();
+    $this->renderTemplate($view, $data);
+    $content = ob_get_clean();
+    return $content;
 }
 
 
@@ -615,13 +612,13 @@ public function getViewContents($view, $data = array())
  */
 public function renderView($view, $data = array())
 {
-	ob_start();
-	include $this->getViewPath($view);
-	$content = ob_get_clean();
+    ob_start();
+    include $this->getViewPath($view);
+    $content = ob_get_clean();
 
-	$this->trigger("renderView", array($view, &$content, $data));
+    $this->trigger("renderView", array($view, &$content, $data));
 
-	echo $content;
+    echo $content;
 }
 
 
@@ -634,49 +631,15 @@ public function renderView($view, $data = array())
  */
 public function renderTemplate($template, $data = array())
 {
-	ob_start();
+    ob_start();
 
-    require_once(PATH_VENDOR."/zordius/lightncandy/src/lightncandy.php");
+    $template = ET::$renderer->getCompiledTemplate($template);
 
-    // Get the filename
-    $file = $this->getTemplatePath($template);
-
-	// Get the maximum last modifiction time of the file.
-    $lastModTime = 0;
-    $lastModTime = max($lastModTime, filemtime($file));
-
-	// Construct a filename for the compiled template.
-	$compiled = PATH_ROOT."/cache/templates/".str_replace('/','_',$template).".php";
-
-	// If this file doesn't exist, or if it is out of date, generate and write it.
-	if (!file_exists($compiled) or filemtime($compiled) < $lastModTime) {
-
-		// Get the contents of each of the files, fixing up image URL paths for CSS files.
-        $handlebars = file_get_contents($file);
-
-        if ($handlebars) {
-            $phpStr = '<?php if (!defined("IN_ESOTALK")) exit; ?>';
-            $phpStr = $phpStr . LightnCandy::compile($handlebars, Array(
-                'basedir' => Array(
-                    PATH_TEMPLATES.'/partials'
-                ),
-                'fileext' => Array(
-                    '.hbs'
-                )
-            ));
-            file_put_contents($compiled, $phpStr);
-        }
-
-		// Minify and write the contents.
-
-	}
-
-    $renderer = include($compiled);
-    echo $renderer($data);
+    echo $template($data);
 
     $content = ob_get_clean();
 
-	$this->trigger("renderView", array($template, &$content, $data));
+    $this->trigger("renderView", array($template, &$content, $data));
 
     echo $content;
 }
@@ -690,45 +653,19 @@ public function renderTemplate($template, $data = array())
  */
 public function getViewPath($view)
 {
-	// If the view has a file extension, assume it contains the full file path and use it as is.
-	if (pathinfo($view, PATHINFO_EXTENSION) == "php") return $view;
+    // If the view has a file extension, assume it contains the full file path and use it as is.
+    if (pathinfo($view, PATHINFO_EXTENSION) == "php") return $view;
 
-	// Check the skin to see if it contains this view.
-	if (file_exists($skinView = ET::$skin->view($view))) return $skinView;
+    // Check the skin to see if it contains this view.
+    if (file_exists($skinView = ET::$skin->view($view))) return $skinView;
 
-	// Check loaded plugins to see if one of them contains the view.
-	foreach (ET::$plugins as $k => $v) {
-		if (file_exists($pluginView = $v->view($view))) return $pluginView;
-	}
+    // Check loaded plugins to see if one of them contains the view.
+    foreach (ET::$plugins as $k => $v) {
+        if (file_exists($pluginView = $v->view($view))) return $pluginView;
+    }
 
-	// Otherwise, just return the default view.
-	return PATH_VIEWS."/$view.php";
-}
-
-
-/**
- * Gets the full filepath to the specified template.
- *
- * @param string $view The name of the template to get the filepath of.
- * @return string The filepath of the template.
- */
-public function getTemplatePath($template)
-{
-	// If the view has a file extension, assume it contains the full file path and use it as is.
-	if (pathinfo($template, PATHINFO_EXTENSION) == "hbs") return $template;
-
-	// Check the skin to see if it contains this view.
-	// TODO(jsonnull): uncomment
-    // if (file_exists($skinView = ET::$skin->view($view))) return $skinView;
-
-	// Check loaded plugins to see if one of them contains the view.
-    // TODO(jsonnull): uncomment
-	/*foreach (ET::$plugins as $k => $v) {
-		if (file_exists($pluginView = $v->view($view))) return $pluginView;
-	}*/
-
-	// Otherwise, just return the default template.
-	return PATH_TEMPLATES."/$template.hbs";
+    // Otherwise, just return the default view.
+    return PATH_VIEWS."/$view.php";
 }
 
 
@@ -739,9 +676,9 @@ public function getTemplatePath($template)
  */
 public function getMessages()
 {
-	ET::$session->remove("messages");
+    ET::$session->remove("messages");
 
-	return $this->messages;
+    return $this->messages;
 }
 
 
@@ -754,8 +691,8 @@ public function getMessages()
  */
 public function addJSLanguage()
 {
-	$args = func_get_args();
-	foreach ($args as $k) $this->jsLanguage[$k] = T($k);
+    $args = func_get_args();
+    foreach ($args as $k) $this->jsLanguage[$k] = T($k);
 }
 
 
@@ -768,7 +705,7 @@ public function addJSLanguage()
  */
 public function addJSVar($key, $val)
 {
-	$this->jsData[$key] = $val;
+    $this->jsData[$key] = $val;
 }
 
 
@@ -783,9 +720,9 @@ public function addJSVar($key, $val)
  */
 public function addJSFile($file, $global = false)
 {
-	if (strpos($file, "://") !== false) $key = "remote";
-	$key = $global ? "global" : "local";
-	if (!in_array($file, $this->jsFiles[$key])) $this->jsFiles[$key][] = $file;
+    if (strpos($file, "://") !== false) $key = "remote";
+    $key = $global ? "global" : "local";
+    if (!in_array($file, $this->jsFiles[$key])) $this->jsFiles[$key][] = $file;
 }
 
 
@@ -800,9 +737,9 @@ public function addJSFile($file, $global = false)
  */
 public function addCSSFile($file, $global = false)
 {
-	if (strpos($file, "://") !== false) $key = "remote";
-	else $key = $global ? "global" : "local";
-	if (!in_array($file, $this->cssFiles[$key])) $this->cssFiles[$key][] = $file;
+    if (strpos($file, "://") !== false) $key = "remote";
+    else $key = $global ? "global" : "local";
+    if (!in_array($file, $this->cssFiles[$key])) $this->cssFiles[$key][] = $file;
 }
 
 
@@ -815,7 +752,7 @@ public function addCSSFile($file, $global = false)
  */
 public function addToHead($string)
 {
-	$this->head .= "\n$string";
+    $this->head .= "\n$string";
 }
 
 /**
@@ -829,49 +766,49 @@ public function addToHead($string)
 protected function aggregateFiles($files, $type)
 {
 
-	/*require_once PATH_VENDOR."/vendor/converter/Converter.php";
-	require_once PATH_VENDOR."/vendor/minify/src/Minify.php";
-	require_once PATH_VENDOR."/vendor/minify/src/JS.php";
-	require_once PATH_VENDOR."/vendor/minify/src/CSS.php";
-	require_once PATH_VENDOR."/vendor/minify/src/Exception.php";*/
+    /*require_once PATH_VENDOR."/vendor/converter/Converter.php";
+    require_once PATH_VENDOR."/vendor/minify/src/Minify.php";
+    require_once PATH_VENDOR."/vendor/minify/src/JS.php";
+    require_once PATH_VENDOR."/vendor/minify/src/CSS.php";
+    require_once PATH_VENDOR."/vendor/minify/src/Exception.php";*/
 
-	$jsmin = new Minify\JS();
-	$cssmin = new Minify\CSS();
+    $jsmin = new Minify\JS();
+    $cssmin = new Minify\CSS();
 
-	// Construct an array of filenames, and get the maximum last modifiction time of all the files.
-	$filenames = array();
-	$lastModTime = 0;
-	foreach ($files as $filename) {
-		$filenames[] = str_replace(".", "", pathinfo($filename, PATHINFO_FILENAME));
-		$lastModTime = max($lastModTime, filemtime(PATH_ROOT."/".$filename));
-	}
+    // Construct an array of filenames, and get the maximum last modifiction time of all the files.
+    $filenames = array();
+    $lastModTime = 0;
+    foreach ($files as $filename) {
+        $filenames[] = str_replace(".", "", pathinfo($filename, PATHINFO_FILENAME));
+        $lastModTime = max($lastModTime, filemtime(PATH_ROOT."/".$filename));
+    }
 
-	// Construct a filename for the aggregation file based on the individual filenames.
-	$file = PATH_ROOT."/cache/$type/".implode(",", $filenames).".$type";
+    // Construct a filename for the aggregation file based on the individual filenames.
+    $file = PATH_ROOT."/cache/$type/".implode(",", $filenames).".$type";
 
-	// If this file doesn't exist, or if it is out of date, generate and write it.
-	if (!file_exists($file) or filemtime($file) < $lastModTime) {
+    // If this file doesn't exist, or if it is out of date, generate and write it.
+    if (!file_exists($file) or filemtime($file) < $lastModTime) {
 
-		// Get the contents of each of the files, fixing up image URL paths for CSS files.
-		foreach ($files as $f) {
-			if ($type == "css") {
-				$cssmin->add(PATH_ROOT."/".$f);
-			}
-			else if ($type == "js") {
-				$jsmin->add(PATH_ROOT."/".$f);
-			}
-		}
+        // Get the contents of each of the files, fixing up image URL paths for CSS files.
+        foreach ($files as $f) {
+            if ($type == "css") {
+                $cssmin->add(PATH_ROOT."/".$f);
+            }
+            else if ($type == "js") {
+                $jsmin->add(PATH_ROOT."/".$f);
+            }
+        }
 
-		// Minify and write the contents.
-		if ($type == "css") {
-			$cssmin->minify($file);
-		}
-		else if ($type == "js") {
-			$jsmin->minify($file);
-		}
-	}
+        // Minify and write the contents.
+        if ($type == "css") {
+            $cssmin->minify($file);
+        }
+        else if ($type == "js") {
+            $jsmin->minify($file);
+        }
+    }
 
-	return array($file);
+    return array($file);
 }
 
 
@@ -882,78 +819,78 @@ protected function aggregateFiles($files, $type)
  */
 public function head()
 {
-	$head = "<!-- This page was generated by esoTalk (http://esotalk.org) -->\n";
+    $head = "<!-- This page was generated by esoTalk (http://esotalk.org) -->\n";
 
-	// Add the canonical URL tag.
-	if (!empty($this->canonicalURL))
-		$head .= "<link rel='canonical' href='$this->canonicalURL'>\n";
+    // Add the canonical URL tag.
+    if (!empty($this->canonicalURL))
+        $head .= "<link rel='canonical' href='$this->canonicalURL'>\n";
 
-	// Add remote stylesheets.
-	if (!empty($this->cssFiles["remote"])) {
-		foreach ($this->cssFiles["remote"] as $url) {
-			$head .= "<link rel='stylesheet' href='$url'>\n";
-		}
-	}
-	unset($this->cssFiles["remote"]);
+    // Add remote stylesheets.
+    if (!empty($this->cssFiles["remote"])) {
+        foreach ($this->cssFiles["remote"] as $url) {
+            $head .= "<link rel='stylesheet' href='$url'>\n";
+        }
+    }
+    unset($this->cssFiles["remote"]);
 
-	// Go through CSS stylesheets and aggregate them, then add appropriate tags to the header.
-	// Here we loop through "groups" of CSS files (usually "global" and "local".)
-	foreach ($this->cssFiles as $key => $files) {
+    // Go through CSS stylesheets and aggregate them, then add appropriate tags to the header.
+    // Here we loop through "groups" of CSS files (usually "global" and "local".)
+    foreach ($this->cssFiles as $key => $files) {
 
-		// If CSS aggregation is enabled, and there's more than one file in this "group", proceed with aggregation.
-		if (count($files) > 1 and C("esoTalk.aggregateCSS") and !(ET::$controller instanceof ETAdminController))
-			$files = $this->aggregateFiles($files, "css");
+        // If CSS aggregation is enabled, and there's more than one file in this "group", proceed with aggregation.
+        if (count($files) > 1 and C("esoTalk.aggregateCSS") and !(ET::$controller instanceof ETAdminController))
+            $files = $this->aggregateFiles($files, "css");
 
-		// Otherwise, we need to prepend the full path to each of the files.
-		else foreach ($files as &$file) $file = PATH_ROOT."/".$file;
-		unset($file);
+        // Otherwise, we need to prepend the full path to each of the files.
+        else foreach ($files as &$file) $file = PATH_ROOT."/".$file;
+        unset($file);
 
-		// For each of the files that we need to include in the page, add a <link> tag.
-		foreach ($files as $file)
-			$head .= "<link rel='stylesheet' href='".getResource($file)."?".@filemtime($file)."'>\n";
+        // For each of the files that we need to include in the page, add a <link> tag.
+        foreach ($files as $file)
+            $head .= "<link rel='stylesheet' href='".getResource($file)."?".@filemtime($file)."'>\n";
 
-	}
+    }
 
-	// Output all necessary config variables and language definitions, as well as other variables.
-	$esoTalkJS = array(
-		"webPath" => ET::$webPath.((C("esoTalk.urls.friendly") and !C("esoTalk.urls.rewrite")) ? "/index.php" : ""),
-		"userId" => ET::$session->user ? (int)ET::$session->userId : false,
-		"token" => ET::$session->token,
-		"debug" => C("esoTalk.debug"),
-		"language" => $this->jsLanguage
-	) + (array)$this->jsData;
-	$head .= "<script>var ET=".json_encode($esoTalkJS)."</script>\n";
+    // Output all necessary config variables and language definitions, as well as other variables.
+    $esoTalkJS = array(
+        "webPath" => ET::$webPath.((C("esoTalk.urls.friendly") and !C("esoTalk.urls.rewrite")) ? "/index.php" : ""),
+        "userId" => ET::$session->user ? (int)ET::$session->userId : false,
+        "token" => ET::$session->token,
+        "debug" => C("esoTalk.debug"),
+        "language" => $this->jsLanguage
+    ) + (array)$this->jsData;
+    $head .= "<script>var ET=".json_encode($esoTalkJS)."</script>\n";
 
-	// Add remote JavaScript.
-	if (!empty($this->jsFiles["remote"])) {
-		foreach ($this->jsFiles["remote"] as $url) {
-			$head .= "<script src='$url'></script>\n";
-		}
-	}
-	unset($this->jsFiles["remote"]);
+    // Add remote JavaScript.
+    if (!empty($this->jsFiles["remote"])) {
+        foreach ($this->jsFiles["remote"] as $url) {
+            $head .= "<script src='$url'></script>\n";
+        }
+    }
+    unset($this->jsFiles["remote"]);
 
-	// Same thing as above, but with JavaScript!
-	foreach ($this->jsFiles as $files) {
+    // Same thing as above, but with JavaScript!
+    foreach ($this->jsFiles as $files) {
 
-		// If JS aggregation is enabled, and there's more than one file in this "group", proceed with aggregation.
-		if (count($files) > 1 and C("esoTalk.aggregateJS") and !(ET::$controller instanceof ETAdminController))
-			$files = $this->aggregateFiles($files, "js");
+        // If JS aggregation is enabled, and there's more than one file in this "group", proceed with aggregation.
+        if (count($files) > 1 and C("esoTalk.aggregateJS") and !(ET::$controller instanceof ETAdminController))
+            $files = $this->aggregateFiles($files, "js");
 
-		// Otherwise, we need to prepend the full path to each of the files.
-		else foreach ($files as &$file) $file = PATH_ROOT."/".$file;
-		unset($file);
+        // Otherwise, we need to prepend the full path to each of the files.
+        else foreach ($files as &$file) $file = PATH_ROOT."/".$file;
+        unset($file);
 
-		// For each of the files that we need to include in the page, add a <script> tag.
-		foreach ($files as $file)
-			$head .= "<script src='".getResource($file)."?".filemtime($file)."'></script>\n";
-	}
+        // For each of the files that we need to include in the page, add a <script> tag.
+        foreach ($files as $file)
+            $head .= "<script src='".getResource($file)."?".filemtime($file)."'></script>\n";
+    }
 
-	// Finally, append the custom HTML string constructed via $this->addToHead().
-	$head .= $this->head;
+    // Finally, append the custom HTML string constructed via $this->addToHead().
+    $head .= $this->head;
 
-	$this->trigger("head", array(&$head));
+    $this->trigger("head", array(&$head));
 
-	return $head;
+    return $head;
 }
 
 
@@ -969,8 +906,8 @@ public function head()
  */
 public function addToMenu($menu, $id, $html, $position = false)
 {
-	if (empty($this->menus[$menu])) $this->menus[$menu] = ETFactory::make("menu");
-	$this->menus[$menu]->add($id, $html, $position);
+    if (empty($this->menus[$menu])) $this->menus[$menu] = ETFactory::make("menu");
+    $this->menus[$menu]->add($id, $html, $position);
 }
 
 }
