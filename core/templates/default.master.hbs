@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='{{translate "charset" "utf-8"}}'>
+    <title>{{ pageTitle }}</title>
+    {{{ head }}}
+</head>
+
+<body class='{{ bodyClass }}'>
+    {{ pageStart }} {{!-- <?php $this->trigger("pageStart"); ?> --}}
+
+    <div id='messages'>
+        {{#each messages}}
+        <div class='messageWrapper'>
+            <div class='message {{className}}' data-id='{{id}}'>{{message}}</div>
+        </div>
+        {{/each}}
+    </div>
+
+    <div id='wrapper'>
+
+    <!-- HEADER -->
+    <div id='hdr'>
+        <div id='hdr-content'>
+            <div id='hdr-inner'>
+                {{#if backButton}}
+                    <a href='{{url}}' id='backButton' title='{{translate backButton.type}}'><i class="icon-chevron-left"></i></a>
+                {{/if}}
+
+                <h1 id='forumTitle'><a href='/'>{{forumTitle}}</a></h1>
+
+                <ul id='mainMenu' class='menu'>
+                    {{{mainMenuItems}}}
+                </ul>
+                <ul id='userMenu' class='menu'>
+                    {{{userMenuItems}}}
+                    <li><a href='{{url "conversation/start"}}' class='link-newConversation button'>{{translate "New Conversation"}}</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- BODY -->
+    <div id='body'>
+        <div id='body-content'>
+            {{{content}}}
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <div id='ftr'>
+        <div id='ftr-content'>
+            <ul class='menu'>
+            <li id='goToTop'><a href='#'>{{translate "Go to top"}}</a></li>
+                {{{metaMenuItems}}}
+                {{{statisticsMenuItems}}}
+            </ul>
+        </div>
+    </div>
+
+    </div>{{!-- /wrapper--}}
+
+    {{ pageEnd }} {{!-- <?php $this->trigger("pageEnd"); ?> --}}
+
+</body>
+</html>

@@ -1,0 +1,13 @@
+<ul class='list conversationList'>
+    {{#each results}}
+        {{> conversations_conversation }}
+    {{/each}}
+
+    {{#if showViewMoreLink }}
+        <li class='viewMore'>
+        {{!-- TODO(jsonnull): fix view more link --}}
+        {{!-- $searchWithoutLimit = ET::searchModel()->removeGambit($data["searchString"], 'return strpos($term, strtolower(T("gambit.limit:"))) === 0;'); --}}
+        <a href='{{url "conversations/" channelSlug}}?search=urlencode($searchWithoutLimit.($searchWithoutLimit ? " + " : "")."#".T("gambit.limit:").($data["limit"] + C("esoTalk.search.limitIncrement")))}}'>{{translate "View more"}}</a>
+        </li>
+    {{/if}}
+</ul>

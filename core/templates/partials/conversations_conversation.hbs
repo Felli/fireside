@@ -1,0 +1,61 @@
+
+<li id='c{{conversationId}}' class='channel-{{channelId}}{{#if starred}} starred{{/if}}{{#each labels}} label-{{this}}{{/each}}{{!-- TODO(jsonnull): if ($conversation["startMemberId"] == ET::$session->user) $className .= " mine"; AND {{#if ../currentUser}}{{#if unread}} unread{{/if}}{{/if}}--}}'>
+    {{#if @root.session.user}}
+        {{!-- TODO(jsonnull): implement star helper
+        <div class='col-star'>{{star conversationId starred}}</div>
+        --}}
+    {{/if}}
+    <div class='col-conversation'>
+        {{!-- Output an "unread indicator", allowing the user to mark the conversation as read.--}}
+        {{#and @root.session.user unread}}
+            <a href='{{url "conversation/markAsRead/" conversationId}}?token={{@root.session.token}}&return={{urlencode (selfUrl)}}' class='unreadIndicator' title='{{translate "Mark as read"}}'>{{unread}}</a>
+        {{/and}}
+
+        <span class='labels'>
+            {{#each labels}}
+                <?php label($label, $label == "draft" ? URL($conversationURL."#reply") : ""); ?>
+            {{/each}}
+        </span>
+
+        {{!-- Output the conversation title, highlighting search keywords. --}}
+        {{!-- TODO(jsonnull): highlighting as below: --}}
+        {{!-- <strong class='title'><a href='".URL($conversationURL.((ET::$session->user and $conversation["unread"]) ? "/unread" : ""))."'>".highlight(sanitizeHTML($conversation["title"]), ET::$session->get("highlight"))."</a></strong> ";--}}
+        <strong class='title'><a href='{{url url}}{{#and @root.session.user unread}}/unread{{/and}}'>{{title}}</a></strong>
+
+        {{!-- If we're highlighting search terms (i.e. if we did a fulltext search), then output a "show matching posts" link. --}}
+        {{#if @root.session.highlight}}
+            <span class='controls'><a href='{{url url "/?search=" (urlEncode @root.fulltextString)}}' class='showMatchingPosts'>{{translate "Show matching posts"}}</a></span>
+        {{/if}}
+
+        {{!-- If this conversation is stickied, output an excerpt from its first post. --}}
+        {{#if firstPost}}
+            <div class='excerpt'>".ET::formatter()->init($conversation["firstPost"])->inline(true)->firstLine()->clip(200)->format()->get()."</div>";
+        {{/if}}
+    </div>
+    <div class='col-channel'>
+        {{#with (lookup @root.channelInfo channelId)}}
+            <a href='{{url (searchUrl "" slug)}}' class='channel channel-{{channelId}}' data-channel='{{slug}}'>{{title}}</a>
+        {{/with}}
+    </div>
+    <div class='col-lastPost'>
+        <span class='action'>
+            {{!-- TODO(jsonnull): implement avatar helper
+            echo avatar(array(
+                  "memberId" => $conversation["lastPostMemberId"],
+                "username" => $conversation["lastPostMember"],
+                "avatarFormat" => $conversation["lastPostMemberAvatarFormat"],
+                "email" => $conversation["lastPostMemberEmail"]
+            ), "thumb");
+            --}}
+            <span class='lastPostMember name'>
+                {{!-- TODO(jsonnull): shortcut could be --}}
+                {{!-- memberLink $conversation["lastPostMemberId"] $conversation["lastPostMember"] --}}
+                <a href='{{url (memberUrl lastPostMemberId lastPostMember)}}' title='{{translate "View %s's profile" lastPostMember}}'>{{lastPostMember}}</a>
+            </span>
+            <a href='{{url url "/unread"}}' class='lastPostTime'>{{relativeTime lastPostTime true}}</a>
+        </span>
+    </div>
+    <div class='col-replies'>
+        <span><a href='{{url url "/unread"}}'>{{replies}}</a></span>
+    </div>
+</li>

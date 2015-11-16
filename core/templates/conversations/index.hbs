@@ -1,0 +1,38 @@
+<div id='conversationsFilter' class='bodyHeader'>
+
+    <form class='search big' id='search' action='{{url "conversations/" channelSlug}}' method='get'>
+        <fieldset>
+            <i class='icon-search'></i>
+            <input name='search' type='text' class='text' value='{{searchString}}' spellcheck='false' placeholder='{{translate "Search conversations..."}}'/>
+            <a class='control-reset' href='{{url "conversations/" channelSlug}}'><i class='icon-remove'></i></a>
+        </fieldset>
+    </form>
+
+    <ul id='channels' class='channels tabs'>
+        <li class='channelListItem'><a href='{{url "channels"}}' class='channel-list' data-channel='list' title='{{translate "Channel List"}}'><i class="icon-list"></i></a></li>
+        {{!-- {{> channels_tabs }} --}}
+    </ul>
+
+    {{!--
+    if ($data["controlsMenu"]->count()): ?>
+    <ul id='searchControls' class='controls'>
+        <?php echo $data["controlsMenu"]->getContents(); ?>
+    </ul>
+    <?php endif; ?>
+    --}}
+
+    {{!--
+    if ($data["gambitsMenu"]->count()): ?>
+    <div id='gambits'>
+        <ul class='popupMenu'>
+            <?php echo $data["gambitsMenu"]->getContents(); ?>
+        </ul>
+    </div>
+    <?php endif; ?>
+    --}}
+
+</div>
+
+<div id='conversations'>
+    {{> conversations_results }}
+</div>
