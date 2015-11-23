@@ -63,10 +63,12 @@ public function getCompiledTemplate($template, $data = array())
                     'lookup' => 'FSRenderer::helperLookup',
                     'searchUrl' => 'FSRenderer::helperSearchUrl',
                     'urlEncode' => 'FSRenderer::helperUrlEncode',
-                    'selfUrl' => 'FSRenderer::helperSelfUrl'
+                    'selfUrl' => 'FSRenderer::helperSelfUrl',
+                    'object' => 'FSRenderer::helperGetObject'
                 ),
                 'blockhelpers' => Array(
-                    'and' => 'FSRenderer::blockHelperAnd'
+                    'and' => 'FSRenderer::blockHelperAnd',
+                    'is' => 'FSRenderer::blockHelperIs'
                 ),
                 'fileext' => Array(
                     '.hbs'
@@ -240,15 +242,49 @@ public static function helperSelfUrl($args, $named) {
     return ET::$controller->selfURL;
 }
 
+
 /**
- * Handlebars block helper to conditionally render block if two conditions are met
+* Handlebars helper to get an object
+ *
+ * @param array $args Object to convert to associative array
+ * @param array $named Not supported.
+ * @return string The encoded result.
+ */
+public static function helperGetObject($args, $named) {
+    if (count($args) == 1) {
+        return Array((array) $args[0], 'value');
+    }
+    else return "";
+}
+
+
+/**
+ * Handlebars block helper to conditionally render block if two values are truthy
  *
  * @param string $cx Handlebars context inside the block
- * @param array $args URL to lookup and optional string to concat before lookup.
+ * @param array $args Values that should be truthy.
  * @param array $named Not supported.
  * @return mixed Context inside the block if conditions are met, otherwise null.
  */
 public static function blockHelperAnd($cx, $args, $named) {
+    if (count($args) == 2) {
+        if ($args[0] AND $args[1]) {
+            return $cx;
+        }
+    }
+    else return null;
+}
+
+
+/**
+ * Handlebars block helper to conditionally render block if two values are equal
+ *
+ * @param string $cx Handlebars context inside the block
+ * @param array $args Values to compare
+ * @param array $named Not supported.
+ * @return mixed Context inside the block if conditions are met, otherwise null.
+ */
+public static function blockHelperIs($cx, $args, $named) {
     if (count($args) == 2) {
         if ($args[0] == $args[1]) {
             return $cx;
