@@ -1,0 +1,55 @@
+{{!-- $form = $data["form"]; --}}
+
+<div id='loginSheet' class='sheet'>
+    <div class='sheetContent'>
+
+        <h3>{{translate "Log In"}}</h3>
+
+        {{!-- <?php echo $form->open(); ?>--}}
+        {{#with (object form)}}
+        <form action='{{action}}' method='post' enctype='multipart/form-data'>
+            {{#each hiddenInputs}}
+                <input type='hidden' name='{{name}}' {{#if value}}value='{{value}}{{/if}}'/>
+            {{/each}}
+
+            <div class='sheetBody'>
+
+                {{#if @root.message}}
+                    <div class='section help'>
+                        {{@root.message}}
+                    </div>
+                {{/if}}
+
+                <div class='section'>
+                    <ul class='form'>
+
+                    {{#each sections}}
+                        <li><label>{{{title}}}{{#is id "password"}} <small><a href='{{url "user/forgot"}}' class='link-forgot' tabindex='-1'>{{translate "Forgot?"}}</a></small>{{/is}}</label> <div class='fieldGroup'>
+                            {{#each fields}}
+                                {{>form_fields}}
+                            {{/each}}
+                        </div></li>
+                    {{/each}}
+
+                    </ul>
+                </div>
+
+            </div>
+
+            <div class='buttons'>
+                <small>{{translate "Don't have an account?"}} <a href='{{url "user/join"}}' class='link-join'>Sign up!</a></small>
+                <input type='submit' name='login' value='{{translate "Log In"}}' class="big submit button"/>
+                <input type='submit' name='cancel' value='{{translate "Cancel"}}' class="big cancel button"/>
+            </div>
+
+        </form>
+        {{/with}}
+
+        <script>
+        $(function() {
+            $('input[name=username]').focus();
+        })
+        </script>
+
+    </div>
+</div>
