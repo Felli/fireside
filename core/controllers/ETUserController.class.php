@@ -45,52 +45,63 @@ public function action_login()
 
 	// Construct a form.
 	$form = ETFactory::make("form");
+	// Assign the action to this route
 	$form->action = URL("user/login");
-	$form->addHidden("return", R("return"));
 
-	$controller = $this; // for use in closures
+	// Add return as a hidden field
+	$form->hidden("return", R("return"));
+	$form->hidden("token", ET::$session->token);
 
-	// Add the username field to the form structure.
-	$form->addSection("username", T("Username or Email"));
-	$form->addField("username", "username", function($form)
-	{
-		return $form->input("username");
-	});
+	$form->section("username", T("Username or Email"));
+	$form->addToSection("username", Array(
+		FSForm::text("username", Array(
+			"placeholder" => "username"
+		))
+	));
 
-	// Add the password field to the form structure. We also use a processing callback on this field to attempt
-	// the login because the password is the specific mechanism of authentication in this instance.
-	$form->addSection("password", T("Password")." <small><a href='".URL("user/forgot")."' class='link-forgot' tabindex='-1'>".T("Forgot?")."</a></small>");
-	$form->addField("password", "password", function($form)
-	{
-		return $form->input("password", "password");
-	},
-	function($form, $key, &$success) use ($controller)
-	{
-		// If the login was successful...
-		if (ET::$session->login($form->getValue("username"), $form->getValue("password"), $form->getValue("remember"))) $success = true;
-
-		// If not, get the errors that occurred and pass them to the form.
-		else $form->errors(ET::$session->errors());
-	});
+	$form->section("password", T("Password"), Array(
+		FSForm::password("password", Array(
+			"placeholder" => "password"
+		))
+	));
 
 	// Add the "remember me" field to the form structure.
 	if (C("esoTalk.enablePersistenceCookies")) {
-		$form->addSection("remember");
-		$form->addField("remember", "remember", function($form)
-		{
-			return "<label class='checkbox'>".$form->checkbox("remember")." ".T("Keep me logged in")."</label>";
-		});
+		array_push($form->sections, Array(
+			"id" => "remember",
+			"fields" => Array(
+				Array(
+					"name" => "remember",
+					"type" => "checkbox",
+					"label" => T("Keep me logged in")
+				)
+			)
+		));
 	}
+
+	$input = $form->values();
 
 	$this->trigger("initLogin", array($form));
 
-	// If the cancel button was pressed, return to where the user was before.
+	// If form post is just to cancel action, redirect to return URL
 	if ($form->isPostBack("cancel")) $this->redirect(URL(R("return")));
 
+	// TODO(jsonnull): replace with hooks system
 	// If the login form was submitted, run the field processing callbacks. If one of them says we
 	// were successful in logging in, then we can redirect back to where the user came from.
+	//if ($form->validPostBack()) $form->runFieldCallbacks($success);
 	$success = false;
-	if ($form->validPostBack()) $form->runFieldCallbacks($success);
+	// Callback for login
+	if ($form->validPostBack()) {
+
+		// If the login was successful...
+		if (ET::$session->login($input["username"], $input["password"], $input["remember"])) $success = true;
+
+		// If not, get the errors that occurred and pass them to the form.
+		else $form->errors(ET::$session->errors());
+	}
+	// END TODO
+
 	if ($success) $this->redirect(URL(R("return")));
 
 	// Instead of showing some specific errors on the form, render them as messages.
@@ -117,7 +128,7 @@ public function action_login()
 public function action_logout()
 {
 	if (!$this->validateToken()) return;
-	
+
 	ET::$session->remove("messages");
 	ET::$session->logout();
 

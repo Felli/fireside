@@ -119,7 +119,7 @@ ETFactory::register("sqlResult", "ETSQLResult", PATH_LIBRARY."/ETSQLResult.class
 ETFactory::register("sqlRaw", "ETSQLRaw", PATH_LIBRARY."/ETSQLRaw.class.php");
 ETFactory::register("session", "ETSession", PATH_LIBRARY."/ETSession.class.php");
 ETFactory::register("cache", "ETCache", PATH_LIBRARY."/ETCache.class.php");
-ETFactory::register("form", "ETForm", PATH_LIBRARY."/ETForm.class.php");
+ETFactory::register("form", "FSForm", PATH_LIBRARY."/FSForm.class.php");
 ETFactory::register("format", "ETFormat", PATH_LIBRARY."/ETFormat.class.php");
 ETFactory::register("upload", "ETUpload", PATH_LIBRARY."/ETUpload.class.php");
 ETFactory::register("menu", "ETMenu", PATH_LIBRARY."/ETMenu.class.php");
