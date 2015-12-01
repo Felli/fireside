@@ -1,0 +1,9 @@
+{{#is type "text"}}
+    <input name='{{name}}' type='text' {{#if placeholder}}placeholder='{{placeholder}}'{{/if}} />
+{{/is}}
+{{#is type "password"}}
+    <input name='{{name}}' type='password' {{#if placeholder}}placeholder='{{placeholder}}'{{/if}} />
+{{/is}}
+{{#is type "checkbox"}}
+    <label class='checkbox' {{#is value 1}}checked='checked'{{/is}}><input name='{{name}}' type='{{type}}' /> {{label}}</label>
+{{/is}}
