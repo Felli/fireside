@@ -9,7 +9,7 @@ Vagrant.configure(2) do |config|
         v.customize ["modifyvm", :id, "--natdnsproxy1", "on"]
     end
 
-    config.vm.define "fireside2" do |app|
+    config.vm.define "fireside" do |app|
         app.vm.box = "ubuntu/trusty64"
         app.vm.network "private_network", type: "dhcp"
         app.vm.synced_folder ".", "/var/www",
