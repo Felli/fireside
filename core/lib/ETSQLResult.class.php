@@ -2,7 +2,9 @@
 // Copyright 2011 Toby Zerner, Simon Zerner
 // This file is part of esoTalk. Please see the included license file for usage information.
 
-if (!defined("IN_ESOTALK")) exit;
+if (!defined("IN_ESOTALK")) {
+    exit;
+}
 
 /**
  * A wrapper around a PDOStatement which provides convenient functions for handling SQL results.
@@ -40,8 +42,8 @@ protected $rows = null;
  */
 public function __construct($pdoStatement)
 {
-	$this->pdoStatement = $pdoStatement;
-	$this->queryString = $pdoStatement->queryString;
+    $this->pdoStatement = $pdoStatement;
+    $this->queryString = $pdoStatement->queryString;
 }
 
 
@@ -52,9 +54,9 @@ public function __construct($pdoStatement)
  */
 protected function rows()
 {
-	if ($this->rows === null)
-		$this->rows = $this->pdoStatement->fetchAll(PDO::FETCH_ASSOC);
-	return $this->rows;
+    if ($this->rows === null)
+        $this->rows = $this->pdoStatement->fetchAll(PDO::FETCH_ASSOC);
+    return $this->rows;
 }
 
 
@@ -65,8 +67,8 @@ protected function rows()
  */
 public function numRows()
 {
-	$rows = $this->rows();
-	return count($rows);
+    $rows = $this->rows();
+    return count($rows);
 }
 
 
@@ -80,15 +82,15 @@ public function numRows()
  */
 public function allRows($keyColumn = false)
 {
-	$rows = $this->rows();
+    $rows = $this->rows();
 
-	if ($keyColumn) {
-		$newRows = array();
-		foreach ($rows as $row) $newRows[$row[$keyColumn]] = $row;
-		return $newRows;
-	}
+    if ($keyColumn) {
+        $newRows = array();
+        foreach ($rows as $row) $newRows[$row[$keyColumn]] = $row;
+        return $newRows;
+    }
 
-	return $rows;
+    return $rows;
 }
 
 
@@ -99,8 +101,8 @@ public function allRows($keyColumn = false)
  */
 public function firstRow()
 {
-	$rows = $this->rows();
-	return isset($rows[0]) ? $rows[0] : false;
+    $rows = $this->rows();
+    return isset($rows[0]) ? $rows[0] : false;
 }
 
 
@@ -111,18 +113,18 @@ public function firstRow()
  */
 public function nextRow()
 {
-	return $this->pdoStatement->fetch(PDO::FETCH_ASSOC);
+    return $this->pdoStatement->fetch(PDO::FETCH_ASSOC);
 }
 
 
 /**
  * Returns the value of the first column of the first row in the result, or false if there are no rows.
  *
- * @return mixed
+ * @return string
  */
 public function result()
 {
-	return $this->pdoStatement->fetchColumn();
+    return $this->pdoStatement->fetchColumn();
 }
 
 }
