@@ -41,18 +41,25 @@ public function action_index()
  */
 public function action_uninstall($language = "")
 {
-    if (!$this->validateToken()) return;
+    if (!$this->validateToken()) {
+        return;
+    }
 
     // Make sure the language exists.
     $languages = ET::getLanguages();
-    if (!$language or !in_array($language, $languages)) return;
+    if (!$language or !in_array($language, $languages)) {
+        return;
+    }
 
     // Attempt to remove the directory. If we couldn't, show a "not writable" message.
-    if (!is_writable($file = PATH_LANGUAGES) or !is_writable($file = PATH_LANGUAGES . "/$language") or !rrmdir($file))
-        $this->message(sprintf(T("message.notWritable"), $file), "warning");
+    if (!is_writable($file = PATH_LANGUAGES) or !is_writable($file = PATH_LANGUAGES . "/$language") or !rrmdir($file)) {
+            $this->message(sprintf(T("message.notWritable"), $file), "warning");
+    }
 
     // Otherwise, show a success message.
-    else $this->message(T("message.languageUninstalled"), "success");
+    else {
+        $this->message(T("message.languageUninstalled"), "success");
+    }
 
     $this->redirect(URL("admin/languages"));
 }
