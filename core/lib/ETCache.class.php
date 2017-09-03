@@ -21,18 +21,18 @@ class ETCache {
  */
 public function exists($key)
 {
-	return false;
+    return false;
 }
 
 /**
  * Get a value stored in the cache. Returns false if it does not exist.
  *
  * @param string $key The identifier for which value to get.
- * @return mixed The stored value, or false if not found.
+ * @return boolean The stored value, or false if not found.
  */
 public function get($key)
 {
-	return false;
+    return false;
 }
 
 /**
@@ -45,7 +45,7 @@ public function get($key)
  */
 public function store($key, $value, $ttl = 0)
 {
-	return true;
+    return true;
 }
 
 /**
@@ -56,7 +56,7 @@ public function store($key, $value, $ttl = 0)
  */
 public function remove($key)
 {
-	return true;
+    return true;
 }
 
 }

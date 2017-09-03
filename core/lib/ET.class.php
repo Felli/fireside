@@ -2,7 +2,9 @@
 // Copyright 2011 Toby Zerner, Simon Zerner
 // This file is part of esoTalk. Please see the included license file for usage information.
 
-if (!defined("IN_ESOTALK")) exit;
+if (!defined("IN_ESOTALK")) {
+    exit;
+}
 
 /**
  * A static class that is a central point of access for all things esoTalk. This class:
@@ -113,8 +115,8 @@ public static $cache;
  */
 public static function SQL($sql = "")
 {
-	if ($sql) return ET::$database->query($sql);
-	else return ETFactory::make("sqlQuery");
+    if ($sql) return ET::$database->query($sql);
+    else return ETFactory::make("sqlQuery");
 }
 
 
@@ -126,7 +128,7 @@ public static function SQL($sql = "")
  */
 public static function raw($expression)
 {
-	return ETFactory::make("sqlRaw", $expression);
+    return ETFactory::make("sqlRaw", $expression);
 }
 
 
@@ -139,14 +141,14 @@ public static function raw($expression)
  */
 public static function trigger($event, $parameters = array())
 {
-	$returns = array();
-	foreach (self::$plugins as $plugin) {
-		if (method_exists($plugin, "handler_$event")) {
-			$return = call_user_func_array(array($plugin, "handler_$event"), $parameters);
-			if ($return !== null) $returns[] = $return;
-		}
-	}
-	return $returns;
+    $returns = array();
+    foreach (self::$plugins as $plugin) {
+        if (method_exists($plugin, "handler_$event")) {
+            $return = call_user_func_array(array($plugin, "handler_$event"), $parameters);
+            if ($return !== null) $returns[] = $return;
+        }
+    }
+    return $returns;
 }
 
 
@@ -160,12 +162,12 @@ public static function trigger($event, $parameters = array())
  */
 public static function first($event, $parameters = array())
 {
-	foreach (self::$plugins as $plugin) {
-		if (method_exists($plugin, "handler_$event")) {
-			$return = call_user_func_array(array($plugin, "handler_$event"), $parameters);
-			if ($return !== null) return $return;
-		}
-	}
+    foreach (self::$plugins as $plugin) {
+        if (method_exists($plugin, "handler_$event")) {
+            $return = call_user_func_array(array($plugin, "handler_$event"), $parameters);
+            if ($return !== null) return $return;
+        }
+    }
 }
 
 
@@ -176,13 +178,13 @@ public static function first($event, $parameters = array())
  */
 public static function checkForUpdates()
 {
-	$json = @file_get_contents("http://esotalk.org/versions.json");
-	$packages = json_decode($json, true);
+    $json = @file_get_contents("http://esotalk.org/versions.json");
+    $packages = json_decode($json, true);
 
-	// Compare the installed version and the latest version. Show a message if there is a new version.
-	if (isset($packages["esoTalk"]) and version_compare($packages["esoTalk"]["version"], ESOTALK_VERSION, ">") == -1) return $packages["esoTalk"];
+    // Compare the installed version and the latest version. Show a message if there is a new version.
+    if (isset($packages["esoTalk"]) and version_compare($packages["esoTalk"]["version"], ESOTALK_VERSION, ">") == -1) return $packages["esoTalk"];
 
-	return false;
+    return false;
 }
 
 
@@ -203,8 +205,8 @@ public static $config = array();
  */
 public static function loadConfig($file)
 {
-	include $file;
-	ET::$config = array_merge(ET::$config, $config);
+    include $file;
+    ET::$config = array_merge(ET::$config, $config);
 }
 
 
@@ -212,12 +214,12 @@ public static function loadConfig($file)
  * Fetch the value of a configuration option, falling back to a default if it isn't set.
  *
  * @param string $key The name of the configuration option.
- * @param mixed $default A default value to fall back on if the config option isn't set.
+ * @param boolean $default A default value to fall back on if the config option isn't set.
  * @return mixed The value of the config option.
  */
 public static function config($key, $default = null)
 {
-	return isset(ET::$config[$key]) ? ET::$config[$key] : $default;
+    return isset(ET::$config[$key]) ? ET::$config[$key] : $default;
 }
 
 
@@ -229,19 +231,19 @@ public static function config($key, $default = null)
  */
 public static function writeConfig($values)
 {
-	// Include the config file so we can re-write the values contained within it.
-	if (file_exists($file = PATH_CONFIG."/config.php")) include $file;
+    // Include the config file so we can re-write the values contained within it.
+    if (file_exists($file = PATH_CONFIG."/config.php")) include $file;
 
-	// Now add the $values to the $config array.
-	if (!isset($config) or !is_array($config)) $config = array();
-	$config = array_merge($config, $values);
-	self::$config = array_merge(self::$config, $values);
+    // Now add the $values to the $config array.
+    if (!isset($config) or !is_array($config)) $config = array();
+    $config = array_merge($config, $values);
+    self::$config = array_merge(self::$config, $values);
 
-	// Finally, loop through and write the config array to the config file.
-	$contents = "<?php\n";
-	foreach ($config as $k => $v) $contents .= '$config["'.$k.'"] = '.var_export($v, true).";\n";
-	$contents .= "\n// Last updated by: ".ET::$session->user["username"]." (".ET::$session->ip.") @ ".date("r")."\n?>";
-	file_put_contents($file, $contents);
+    // Finally, loop through and write the config array to the config file.
+    $contents = "<?php\n";
+    foreach ($config as $k => $v) $contents .= '$config["'.$k.'"] = '.var_export($v, true).";\n";
+    $contents .= "\n// Last updated by: ".ET::$session->user["username"]." (".ET::$session->ip.") @ ".date("r")."\n?>";
+    file_put_contents($file, $contents);
 }
 
 
@@ -286,28 +288,28 @@ private static $_definitions = array();
  */
 public static function loadLanguage($language = "")
 {
-	// Clear the currently loaded definitions.
-	self::$definitions = array();
+    // Clear the currently loaded definitions.
+    self::$definitions = array();
 
-	// If the specified language doesn't exist, use the default language.
-	self::$language = file_exists(PATH_LANGUAGES."/".sanitizeFileName($language)."/definitions.php") ? $language : C("esoTalk.language");
+    // If the specified language doesn't exist, use the default language.
+    self::$language = file_exists(PATH_LANGUAGES."/".sanitizeFileName($language)."/definitions.php") ? $language : C("esoTalk.language");
 
-	// Load the main definitions file.
-	$languagePath = PATH_LANGUAGES."/".sanitizeFileName(self::$language);
-	self::loadDefinitions("$languagePath/definitions.php");
+    // Load the main definitions file.
+    $languagePath = PATH_LANGUAGES."/".sanitizeFileName(self::$language);
+    self::loadDefinitions("$languagePath/definitions.php");
 
-	// Set the locale.
-	if (isset(ET::$languageInfo[self::$language]["locale"])) setlocale(LC_ALL, ET::$languageInfo[self::$language]["locale"]);
+    // Set the locale.
+    if (isset(ET::$languageInfo[self::$language]["locale"])) setlocale(LC_ALL, ET::$languageInfo[self::$language]["locale"]);
 
-	// Loop through the loaded plugins and include their definition files, if they exist.
-	foreach (C("esoTalk.enabledPlugins") as $plugin) {
-		if (file_exists($file = "$languagePath/definitions.".sanitizeFileName($plugin).".php"))
-			self::loadDefinitions($file);
-	}
+    // Loop through the loaded plugins and include their definition files, if they exist.
+    foreach (C("esoTalk.enabledPlugins") as $plugin) {
+        if (file_exists($file = "$languagePath/definitions.".sanitizeFileName($plugin).".php"))
+            self::loadDefinitions($file);
+    }
 
-	// Re-define runtime definitions.
-	foreach (self::$runtimeDefinitions as $k => $v)
-		ET::define($k, $v, true);
+    // Re-define runtime definitions.
+    foreach (self::$runtimeDefinitions as $k => $v)
+        ET::define($k, $v, true);
 }
 
 
@@ -319,8 +321,8 @@ public static function loadLanguage($language = "")
  */
 public static function loadDefinitions($file)
 {
-	include $file;
-	ET::$definitions = array_merge(ET::$definitions, (array)@$definitions);
+    include $file;
+    ET::$definitions = array_merge(ET::$definitions, (array)@$definitions);
 }
 
 
@@ -331,8 +333,8 @@ public static function loadDefinitions($file)
  */
 public static function saveLanguageState()
 {
-	self::$_definitions = self::$definitions;
-	self::$_language = self::$language;
+    self::$_definitions = self::$definitions;
+    self::$_language = self::$language;
 }
 
 
@@ -343,8 +345,8 @@ public static function saveLanguageState()
  */
 public static function revertLanguageState()
 {
-	self::$language = self::$_language;
-	self::$definitions = self::$_definitions;
+    self::$language = self::$_language;
+    self::$definitions = self::$_definitions;
 }
 
 
@@ -354,14 +356,14 @@ public static function revertLanguageState()
  * @param string $key The definition key.
  * @param string $value The definition value.
  * @param bool $override If true, this new definition will be set regardless of if it is already set.
- * @return void
+ * @return false|null
  */
 public static function define($key, $value, $override = false)
 {
-	if (isset(self::$definitions[$key]) and !$override) return false;
-	self::$definitions[$key] = $value;
+    if (isset(self::$definitions[$key]) and !$override) return false;
+    self::$definitions[$key] = $value;
 
-	self::$runtimeDefinitions[$key] = $value;
+    self::$runtimeDefinitions[$key] = $value;
 }
 
 
@@ -375,7 +377,7 @@ public static function define($key, $value, $override = false)
  */
 public static function translate($string, $default = false)
 {
-	return isset(self::$definitions[$string]) ? self::$definitions[$string] : ($default ? $default : $string);
+    return isset(self::$definitions[$string]) ? self::$definitions[$string] : ($default ? $default : $string);
 }
 
 
@@ -386,21 +388,21 @@ public static function translate($string, $default = false)
  */
 public static function getLanguages()
 {
-	$languages = array();
-	if ($handle = opendir(PATH_LANGUAGES)) {
-	    while (false !== ($file = readdir($handle))) {
+    $languages = array();
+    if ($handle = opendir(PATH_LANGUAGES)) {
+        while (false !== ($file = readdir($handle))) {
 
-	        if ($file[0] != "." and file_exists($defs = PATH_LANGUAGES."/$file/definitions.php")) {
+            if ($file[0] != "." and file_exists($defs = PATH_LANGUAGES."/$file/definitions.php")) {
 
-	        	// Include the file so we get the language information in ET::$languageInfo.
-	        	include_once $defs;
-				$languages[] = $file;
-			}
+                // Include the file so we get the language information in ET::$languageInfo.
+                include_once $defs;
+                $languages[] = $file;
+            }
 
-		}
-	}
-	sort($languages);
-	return $languages;
+        }
+    }
+    sort($languages);
+    return $languages;
 }
 
 
@@ -418,13 +420,14 @@ private static $instances = array();
  * Get an instance of the class specified by $factoryName. So that we don't constantly get new instances and
  * increase overhead, we store instances in ET::$instances and reuse them as needed.
  *
+ * @param string $factoryName
  * @return mixed An instance of the specified class.
  */
 public static function getInstance($factoryName)
 {
-	if (!isset(self::$instances[$factoryName]))
-		self::$instances[$factoryName] = ETFactory::make($factoryName);
-	return self::$instances[$factoryName];
+    if (!isset(self::$instances[$factoryName]))
+        self::$instances[$factoryName] = ETFactory::make($factoryName);
+    return self::$instances[$factoryName];
 }
 
 
@@ -433,52 +436,52 @@ public static function getInstance($factoryName)
  */
 public static function memberModel()
 {
-	return self::getInstance("memberModel");
+    return self::getInstance("memberModel");
 }
 
 public static function conversationModel()
 {
-	return self::getInstance("conversationModel");
+    return self::getInstance("conversationModel");
 }
 
 public static function postModel()
 {
-	return self::getInstance("postModel");
+    return self::getInstance("postModel");
 }
 
 public static function searchModel()
 {
-	return self::getInstance("searchModel");
+    return self::getInstance("searchModel");
 }
 
 public static function channelModel()
 {
-	return self::getInstance("channelModel");
+    return self::getInstance("channelModel");
 }
 
 public static function groupModel()
 {
-	return self::getInstance("groupModel");
+    return self::getInstance("groupModel");
 }
 
 public static function upgradeModel()
 {
-	return self::getInstance("upgradeModel");
+    return self::getInstance("upgradeModel");
 }
 
 public static function activityModel()
 {
-	return self::getInstance("activityModel");
+    return self::getInstance("activityModel");
 }
 
 public static function formatter()
 {
-	return self::getInstance("format");
+    return self::getInstance("format");
 }
 
 public static function uploader()
 {
-	return self::getInstance("upload");
+    return self::getInstance("upload");
 }
 
 
@@ -493,43 +496,43 @@ public static function uploader()
  */
 public static function fatalError($exception)
 {
-	// Get the information about the exception.
-	$errorNumber = $exception->getCode();
-	$message = $exception->getMessage();
-	$file = $exception->getFile();
-	$line = $exception->getLine();
-	$backtrace = $exception->getTrace();
+    // Get the information about the exception.
+    $errorNumber = $exception->getCode();
+    $message = $exception->getMessage();
+    $file = $exception->getFile();
+    $line = $exception->getLine();
+    $backtrace = $exception->getTrace();
 
-	// Use the controller's response type, or just use the default one.
-	$responseType = (self::$controller and self::$controller->responseType) ? self::$controller->responseType : RESPONSE_TYPE_DEFAULT;
+    // Use the controller's response type, or just use the default one.
+    $responseType = (self::$controller and self::$controller->responseType) ? self::$controller->responseType : RESPONSE_TYPE_DEFAULT;
 
-	// Clean the output buffer and send headers if possible.
-	@ob_end_clean();
-	if (!headers_sent()) {
-		header("HTTP/1.0 500 Internal Server Error");
-		header("Content-Type: text/html; charset=utf-8");
-	}
+    // Clean the output buffer and send headers if possible.
+    @ob_end_clean();
+    if (!headers_sent()) {
+        header("HTTP/1.0 500 Internal Server Error");
+        header("Content-Type: text/html; charset=utf-8");
+    }
 
-	// See if we can get the lines of the file that caused the error.
-	if (is_string($file) and is_numeric($line) and file_exists($file)) $errorLines = file($file);
-	else $errorLines = false;
+    // See if we can get the lines of the file that caused the error.
+    if (is_string($file) and is_numeric($line) and file_exists($file)) $errorLines = file($file);
+    else $errorLines = false;
 
-	$data = array();
-	$data["pageTitle"] = T("Fatal Error");
+    $data = array();
+    $data["pageTitle"] = T("Fatal Error");
 
-	// Render the view into $data["content"], so it will be outputted within the master view.
-	ob_start();
-	include PATH_VIEWS."/error.php";
-	$data["content"] = ob_get_contents();
-	ob_end_clean();
+    // Render the view into $data["content"], so it will be outputted within the master view.
+    ob_start();
+    include PATH_VIEWS."/error.php";
+    $data["content"] = ob_get_contents();
+    ob_end_clean();
 
-	// Render the master view, or just output the content if we can't find one.
-	if ($responseType === RESPONSE_TYPE_DEFAULT and file_exists($view = PATH_VIEWS."/message.master.php"))
-		include $view;
-	else
-		echo $data["content"];
+    // Render the master view, or just output the content if we can't find one.
+    if ($responseType === RESPONSE_TYPE_DEFAULT and file_exists($view = PATH_VIEWS."/message.master.php"))
+        include $view;
+    else
+        echo $data["content"];
 
-	exit;
+    exit;
 }
 
 
@@ -540,20 +543,20 @@ public static function fatalError($exception)
  */
 public static function notFound()
 {
-	header("HTTP/1.1 404 Not Found");
+    header("HTTP/1.1 404 Not Found");
 
-	$data = array();
-	$data["pageTitle"] = T("Page Not Found");
+    $data = array();
+    $data["pageTitle"] = T("Page Not Found");
 
-	// Render the view into $data["content"], so it will be outputted within the master view.
-	ob_start();
-	include PATH_VIEWS."/404.php";
-	$data["content"] = ob_get_contents();
-	ob_end_clean();
+    // Render the view into $data["content"], so it will be outputted within the master view.
+    ob_start();
+    include PATH_VIEWS."/404.php";
+    $data["content"] = ob_get_contents();
+    ob_end_clean();
 
-	// Render the master view.
-	include PATH_VIEWS."/message.master.php";
-	exit;
+    // Render the master view.
+    include PATH_VIEWS."/message.master.php";
+    exit;
 }
 
 }
