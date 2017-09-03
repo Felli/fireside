@@ -111,7 +111,9 @@ public function action_index($channelSlug = false)
 
     // Construct a canonical URL and add to the breadcrumb stack.
     $slugs = array();
-    foreach ($currentChannels as $channel) $slugs[] = $channelInfo[$channel]["slug"];
+    foreach ($currentChannels as $channel) {
+        $slugs[] = $channelInfo[$channel]["slug"];
+    }
     $url = "conversations/" . urlencode(($k = implode(" ", $slugs)) ? $k : "all") . ($searchString ? "?search=" . urlencode($searchString) : "");
     $this->pushNavigation("conversations", "search", URL($url));
     $this->canonicalURL = URL($url, true);
@@ -236,13 +238,17 @@ public function action_index($channelSlug = false)
             "member" => ET::SQL()->select("COUNT(*)")->from("member")->get()
         );
         $sql = ET::SQL();
-        foreach ($queries as $k => $query) $sql->select("($query) AS $k");
+        foreach ($queries as $k => $query) {
+            $sql->select("($query) AS $k");
+        }
         $stats = $sql->exec()->firstRow();
 
         // ...and show them in the footer.
         foreach ($stats as $k => $v) {
             $stat = Ts("statistic.$k", "statistic.$k.plural", number_format($v));
-            if ($k == "member" and (C("esoTalk.members.visibleToGuests") or ET::$session->user)) $stat = "<a href='" . URL("members") . "'>$stat</a>";
+            if ($k == "member" and (C("esoTalk.members.visibleToGuests") or ET::$session->user)) {
+                $stat = "<a href='" . URL("members") . "'>$stat</a>";
+            }
             $this->addToMenu("statistics", "statistic-$k", $stat, array("before" => "statistic-online"));
         }
 
@@ -402,10 +408,14 @@ public function action_update($channelSlug = "", $query = "")
 
     // Make sure they are all integers.
     foreach ($conversationIds as $k => $v) {
-        if (!($conversationIds[$k] = (int) $v)) unset($conversationIds[$k]);
+        if (!($conversationIds[$k] = (int) $v)) {
+            unset($conversationIds[$k]);
+        }
     }
 
-    if (!count($conversationIds)) return;
+    if (!count($conversationIds)) {
+        return;
+    }
     $conversationIds = array_slice((array) $conversationIds, 0, 20);
 
     // Work out if there are any new results for this channel/search query.
@@ -430,7 +440,9 @@ public function action_update($channelSlug = "", $query = "")
 
         // Get the difference of the two sets of conversationId's.
         $diff = array_diff((array) $newConversationIds, (array) $conversationIds);
-        if (count($diff)) $this->message(sprintf(T("message.newSearchResults"), "javascript:ETSearch.showNewActivity();void(0)"), array("id" => "newSearchResults"));
+        if (count($diff)) {
+            $this->message(sprintf(T("message.newSearchResults"), "javascript:ETSearch.showNewActivity();void(0)"), array("id" => "newSearchResults"));
+        }
 
     }
 

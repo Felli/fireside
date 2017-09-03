@@ -347,14 +347,18 @@ public function getConversationIDs($channelIDs = array(), $searchString = "", $o
         }
 
         // If we didn't find a gambit, use this term as a fulltext term.
-        if ($negate) $term = "-" . str_replace(" ", " -", $term);
+        if ($negate) {
+            $term = "-" . str_replace(" ", " -", $term);
+        }
         $this->fulltext($term);
     }
 
     // If an order for the search results has not been specified, apply a default.
     // Order by sticky and then last post time.
     if (!count($this->orderBy)) {
-        if ($orderBySticky) $this->orderBy("c.sticky DESC");
+        if ($orderBySticky) {
+            $this->orderBy("c.sticky DESC");
+        }
         $this->orderBy("c.lastPostTime DESC");
     }
 
@@ -379,31 +383,41 @@ public function getConversationIDs($channelIDs = array(), $searchString = "", $o
         // Get the list of conversation IDs so that the next condition can use it in its query.
         $result = $sql->exec();
         $ids = array();
-        while ($row = $result->nextRow()) $ids[] = (int) reset($row);
+        while ($row = $result->nextRow()) {
+            $ids[] = (int) reset($row);
+        }
 
         // If this condition is negated, then add the IDs to the list of bad conversations.
         // If the condition is not negated, set the list of good conversations to the IDs, provided there are some.
-        if ($negate) $badConversationIDs = array_merge($badConversationIDs, $ids);
-        elseif (count($ids)) $goodConversationIDs = $ids;
-        else return false;
+        if ($negate) {
+            $badConversationIDs = array_merge($badConversationIDs, $ids);
+        } elseif (count($ids)) {
+            $goodConversationIDs = $ids;
+        } else {
+            return false;
+        }
 
         // Strip bad conversation IDs from the list of good conversation IDs.
         if (count($goodConversationIDs)) {
             $goodConversationIds = array_diff($goodConversationIDs, $badConversationIDs);
-            if (!count($goodConversationIDs)) return false;
+            if (!count($goodConversationIDs)) {
+                return false;
+            }
         }
 
         // This will be the condition for the next query that restricts or eliminates conversation IDs.
-        if (count($goodConversationIDs))
-            $idCondition = "conversationId IN (" . implode(",", $goodConversationIDs) . ")";
-        elseif (count($badConversationIDs))
-            $idCondition = "conversationId NOT IN (" . implode(",", $badConversationIDs) . ")";
+        if (count($goodConversationIDs)) {
+                    $idCondition = "conversationId IN (" . implode(",", $goodConversationIDs) . ")";
+        } elseif (count($badConversationIDs)) {
+                    $idCondition = "conversationId NOT IN (" . implode(",", $badConversationIDs) . ")";
+        }
     }
 
     // Reverse the order if necessary - swap DESC and ASC.
     if ($this->orderReverse) {
-        foreach ($this->orderBy as $k => $v)
-            $this->orderBy[$k] = strtr($this->orderBy[$k], array("DESC" => "ASC", "ASC" => "DESC"));
+        foreach ($this->orderBy as $k => $v) {
+                    $this->orderBy[$k] = strtr($this->orderBy[$k], array("DESC" => "ASC", "ASC" => "DESC"));
+        }
     }
 
     // Now check if there are any fulltext keywords to filter by.
@@ -424,20 +438,29 @@ public function getConversationIDs($channelIDs = array(), $searchString = "", $o
 
         $result = $fulltextQuery->exec();
         $ids = array();
-        while ($row = $result->nextRow()) $ids[] = reset($row);
+        while ($row = $result->nextRow()) {
+            $ids[] = reset($row);
+        }
 
         // Change the ID condition to this list of matching IDs, and order by relevance.
-        if (count($ids)) $idCondition = "conversationId IN (" . implode(",", $ids) . ")";
-        else return false;
+        if (count($ids)) {
+            $idCondition = "conversationId IN (" . implode(",", $ids) . ")";
+        } else {
+            return false;
+        }
         $this->orderBy = array("FIELD(c.conversationId," . implode(",", $ids) . ")");
     }
 
     // Set a default limit if none has previously been set.
-    if (!$this->limit) $this->limit = C("esoTalk.search.limit");
+    if (!$this->limit) {
+        $this->limit = C("esoTalk.search.limit");
+    }
 
     // Finish constructing the final query using the ID whitelist/blacklist we've come up with.
     // Get one more result than we'll actually need so we can see if there are "more results."
-    if ($idCondition) $this->sql->where($idCondition);
+    if ($idCondition) {
+        $this->sql->where($idCondition);
+    }
     $this->sql->orderBy($this->orderBy)->limit($this->limit + 1);
 
     // Make sure conversations that the user isn't allowed to see are filtered out.
@@ -793,12 +816,16 @@ public static function gambitContributor(&$search, $term, $negate)
  */
 public static function gambitLimit(&$search, $term, $negate)
 {
-    if ($negate) return;
+    if ($negate) {
+        return;
+    }
 
     // Get the number of results they want.
     $limit = (int) trim(substr($term, strlen(T("gambit.limit:"))));
     $limit = max(1, $limit);
-    if (($max = C("esoTalk.search.limitMax")) > 0) $limit = min($max, $limit);
+    if (($max = C("esoTalk.search.limitMax")) > 0) {
+        $limit = min($max, $limit);
+    }
 
     $search->limit($limit);
 }

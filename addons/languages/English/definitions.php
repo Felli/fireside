@@ -3,14 +3,14 @@
 // This file is part of esoTalk. Please see the included license file for usage information.
 
 ET::$languageInfo["English"] = array(
-	"locale" => "en_US",
-	"name" => "English",
-	"description" => "A casual English language pack.",
-	"version" => ESOTALK_VERSION,
-	"author" => "esoTalk Team",
-	"authorEmail" => "support@esotalk.org",
-	"authorURL" => "http://esotalk.org",
-	"license" => "GPLv2"
+    "locale" => "en_US",
+    "name" => "English",
+    "description" => "A casual English language pack.",
+    "version" => ESOTALK_VERSION,
+    "author" => "esoTalk Team",
+    "authorEmail" => "support@esotalk.org",
+    "authorURL" => "http://esotalk.org",
+    "license" => "GPLv2"
 );
 
 // Define the character set that this language uses.
@@ -437,7 +437,7 @@ $definitions["message.conversationDeleted"] = "The conversation was deleted. Did
 $definitions["message.conversationNotFound"] = "For some reason this conversation cannot be viewed. It may not exist, or you may not have permission to view it.";
 $definitions["message.cookieAuthenticationTheft"] = "For security reasons, we couldn't log you in with your 'remember me' cookie. Please log in manually!";
 $definitions["message.deleteChannelHelp"] = "Woah, hold up there! If you delete this channel, there'll be no way to get it back. Unless you build a time machine. But, uh, there'll be no <em>easy</em> way to get it back. All of the conversations in this channel can be moved to another of your choice.";
-$definitions["message.emailConfirmed"] = "Cool! Your account has been validated and you can now start participating in conversations. Why not <a href='".URL("conversation/start")."'>start one</a> yourself?";
+$definitions["message.emailConfirmed"] = "Cool! Your account has been validated and you can now start participating in conversations. Why not <a href='" . URL("conversation/start") . "'>start one</a> yourself?";
 $definitions["message.emailDoesntExist"] = "That email address doesn't match any members in the database. Did you make a typo?";
 $definitions["message.emailNotYetConfirmed"] = "You need to confirm your email before you can log in with it! If you didn't receive the confirmation email, please check your spam folder or <a href='%s'>click here to get it sent again</a>.";
 $definitions["message.emailTaken"] = "Curses, there is already a member with this email!";
@@ -474,7 +474,7 @@ $definitions["message.languageUninstalled"] = "The language was uninstalled.";
 $definitions["message.locked"] = "Hm, looks like this conversation is <strong>locked</strong>, so you can't reply to it.";
 $definitions["message.loginToParticipate"] = "To start conversations or reply to posts, please log in.";
 $definitions["message.logInToReply"] = "<a href='%1\$s' class='link-login'>Log In</a> or <a href='%2\$s' class='link-join'>Sign Up</a> to reply!";
-$definitions["message.logInToSeeAllConversations"] = "<a href='".URL("user/login")."' class='link-login'>Log in</a> to expose some channels/conversations that may be hidden to guests.";
+$definitions["message.logInToSeeAllConversations"] = "<a href='" . URL("user/login") . "' class='link-login'>Log in</a> to expose some channels/conversations that may be hidden to guests.";
 $definitions["message.memberNotFound"] = "Hm, there doesn't seem to be a member with that name.";
 $definitions["message.memberNoPermissionView"] = "That member can't be added because they don't have permission to view the channel that this conversation is in.";
 $definitions["message.nameTaken"] = "The name you have entered is taken or is a reserved word.";

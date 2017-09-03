@@ -23,7 +23,9 @@ class ETAdminController extends ETController {
 public function init()
 {
     // If the user isn't an administrator, kick them out.
-    if (!ET::$session->isAdmin()) $this->redirect(URL("user/login?return=" . urlencode($this->selfURL)));
+    if (!ET::$session->isAdmin()) {
+        $this->redirect(URL("user/login?return=" . urlencode($this->selfURL)));
+    }
 
     parent::init();
 

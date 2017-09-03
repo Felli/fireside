@@ -234,7 +234,9 @@ public function action_install()
     ET::writeConfig($config);
 
     // Write custom.css and index.html as empty files (if they're not already there.)
-    if (!file_exists(PATH_CONFIG . "/custom.css")) file_put_contents(PATH_CONFIG . "/custom.css", "");
+    if (!file_exists(PATH_CONFIG . "/custom.css")) {
+        file_put_contents(PATH_CONFIG . "/custom.css", "");
+    }
     file_put_contents(PATH_CONFIG . "/index.html", "");
     file_put_contents(PATH_UPLOADS . "/index.html", "");
     file_put_contents(PATH_UPLOADS . "/avatars/index.html", "");
@@ -351,12 +353,15 @@ protected function fatalChecks()
             if (!$file) {
                 $realPath = realpath($file);
                 $fileErrors[] = substr($realPath, strrpos($realPath, "/") + 1) . "/";
+            } else {
+                $fileErrors[] = $file . "/";
             }
-            else $fileErrors[] = $file . "/";
 
         }
     }
-    if (count($fileErrors)) $errors[] = sprintf(T("message.installerFilesNotWritable"), implode("</strong>, <strong>", $fileErrors));
+    if (count($fileErrors)) {
+        $errors[] = sprintf(T("message.installerFilesNotWritable"), implode("</strong>, <strong>", $fileErrors));
+    }
 
     return $errors;
 }

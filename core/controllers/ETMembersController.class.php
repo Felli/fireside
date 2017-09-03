@@ -26,7 +26,9 @@ class ETMembersController extends ETController {
  */
 public function action_index($orderBy = false, $start = 0)
 {
-    if (!$this->allowed("esoTalk.members.visibleToGuests")) return;
+    if (!$this->allowed("esoTalk.members.visibleToGuests")) {
+        return;
+    }
 
     // Begin constructing a query to fetch results.
     $sql = ET::SQL()->from("member m");
@@ -51,7 +53,9 @@ public function action_index($orderBy = false, $start = 0)
 
             $term = mb_strtolower(trim($term), "UTF-8");
 
-            if (!$term) continue;
+            if (!$term) {
+                continue;
+            }
 
             $thisCondition = array();
 
@@ -71,8 +75,7 @@ public function action_index($orderBy = false, $start = 0)
                 if ($group < 0) {
                     $thisCondition[] = "account=:account$k";
                     $sql->bind(":account$k", $groups[$group]["name"]);
-                }
-                elseif (!$groups[$group]["private"] or ET::groupModel()->groupIdsAllowedInGroupIds(ET::$session->getGroupIds(), $group, true)) {
+                } elseif (!$groups[$group]["private"] or ET::groupModel()->groupIdsAllowedInGroupIds(ET::$session->getGroupIds(), $group, true)) {
                     $sql->from("member_group mg", "mg.memberId=m.memberId", "left");
                     $thisCondition[] = "mg.groupId=:group$k";
                     $sql->bind(":group$k", $group);
@@ -81,9 +84,9 @@ public function action_index($orderBy = false, $start = 0)
 
             // Also perform a normal LIKE search.
             $thisCondition[] = "username LIKE :search$k";
-            $sql->bind(":search$k", "%".$term."%");
+            $sql->bind(":search$k", "%" . $term . "%");
 
-            $conditions[] = "(".implode(" OR ", $thisCondition).")";
+            $conditions[] = "(" . implode(" OR ", $thisCondition) . ")";
 
         }
 
@@ -105,7 +108,9 @@ public function action_index($orderBy = false, $start = 0)
     );
 
     // If an invalid orderBy key was provided, just use the first one.
-    if (!isset($orders[$orderBy])) $orderBy = reset(array_keys($orders));
+    if (!isset($orders[$orderBy])) {
+        $orderBy = reset(array_keys($orders));
+    }
 
     // Work out where to start the results from.
     $page = 0;
@@ -134,7 +139,7 @@ public function action_index($orderBy = false, $start = 0)
 
         // Otherwise, parse the start argument as a simple integer offset.
         else {
-            $start = (int)($start);
+            $start = (int) ($start);
             $page = round($start / C("esoTalk.members.membersPerPage"));
         }
 
@@ -150,11 +155,16 @@ public function action_index($orderBy = false, $start = 0)
         ->orderBy($orders[$orderBy][1])
         ->exec()
         ->allRows();
-    foreach ($ids as &$id) $id = $id["memberId"];
+    foreach ($ids as &$id) {
+        $id = $id["memberId"];
+    }
 
     // Finally, fetch the member data for the members with these IDs.
-    if ($ids) $members = ET::memberModel()->getByIds($ids);
-    else $members = array();
+    if ($ids) {
+        $members = ET::memberModel()->getByIds($ids);
+    } else {
+        $members = array();
+    }
 
     // If we're ordering by last active, filter out members who have opted out of being displayed on the online list.
     if ($orderBy == "activity") {
@@ -198,7 +208,9 @@ public function action_index($orderBy = false, $start = 0)
 
         $groups = ET::groupModel()->getAll();
         foreach ($groups as $group) {
-            if ($group["private"]) continue;
+            if ($group["private"]) {
+                continue;
+            }
             $name = $group["name"];
             addToArrayString($gambits["groups"], T("group.$name.plural", ucfirst($name)), array("gambit-group-$name", "icon-tag"), 1);
         }
@@ -207,14 +219,16 @@ public function action_index($orderBy = false, $start = 0)
 
         // Construct the gambits menu based on the above arrays.
         $gambitsMenu = ETFactory::make("menu");
-        $linkPrefix = "members/".$orderBy."/?search=";
+        $linkPrefix = "members/" . $orderBy . "/?search=";
 
         foreach ($gambits as $section => $items) {
             foreach ($items as $gambit => $classes) {
-                $gambitsMenu->add($classes[0], "<a href='".URL($linkPrefix.urlencode($gambit))."' class='{$classes[0]}' data-gambit='$gambit'>".(!empty($classes[1]) ? "<i class='{$classes[1]}'></i> " : "")."$gambit</a>");
+                $gambitsMenu->add($classes[0], "<a href='" . URL($linkPrefix . urlencode($gambit)) . "' class='{$classes[0]}' data-gambit='$gambit'>" . (!empty($classes[1]) ? "<i class='{$classes[1]}'></i> " : "") . "$gambit</a>");
             }
             end($gambits);
-            if ($section !== key($gambits)) $gambitsMenu->separator();
+            if ($section !== key($gambits)) {
+                $gambitsMenu->separator();
+            }
         }
 
         $this->data("gambitsMenu", $gambitsMenu);
@@ -232,10 +246,10 @@ public function action_index($orderBy = false, $start = 0)
     if ($this->responseType === RESPONSE_TYPE_AJAX) {
         $this->json("startFrom", $start);
         $this->render("members/list");
+    } else {
+        $this->render("members/index");
     }
-
-    else $this->render("members/index");
-}
+    }
 
 
 /**
@@ -246,22 +260,26 @@ public function action_index($orderBy = false, $start = 0)
 public function action_create()
 {
     // Non-admins can't do this! Suckers.
-    if (!ET::$session->isAdmin()) return;
+    if (!ET::$session->isAdmin()) {
+        return;
+    }
 
     // Set up the form.
     $form = ETFactory::make("form");
     $form->action = URL("members/create");
 
     // Was the cancel button pressed?
-    if ($form->isPostBack("cancel"))
-        $this->redirect(URL(R("return", "members")));
+    if ($form->isPostBack("cancel")) {
+            $this->redirect(URL(R("return", "members")));
+    }
 
     // Was the "create" button pressed?
     if ($form->validPostBack("submit")) {
 
         // Make sure the passwords match.
-        if ($form->getValue("confirm") != $form->getValue("password"))
-            $form->error("confirm", T("message.passwordsDontMatch"));
+        if ($form->getValue("confirm") != $form->getValue("password")) {
+                    $form->error("confirm", T("message.passwordsDontMatch"));
+        }
 
         // If there were no preliminary errors, proceed to attempt to create the member with the model.
         if (!$form->errorCount()) {
@@ -278,10 +296,14 @@ public function action_create()
             $id = $model->create($data);
 
             // If there were any errors, pass them back to the form.
-            if ($model->errorCount()) $form->errors($model->errors());
+            if ($model->errorCount()) {
+                $form->errors($model->errors());
+            }
 
             // Otherwise, redirect to this new member's profile.
-            else $this->redirect(URL(memberURL($id, $form->getValue("username"))));
+            else {
+                $this->redirect(URL(memberURL($id, $form->getValue("username"))));
+            }
 
         }
 
@@ -311,7 +333,7 @@ public function action_online()
 
     // Construct a query to get only members who are online.
     $sql = ET::SQL()
-        ->where((time() - ET::config("esoTalk.userOnlineExpire"))."<lastActionTime")
+        ->where((time() - ET::config("esoTalk.userOnlineExpire")) . "<lastActionTime")
         ->orderBy("lastActionTime DESC");
 
     // Pass this query to the member model and get all of these members' data.
@@ -345,7 +367,9 @@ public function action_autocomplete($input = "")
     $this->responseType = RESPONSE_TYPE_JSON;
 
     // Don't do this for strings less than three characters for performance reasons.
-    if (strlen($input) < 2) return;
+    if (strlen($input) < 2) {
+        return;
+    }
 
     // Construct a query to fetch matching members.
     $results = ET::SQL()
@@ -356,7 +380,7 @@ public function action_autocomplete($input = "")
         ->select("email")
         ->from("member")
         ->where("username LIKE :username")
-        ->bind(":username", $input."%")
+        ->bind(":username", $input . "%")
         ->orderBy("username")
         ->limit(50)
         ->exec()

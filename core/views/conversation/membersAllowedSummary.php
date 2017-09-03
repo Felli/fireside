@@ -25,13 +25,13 @@ foreach ($conversation["membersAllowedSummary"] as $member) {
     // If this entity is a member, add their name as a link to their profile. Also add an avatar to be
     // displayed at the start of the list.
     if ($member["type"] == "member") {
-        $names[] = "<span class='name'>".memberLink($member["id"], $member["name"])."</span>";
+        $names[] = "<span class='name'>" . memberLink($member["id"], $member["name"]) . "</span>";
         if (count($avatars) < 3) $avatars[] = avatar($member + array("memberId" => $member["id"]), "thumb");
     }
 
     // For groups, just display a plain ol' group name.
     else {
-        $names[] = "<span class='name'>".groupLink($member["name"])."</span>";
+        $names[] = "<span class='name'>" . groupLink($member["name"]) . "</span>";
     }
 
 }
@@ -40,7 +40,7 @@ foreach ($conversation["membersAllowedSummary"] as $member) {
 if (count($names)) {
 
     // Output a few avatars at the start.
-    echo "<span class='avatars'>".implode(" ", $avatars)."</span> ";
+    echo "<span class='avatars'>" . implode(" ", $avatars) . "</span> ";
 
     // If there's more than one name, construct the list so that it has the word "and" in it.
     if (count($names) > 1) {
@@ -49,7 +49,7 @@ if (count($names)) {
         // "x others" link.
         if (count($names) > 3) {
             $otherNames = array_splice($names, 3);
-            $lastName = "<a href='#' class='showMore name'>".sprintf(T("%s others"), count($otherNames))."</a>";
+            $lastName = "<a href='#' class='showMore name'>" . sprintf(T("%s others"), count($otherNames)) . "</a>";
         } else {
             $lastName = array_pop($names);
         }
@@ -64,19 +64,19 @@ if (count($names)) {
             $translatedNames = sprintf(T("%s and %s"), $names[0], $lastName);
         }
 
-        printf(T("%s ".($conversation["countPosts"] > 0 ? "can" : "will be able to")." view this conversation."), $translatedNames);
+        printf(T("%s " . ($conversation["countPosts"] > 0 ? "can" : "will be able to") . " view this conversation."), $translatedNames);
     }
 
     // If there's only one name, we don't need to do anything gramatically fancy.
     else {
-        printf(T("%s ".($conversation["countPosts"] > 0 ? "can" : "will be able to")." view this conversation."), $names[0]);
+        printf(T("%s " . ($conversation["countPosts"] > 0 ? "can" : "will be able to") . " view this conversation."), $names[0]);
     }
 
 }
 
 // If there are no names, assume that everyone can view the conversation.
 else {
-    printf(T("%s ".($conversation["countPosts"] > 0 ? "can" : "will be able to")." view this conversation."), T("Everyone"));
+    printf(T("%s " . ($conversation["countPosts"] > 0 ? "can" : "will be able to") . " view this conversation."), T("Everyone"));
 }
 
 ?>

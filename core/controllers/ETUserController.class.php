@@ -347,16 +347,19 @@ public function action_confirm($hash = "")
 public function action_sendConfirmation($username = "")
 {
     // If email confirmation is not necessary, get out of here.
-    if (C("esoTalk.registration.requireConfirmation") != "email") return;
+    if (C("esoTalk.registration.requireConfirmation") != "email") {
+        return;
+    }
 
     // Get the requested member.
     $member = reset(ET::memberModel()->get(array("m.username" => $username, "m.confirmed" => false)));
     if ($member) {
         $this->sendConfirmationEmail($member["email"], $member["username"], $member["memberId"] . $member["resetPassword"]);
         $this->renderMessage(T("Success!"), T("message.confirmEmail"));
+    } else {
+        $this->redirect(URL(""));
     }
-    else $this->redirect(URL(""));
-}
+    }
 
 
 /**

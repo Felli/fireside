@@ -126,7 +126,9 @@ public function action_toggle($plugin = "")
         }
 
         // Set up an instance of the plugin so we can call its setup function.
-        if (file_exists($file = PATH_PLUGINS . "/" . sanitizeFileName($plugin) . "/plugin.php")) include_once $file;
+        if (file_exists($file = PATH_PLUGINS . "/" . sanitizeFileName($plugin) . "/plugin.php")) {
+            include_once $file;
+        }
         $className = "ETPlugin_$plugin";
         if (class_exists($className)) {
             $pluginObject = new $className("addons/plugins/" . $plugin);
@@ -211,7 +213,9 @@ public function action_uninstall($plugin = "")
     }
 
     // Set up an instance of the plugin so we can call its uninstall function.
-    if (file_exists($file = PATH_PLUGINS . "/" . sanitizeFileName($plugin) . "/plugin.php")) include_once $file;
+    if (file_exists($file = PATH_PLUGINS . "/" . sanitizeFileName($plugin) . "/plugin.php")) {
+        include_once $file;
+    }
     $className = "ETPlugin_$plugin";
     if (class_exists($className)) {
         $pluginObject = new $className;
@@ -219,11 +223,14 @@ public function action_uninstall($plugin = "")
     }
 
     // Attempt to remove the directory. If we couldn't, show a "not writable" message.
-    if (!is_writable($file = PATH_PLUGINS) or !is_writable($file = PATH_PLUGINS . "/$plugin") or !rrmdir($file))
-        $this->message(sprintf(T("message.notWritable"), $file), "warning");
+    if (!is_writable($file = PATH_PLUGINS) or !is_writable($file = PATH_PLUGINS . "/$plugin") or !rrmdir($file)) {
+            $this->message(sprintf(T("message.notWritable"), $file), "warning");
+    }
 
     // Otherwise, show a success message.
-    else $this->message(T("message.pluginUninstalled"), "success");
+    else {
+        $this->message(T("message.pluginUninstalled"), "success");
+    }
 
     $this->redirect(URL("admin/plugins"));
 }
