@@ -179,7 +179,7 @@ class CSS extends Minify
         // loop the matches
         foreach ($matches as $match) {
             // get the path for the file that will be imported
-            $importPath = dirname($source).'/'.$match['path'];
+            $importPath = dirname($source) . '/' . $match['path'];
 
             // only replace the import with the content if we can grab the
             // content of the file
@@ -191,7 +191,7 @@ class CSS extends Minify
 
                 // check if this is only valid for certain media
                 if ($match['media']) {
-                    $importContent = '@media '.$match['media'].'{'.$importContent.'}';
+                    $importContent = '@media ' . $match['media'] . '{' . $importContent . '}';
                 }
 
                 // add to replacement array
@@ -218,7 +218,7 @@ class CSS extends Minify
     protected function importFiles($source, $content)
     {
         $extensions = array_keys($this->importExtensions);
-        $regex = '/url\((["\']?)((?!["\']?data:).*?\.('.implode('|', $extensions).'))\\1\)/i';
+        $regex = '/url\((["\']?)((?!["\']?data:).*?\.(' . implode('|', $extensions) . '))\\1\)/i';
         if ($extensions && preg_match_all($regex, $content, $matches, PREG_SET_ORDER)) {
             $search = array();
             $replace = array();
@@ -227,7 +227,7 @@ class CSS extends Minify
             foreach ($matches as $match) {
                 // get the path for the file that will be imported
                 $path = $match[2];
-                $path = dirname($source).'/'.$path;
+                $path = dirname($source) . '/' . $path;
                 $extension = $match[3];
 
                 // only replace the import with the content if we're able to get
@@ -245,7 +245,7 @@ class CSS extends Minify
 
                 // build replacement
                 $search[] = $match[0];
-                $replace[] = 'url('.$this->importExtensions[$extension].';base64,'.$importContent.')';
+                $replace[] = 'url(' . $this->importExtensions[$extension] . ';base64,' . $importContent . ')';
             }
 
             // replace the import statements
@@ -419,9 +419,9 @@ class CSS extends Minify
             // build replacement
             $search[] = $match[0];
             if ($type == 'url') {
-                $replace[] = 'url('.$url.')';
+                $replace[] = 'url(' . $url . ')';
             } elseif ($type == 'import') {
-                $replace[] = '@import "'.$url.'"';
+                $replace[] = '@import "' . $url . '"';
             }
         }
 
@@ -467,19 +467,19 @@ class CSS extends Minify
         // practice, Webkit (especially Safari) seems to stumble over at least
         // 0%, potentially other units as well. Only stripping 'px' for now.
         // @see https://github.com/matthiasmullie/minify/issues/60
-        $content = preg_replace('/'.$before.'(-?0*(\.0+)?)(?<=0)px'.$after.'/', '\\1', $content);
+        $content = preg_replace('/' . $before . '(-?0*(\.0+)?)(?<=0)px' . $after . '/', '\\1', $content);
 
         // strip 0-digits (.0 -> 0)
-        $content = preg_replace('/'.$before.'\.0+'.$units.'?'.$after.'/', '0\\1', $content);
+        $content = preg_replace('/' . $before . '\.0+' . $units . '?' . $after . '/', '0\\1', $content);
         // strip trailing 0: 50.10 -> 50.1, 50.10px -> 50.1px
-        $content = preg_replace('/'.$before.'(-?[0-9]+\.[0-9]+)0+'.$units.'?'.$after.'/', '\\1\\2', $content);
+        $content = preg_replace('/' . $before . '(-?[0-9]+\.[0-9]+)0+' . $units . '?' . $after . '/', '\\1\\2', $content);
         // strip trailing 0: 50.00 -> 50, 50.00px -> 50px
-        $content = preg_replace('/'.$before.'(-?[0-9]+)\.0+'.$units.'?'.$after.'/', '\\1\\2', $content);
+        $content = preg_replace('/' . $before . '(-?[0-9]+)\.0+' . $units . '?' . $after . '/', '\\1\\2', $content);
         // strip leading 0: 0.1 -> .1, 01.1 -> 1.1
-        $content = preg_replace('/'.$before.'(-?)0+([0-9]*\.[0-9]+)'.$units.'?'.$after.'/', '\\1\\2\\3', $content);
+        $content = preg_replace('/' . $before . '(-?)0+([0-9]*\.[0-9]+)' . $units . '?' . $after . '/', '\\1\\2\\3', $content);
 
         // strip negative zeroes (-0 -> 0) & truncate zeroes (00 -> 0)
-        $content = preg_replace('/'.$before.'-?0+'.$units.'?'.$after.'/', '0\\1', $content);
+        $content = preg_replace('/' . $before . '-?0+' . $units . '?' . $after . '/', '0\\1', $content);
 
         return $content;
     }

@@ -133,7 +133,7 @@ class Converter
         }
 
         // normalize paths
-        $path = $this->normalize($this->from.'/'.$path);
+        $path = $this->normalize($this->from . '/' . $path);
         $to = $this->normalize($this->to);
 
         // strip shared ancestor paths
@@ -144,7 +144,7 @@ class Converter
         // add .. for every directory that needs to be traversed to new path
         $to = str_repeat('../', mb_substr_count($to, '/'));
 
-        return $to.ltrim($path, '/');
+        return $to . ltrim($path, '/');
     }
 
     /**

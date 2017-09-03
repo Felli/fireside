@@ -2,7 +2,9 @@
 // Copyright 2011 Toby Zerner, Simon Zerner
 // This file is part of esoTalk. Please see the included license file for usage information.
 
-if (!defined("IN_ESOTALK")) exit;
+if (!defined("IN_ESOTALK")) {
+    exit;
+}
 
 /**
  * Default configuration: This file will get overwritten with every esoTalk update, so do not edit it.
@@ -15,7 +17,9 @@ if (!defined("IN_ESOTALK")) exit;
 define("ESOTALK_VERSION", "1.0.1");
 
 // Define response type constants.
-if (!defined("RESPONSE_TYPE_DEFAULT")) define("RESPONSE_TYPE_DEFAULT", "default");
+if (!defined("RESPONSE_TYPE_DEFAULT")) {
+    define("RESPONSE_TYPE_DEFAULT", "default");
+}
 define("RESPONSE_TYPE_VIEW", "view"); // Renders only the controller's view (without the master view)
 define("RESPONSE_TYPE_AJAX", "ajax"); // Renders the controller's json contents and includes the view contents
 define("RESPONSE_TYPE_JSON", "json"); // Renders only the contorller's json contents

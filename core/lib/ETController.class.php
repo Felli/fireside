@@ -146,10 +146,14 @@ public function __construct()
 {
     // Pull any messages stored into the session into the controller's $messages property.
     $messages = ET::$session->get("messages");
-    if (is_array($messages)) $this->messages = $messages;
+    if (is_array($messages)) {
+        $this->messages = $messages;
+    }
 
-    if (ET::$session->errorCount()) $this->messages(ET::$session->errors(), "warning");
-}
+    if (ET::$session->errorCount()) {
+        $this->messages(ET::$session->errors(), "warning");
+    }
+    }
 
 
 /**
@@ -163,15 +167,15 @@ public function dispatch($method, $arguments)
 {
     // Create an array of arguments where the first item is $this.
     $eventArguments = array_merge(array(&$this), $arguments);
-    $eventName = $this->className."_".$method;
+    $eventName = $this->className . "_" . $method;
 
     // Trigger a "before" event for this method.
-    ET::trigger($eventName."_before", $eventArguments);
+    ET::trigger($eventName . "_before", $eventArguments);
 
     // Go through plugins and look for a handler for this controller/method.
     $called = false;
     foreach (ET::$plugins as $plugin) {
-        $actionName = "action_".$eventName;
+        $actionName = "action_" . $eventName;
         if (method_exists($plugin, $actionName)) {
             call_user_func_array(array($plugin, $actionName), $eventArguments);
             $called = true;
@@ -180,10 +184,10 @@ public function dispatch($method, $arguments)
     }
 
     // If one wasn't found, call the method on $this.
-    if (!$called) call_user_func_array(array($this, "action_".$method), $arguments);
+    if (!$called) call_user_func_array(array($this, "action_" . $method), $arguments);
 
     // Trigger an "after" event for this method.
-    ET::trigger($eventName."_after", $eventArguments);
+    ET::trigger($eventName . "_after", $eventArguments);
 }
 
 
@@ -202,10 +206,15 @@ public function dispatch($method, $arguments)
  */
 public function message($message, $options = "")
 {
-    if (!is_array($options)) $options = array("className" => $options);
+    if (!is_array($options)) {
+        $options = array("className" => $options);
+    }
     $options["message"] = $message;
-    if (!empty($options["id"])) $this->messages[$options["id"]] = $options;
-    else $this->messages[] = $options;
+    if (!empty($options["id"])) {
+        $this->messages[$options["id"]] = $options;
+    } else {
+        $this->messages[] = $options;
+    }
     ET::$session->store("messages", $this->messages);
 }
 
@@ -221,7 +230,9 @@ public function message($message, $options = "")
  */
 public function messages($messages, $options = "")
 {
-    if (!is_array($options)) $options = array("className" => $options);
+    if (!is_array($options)) {
+        $options = array("className" => $options);
+    }
     foreach ($messages as $id => $message) {
         $options["id"] = !is_numeric($id) ? $id : null;
         $this->message(T("message.$message", $message), $options);
@@ -239,20 +250,22 @@ public function messages($messages, $options = "")
 public function notificationMessages($notifications)
 {
 
-  // Only show the first 3 notifications.
-	$notifications = array_slice($notifications, 0, 3);
+    // Only show the first 3 notifications.
+    $notifications = array_slice($notifications, 0, 3);
 
-	foreach ($notifications as $notification) {
+    foreach ($notifications as $notification) {
 
         // If we've already shown this notification as a message before, don't show it again.
-        if ($notification["time"] <= ET::$session->preference("notificationCheckTime")) continue;
+        if ($notification["time"] <= ET::$session->preference("notificationCheckTime")) {
+            continue;
+        }
 
         $avatar = avatar(array(
             "memberId" => $notification["fromMemberId"],
             "avatarFormat" => $notification["avatarFormat"],
             "email" => $notification["email"]
         ), "thumb");
-        $this->message("<a href='".$notification["link"]."' class='messageLink'><span class='action'>".$avatar.$notification["body"]."</span></a>", "popup notificationMessage autoDismiss hasSprite");
+        $this->message("<a href='" . $notification["link"] . "' class='messageLink'><span class='action'>" . $avatar . $notification["body"] . "</span></a>", "popup notificationMessage autoDismiss hasSprite");
     }
 
     // Update the user's "notificationCheckTime" preference so these notifications won't be shown again.
@@ -271,66 +284,66 @@ public function notificationMessages($notifications)
 public function init()
 {
 
-  // Check for updates to the esoTalk software, but only if we're the root admin and we haven't checked in
-	// a while.
-	if (ET::$session->userId == C("esoTalk.rootAdmin") and C("esoTalk.admin.lastUpdateCheckTime") + C("esoTalk.updateCheckInterval") < time())
-		ET::upgradeModel()->checkForUpdates();
+    // Check for updates to the esoTalk software, but only if we're the root admin and we haven't checked in
+    // a while.
+    if (ET::$session->userId == C("esoTalk.rootAdmin") and C("esoTalk.admin.lastUpdateCheckTime") + C("esoTalk.updateCheckInterval") < time())
+        ET::upgradeModel()->checkForUpdates();
 
-	if ($this->responseType === RESPONSE_TYPE_DEFAULT) {
+    if ($this->responseType === RESPONSE_TYPE_DEFAULT) {
 
-		// If the user IS NOT logged in, add the 'login' and 'sign up' links to the bar.
-		if (!ET::$session->user) {
-			$this->addToMenu("user", "join", "<a href='".URL("user/join?return=".urlencode($this->selfURL))."' class='link-join'>".T("Sign Up")."</a>");
-			$this->addToMenu("user", "login", "<a href='".URL("user/login?return=".urlencode($this->selfURL))."' class='link-login'>".T("Log In")."</a>");
-		}
+        // If the user IS NOT logged in, add the 'login' and 'sign up' links to the bar.
+        if (!ET::$session->user) {
+            $this->addToMenu("user", "join", "<a href='".URL("user/join?return=".urlencode($this->selfURL))."' class='link-join'>".T("Sign Up")."</a>");
+            $this->addToMenu("user", "login", "<a href='".URL("user/login?return=".urlencode($this->selfURL))."' class='link-login'>".T("Log In")."</a>");
+        }
 
-		// If the user IS logged in, we want to display their name and appropriate links.
-		else {
-			$this->addToMenu("user", "user", "<a href='".URL("member/me")."'>".avatar(ET::$session->user, "thumb").name(ET::$session->user["username"])."</a>");
+        // If the user IS logged in, we want to display their name and appropriate links.
+        else {
+            $this->addToMenu("user", "user", "<a href='".URL("member/me")."'>".avatar(ET::$session->user, "thumb").name(ET::$session->user["username"])."</a>");
 
-			$this->addToMenu("user", "settings", "<a href='".URL("settings")."' class='link-settings'>".T("Settings")."</a>");
+            $this->addToMenu("user", "settings", "<a href='".URL("settings")."' class='link-settings'>".T("Settings")."</a>");
 
-			if (ET::$session->isAdmin())
-				$this->addToMenu("user", "administration", "<a href='".URL("admin")."' class='link-administration'>".T("Administration")."</a>");
+            if (ET::$session->isAdmin())
+                $this->addToMenu("user", "administration", "<a href='".URL("admin")."' class='link-administration'>".T("Administration")."</a>");
 
-			$this->addToMenu("user", "logout", "<a href='".URL("user/logout?token=".ET::$session->token)."' class='link-logout'>".T("Log Out")."</a>");
-		}
+            $this->addToMenu("user", "logout", "<a href='".URL("user/logout?token=".ET::$session->token)."' class='link-logout'>".T("Log Out")."</a>");
+        }
 
-		// Get the number of members currently online and add it as a statistic.
-		if (C("esoTalk.members.visibleToGuests") or ET::$session->user) {
-			$online = ET::SQL()
-				->select("COUNT(*)")
-				->from("member")
-				->where("UNIX_TIMESTAMP()-:seconds<lastActionTime")
-				->bind(":seconds", C("esoTalk.userOnlineExpire"))
-				->exec()
-				->result();
-			$stat = Ts("statistic.online", "statistic.online.plural", number_format($online));
-			$stat = "<a href='".URL("members/online")."' class='link-membersOnline'>$stat</a>";
-			$this->addToMenu("statistics", "statistic-online", $stat);
-		}
+        // Get the number of members currently online and add it as a statistic.
+        if (C("esoTalk.members.visibleToGuests") or ET::$session->user) {
+            $online = ET::SQL()
+                ->select("COUNT(*)")
+                ->from("member")
+                ->where("UNIX_TIMESTAMP()-:seconds<lastActionTime")
+                ->bind(":seconds", C("esoTalk.userOnlineExpire"))
+                ->exec()
+                ->result();
+            $stat = Ts("statistic.online", "statistic.online.plural", number_format($online));
+            $stat = "<a href='".URL("members/online")."' class='link-membersOnline'>$stat</a>";
+            $this->addToMenu("statistics", "statistic-online", $stat);
+        }
 
-		$this->addToMenu("meta", "copyright", "<a href='http://esotalk.org/' target='_blank'>".T("Powered by")." esoTalk</a>");
+        $this->addToMenu("meta", "copyright", "<a href='http://esotalk.org/' target='_blank'>".T("Powered by")." esoTalk</a>");
 
-		// Set up some default JavaScript files and language definitions.
-		$this->addJSFile("core/js/lib/jquery.js", true);
-		$this->addJSFile("core/js/lib/jquery.migrate.js", true);
-		$this->addJSFile("core/js/lib/jquery.misc.js", true);
-		$this->addJSFile("core/js/lib/jquery.history.js", true);
-		$this->addJSFile("core/js/lib/jquery.scrollTo.js", true);
-		// https://github.com/ceesvanegmond/minify
-		$this->addJSFile("core/js/lib/underscore-min.js", true);
-		$this->addJSFile("core/js/lib/backbone-min.js", true);
-		$this->addJSFile("core/js/lib/tether.min.js", true);
-		$this->addJSFile("core/js/lib/drop.min.js", true);
-		$this->addJSFile("core/js/global.js", true);
-		$this->addJSFile("core/js/global/popup.js", true);
-		$this->addJSLanguage("message.ajaxRequestPending", "message.ajaxDisconnected", "Loading...", "Notifications");
-		$this->addJSVar("notificationCheckInterval", C("esoTalk.notificationCheckInterval"));
+        // Set up some default JavaScript files and language definitions.
+        $this->addJSFile("core/js/lib/jquery.js", true);
+        $this->addJSFile("core/js/lib/jquery.migrate.js", true);
+        $this->addJSFile("core/js/lib/jquery.misc.js", true);
+        $this->addJSFile("core/js/lib/jquery.history.js", true);
+        $this->addJSFile("core/js/lib/jquery.scrollTo.js", true);
+        // https://github.com/ceesvanegmond/minify
+        $this->addJSFile("core/js/lib/underscore-min.js", true);
+        $this->addJSFile("core/js/lib/backbone-min.js", true);
+        $this->addJSFile("core/js/lib/tether.min.js", true);
+        $this->addJSFile("core/js/lib/drop.min.js", true);
+        $this->addJSFile("core/js/global.js", true);
+        $this->addJSFile("core/js/global/popup.js", true);
+        $this->addJSLanguage("message.ajaxRequestPending", "message.ajaxDisconnected", "Loading...", "Notifications");
+        $this->addJSVar("notificationCheckInterval", C("esoTalk.notificationCheckInterval"));
 
-	}
+    }
 
-	$this->trigger("init");
+    $this->trigger("init");
 
 }
 
@@ -347,13 +360,16 @@ public function init()
 public function redirect($url, $code = 302)
 {
     if ($this->responseType === RESPONSE_TYPE_AJAX or $this->responseType === RESPONSE_TYPE_JSON or $this->responseType === RESPONSE_TYPE_VIEW) {
-        if ($this->responseType === RESPONSE_TYPE_VIEW) $this->responseType = RESPONSE_TYPE_AJAX;
+        if ($this->responseType === RESPONSE_TYPE_VIEW) {
+            $this->responseType = RESPONSE_TYPE_AJAX;
+        }
         $this->json("redirect", $url);
         $this->render();
         exit;
+    } else {
+        redirect($url, $code);
     }
-    else redirect($url, $code);
-}
+    }
 
 
 /**
@@ -409,17 +425,17 @@ public function render($view = "")
 {
     $this->trigger("renderBefore");
 
-	if ($this->responseType == RESPONSE_TYPE_DEFAULT and ET::$session->user) {
+    if ($this->responseType == RESPONSE_TYPE_DEFAULT and ET::$session->user) {
 
-		// Fetch all unread notifications so we have a count for the notifications button.
-		$notifications = ET::activityModel()->getNotifications(-1);
-		$count = count($notifications);
-		$this->addToMenu("user", "notifications", "<a href='".URL("settings/notifications")."' id='notifications' class='button popupButton ".($count ? "new" : "")."'><span>$count</span></a>");
+        // Fetch all unread notifications so we have a count for the notifications button.
+        $notifications = ET::activityModel()->getNotifications(-1);
+        $count = count($notifications);
+        $this->addToMenu("user", "notifications", "<a href='".URL("settings/notifications")."' id='notifications' class='button popupButton ".($count ? "new" : "")."'><span>$count</span></a>");
 
-		// Show messages with these notifications.
-		$this->notificationMessages($notifications);
+        // Show messages with these notifications.
+        $this->notificationMessages($notifications);
 
-	}
+    }
 
     // Set up the master view, content type, and other stuff depending on the response type.
     switch ($this->responseType) {
@@ -433,7 +449,9 @@ public function render($view = "")
         // For an AJAX or JSON response, set the master view and the content type.
         // If it's an AJAX response, set one of the JSON parameters to the specified view's contents.
         case RESPONSE_TYPE_AJAX:
-            if ($view) $this->json("view", $this->getViewContents($view, $this->data));
+            if ($view) {
+                $this->json("view", $this->getViewContents($view, $this->data));
+            }
 
         case RESPONSE_TYPE_JSON:
             $this->masterView = "json.master";
@@ -442,7 +460,7 @@ public function render($view = "")
     }
 
     // Set a content-type header.
-    header("Content-type: ".$this->contentType."; charset=".T("charset", "utf-8"));
+    header("Content-type: " . $this->contentType . "; charset=" . T("charset", "utf-8"));
 
     // If we're just outputting the view on its own, do that now.
     if ($this->responseType === RESPONSE_TYPE_VIEW) {
@@ -460,10 +478,12 @@ public function render($view = "")
         if ($this->masterView != "json.master" and $this->masterView != "atom.master") {
 
             // Fetch the content of the view, passing the data collected in the controller.
-            if ($view) $data["content"] = $this->getViewContents($view, $this->data);
+            if ($view) {
+                $data["content"] = $this->getViewContents($view, $this->data);
+            }
 
             // If config/custom.css contains something, add it to be included in the page.
-            if (file_exists($file = PATH_CONFIG."/custom.css") and filesize($file) > 0) {
+            if (file_exists($file = PATH_CONFIG . "/custom.css") and filesize($file) > 0) {
                 $this->addCSSFile("config/custom.css", true);
             }
 
@@ -478,14 +498,14 @@ public function render($view = "")
             $logo = C("esoTalk.forumLogo");
             $title = C("esoTalk.forumTitle");
             if ($logo) $size = getimagesize($logo);
-            $data["forumTitle"] = $logo ? "<img src='".getWebPath($logo)."' {$size[3]} alt='$title'/>" : $title;
+            $data["forumTitle"] = $logo ? "<img src='" . getWebPath($logo) . "' {$size[3]} alt='$title'/>" : $title;
 
             // Add the details for the "back" button.
             $data["backButton"] = ET::$session->getNavigation($this->navigationId);
 
             // Get common menu items.
             foreach ($this->menus as $menu => $items)
-                $data[$menu."MenuItems"] = $items->getContents();
+                $data[$menu . "MenuItems"] = $items->getContents();
 
             // Add the body class.
             $data["bodyClass"] = $this->bodyClass;
@@ -563,7 +583,9 @@ public function render404($message = "", $showLogin = false)
  */
 public function validateToken($token = false)
 {
-    if ($token === false) $token = R("token");
+    if ($token === false) {
+        $token = R("token");
+    }
 
     if (!ET::$session->validateToken($token)) {
         $this->renderMessage(T("Error"), T("message.noPermission"));
@@ -584,10 +606,12 @@ public function validateToken($token = false)
  */
 public function allowed($key = "esoTalk.visibleToGuests")
 {
-    if (ET::$session->user or C($key)) return true;
+    if (ET::$session->user or C($key)) {
+        return true;
+    }
 
     $url = ltrim($this->selfURL, "/");
-    $this->redirect(URL("user/login".($url ? "?return=$url" : "")));
+    $this->redirect(URL("user/login" . ($url ? "?return=$url" : "")));
     return false;
 }
 
@@ -633,18 +657,24 @@ public function renderView($view, $data = array())
 public function getViewPath($view)
 {
     // If the view has a file extension, assume it contains the full file path and use it as is.
-    if (pathinfo($view, PATHINFO_EXTENSION) == "php") return $view;
+    if (pathinfo($view, PATHINFO_EXTENSION) == "php") {
+        return $view;
+    }
 
     // Check the skin to see if it contains this view.
-    if (file_exists($skinView = ET::$skin->view($view))) return $skinView;
+    if (file_exists($skinView = ET::$skin->view($view))) {
+        return $skinView;
+    }
 
     // Check loaded plugins to see if one of them contains the view.
     foreach (ET::$plugins as $k => $v) {
-        if (file_exists($pluginView = $v->view($view))) return $pluginView;
+        if (file_exists($pluginView = $v->view($view))) {
+            return $pluginView;
+        }
     }
 
     // Otherwise, just return the default view.
-    return PATH_VIEWS."/$view.php";
+    return PATH_VIEWS . "/$view.php";
 }
 
 /**
@@ -668,8 +698,10 @@ public function getMessages()
 public function addJSLanguage()
 {
     $args = func_get_args();
-    foreach ($args as $k) $this->jsLanguage[$k] = T($k);
-}
+    foreach ($args as $k) {
+        $this->jsLanguage[$k] = T($k);
+    }
+    }
 
 /**
  * Set a variable that can be accessed by JavaScript code on the page, as a property of the esoTalk object.
@@ -694,10 +726,14 @@ public function addJSVar($key, $val)
  */
 public function addJSFile($file, $global = false)
 {
-    if (strpos($file, "://") !== false) $key = "remote";
+    if (strpos($file, "://") !== false) {
+        $key = "remote";
+    }
     $key = $global ? "global" : "local";
-    if (!in_array($file, $this->jsFiles[$key])) $this->jsFiles[$key][] = $file;
-}
+    if (!in_array($file, $this->jsFiles[$key])) {
+        $this->jsFiles[$key][] = $file;
+    }
+    }
 
 /**
  * Add a CSS file, or files, to be included on the page.
@@ -710,10 +746,15 @@ public function addJSFile($file, $global = false)
  */
 public function addCSSFile($file, $global = false)
 {
-    if (strpos($file, "://") !== false) $key = "remote";
-    else $key = $global ? "global" : "local";
-    if (!in_array($file, $this->cssFiles[$key])) $this->cssFiles[$key][] = $file;
-}
+    if (strpos($file, "://") !== false) {
+        $key = "remote";
+    } else {
+        $key = $global ? "global" : "local";
+    }
+    if (!in_array($file, $this->cssFiles[$key])) {
+        $this->cssFiles[$key][] = $file;
+    }
+    }
 
 /**
  * Add a string of HTML to be outputted inside of the <head> tag. This can be used to add things to the page
@@ -738,53 +779,53 @@ public function addToHead($string)
 protected function aggregateFiles($files, $type)
 {
 
-	require_once PATH_LIBRARY."/vendor/converter/Converter.php";
-	require_once PATH_LIBRARY."/vendor/minify/src/Minify.php";
-	require_once PATH_LIBRARY."/vendor/minify/src/JS.php";
-	require_once PATH_LIBRARY."/vendor/minify/src/CSS.php";
-	require_once PATH_LIBRARY."/vendor/minify/src/Exception.php";
+    require_once PATH_LIBRARY."/vendor/converter/Converter.php";
+    require_once PATH_LIBRARY."/vendor/minify/src/Minify.php";
+    require_once PATH_LIBRARY."/vendor/minify/src/JS.php";
+    require_once PATH_LIBRARY."/vendor/minify/src/CSS.php";
+    require_once PATH_LIBRARY."/vendor/minify/src/Exception.php";
 
-	$jsmin = new Minify\JS();
-	$cssmin = new Minify\CSS();
+    $jsmin = new Minify\JS();
+    $cssmin = new Minify\CSS();
 
-	// Construct an array of filenames, and get the maximum last modifiction time of all the files.
-	$filenames = array();
-	$lastModTime = 0;
-	foreach ($files as $filename) {
-		$filenames[] = str_replace(".", "", pathinfo($filename, PATHINFO_FILENAME));
-		$lastModTime = max($lastModTime, filemtime(PATH_ROOT."/".$filename));
-	}
+    // Construct an array of filenames, and get the maximum last modifiction time of all the files.
+    $filenames = array();
+    $lastModTime = 0;
+    foreach ($files as $filename) {
+        $filenames[] = str_replace(".", "", pathinfo($filename, PATHINFO_FILENAME));
+        $lastModTime = max($lastModTime, filemtime(PATH_ROOT."/".$filename));
+    }
 
-	// Construct a filename for the aggregation file based on the individual filenames.
-	$file = PATH_ROOT."/cache/$type/".implode(",", $filenames).".$type";
+    // Construct a filename for the aggregation file based on the individual filenames.
+    $file = PATH_ROOT."/cache/$type/".implode(",", $filenames).".$type";
 
-	// If this file doesn't exist, or if it is out of date, generate and write it.
-	if (!file_exists($file) or filemtime($file) < $lastModTime) {
+    // If this file doesn't exist, or if it is out of date, generate and write it.
+    if (!file_exists($file) or filemtime($file) < $lastModTime) {
 
-		// Get the contents of each of the files, fixing up image URL paths for CSS files.
-		foreach ($files as $f) {
-			if ($type == "css") {
-				$cssmin->add(PATH_ROOT."/".$f);
-			}
-			else if ($type == "js") {
-				$jsmin->add(PATH_ROOT."/".$f);
-			}
-			/*$content = file_get_contents(PATH_ROOT."/".$f);
+        // Get the contents of each of the files, fixing up image URL paths for CSS files.
+        foreach ($files as $f) {
+            if ($type == "css") {
+                $cssmin->add(PATH_ROOT."/".$f);
+            }
+            else if ($type == "js") {
+                $jsmin->add(PATH_ROOT."/".$f);
+            }
+            /*$content = file_get_contents(PATH_ROOT."/".$f);
 			if ($type == "css") $content = preg_replace("/url\(('?)/i", "url($1".getResource(pathinfo($f, PATHINFO_DIRNAME)."/"), $content);
 			$contents .= $content." ";*/
-		}
+        }
 
-		// Minify and write the contents.
-		if ($type == "css") {
-			$cssmin->minify($file);
-		}
-		else if ($type == "js") {
-			$jsmin->minify($file);
-		}
-		//file_force_contents($file, $type == "css" ? minifyCSS($contents) : minifyJS($contents));
-	}
+        // Minify and write the contents.
+        if ($type == "css") {
+            $cssmin->minify($file);
+        }
+        else if ($type == "js") {
+            $jsmin->minify($file);
+        }
+        //file_force_contents($file, $type == "css" ? minifyCSS($contents) : minifyJS($contents));
+    }
 
-	return array($file);
+    return array($file);
 
 }
 
@@ -798,8 +839,9 @@ public function head()
     $head = "<!-- This page was generated by esoTalk (http://esotalk.org) -->\n";
 
     // Add the canonical URL tag.
-    if (!empty($this->canonicalURL))
-        $head .= "<link rel='canonical' href='$this->canonicalURL'>\n";
+    if (!empty($this->canonicalURL)) {
+            $head .= "<link rel='canonical' href='$this->canonicalURL'>\n";
+    }
 
     // Add remote stylesheets.
     if (!empty($this->cssFiles["remote"])) {
@@ -818,24 +860,24 @@ public function head()
             $files = $this->aggregateFiles($files, "css");
 
         // Otherwise, we need to prepend the full path to each of the files.
-        else foreach ($files as &$file) $file = PATH_ROOT."/".$file;
+        else foreach ($files as &$file) $file = PATH_ROOT . "/" . $file;
         unset($file);
 
         // For each of the files that we need to include in the page, add a <link> tag.
         foreach ($files as $file)
-            $head .= "<link rel='stylesheet' href='".getResource($file)."?".@filemtime($file)."'>\n";
+            $head .= "<link rel='stylesheet' href='" . getResource($file) . "?" . @filemtime($file) . "'>\n";
 
     }
 
     // Output all necessary config variables and language definitions, as well as other variables.
     $esoTalkJS = array(
-        "webPath" => ET::$webPath.((C("esoTalk.urls.friendly") and !C("esoTalk.urls.rewrite")) ? "/index.php" : ""),
-        "userId" => ET::$session->user ? (int)ET::$session->userId : false,
+        "webPath" => ET::$webPath . ((C("esoTalk.urls.friendly") and !C("esoTalk.urls.rewrite")) ? "/index.php" : ""),
+        "userId" => ET::$session->user ? (int) ET::$session->userId : false,
         "token" => ET::$session->token,
         "debug" => C("esoTalk.debug"),
         "language" => $this->jsLanguage
-    ) + (array)$this->jsData;
-    $head .= "<script>var ET=".json_encode($esoTalkJS)."</script>\n";
+    ) + (array) $this->jsData;
+    $head .= "<script>var ET=" . json_encode($esoTalkJS) . "</script>\n";
 
     // Add remote JavaScript.
     if (!empty($this->jsFiles["remote"])) {
@@ -853,12 +895,12 @@ public function head()
             $files = $this->aggregateFiles($files, "js");
 
         // Otherwise, we need to prepend the full path to each of the files.
-        else foreach ($files as &$file) $file = PATH_ROOT."/".$file;
+        else foreach ($files as &$file) $file = PATH_ROOT . "/" . $file;
         unset($file);
 
         // For each of the files that we need to include in the page, add a <script> tag.
         foreach ($files as $file)
-            $head .= "<script src='".getResource($file)."?".filemtime($file)."'></script>\n";
+            $head .= "<script src='" . getResource($file) . "?" . filemtime($file) . "'></script>\n";
     }
 
     // Finally, append the custom HTML string constructed via $this->addToHead().
@@ -881,7 +923,9 @@ public function head()
  */
 public function addToMenu($menu, $id, $html, $position = false)
 {
-    if (empty($this->menus[$menu])) $this->menus[$menu] = ETFactory::make("menu");
+    if (empty($this->menus[$menu])) {
+        $this->menus[$menu] = ETFactory::make("menu");
+    }
     $this->menus[$menu]->add($id, $html, $position);
 }
 
