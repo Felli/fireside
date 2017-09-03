@@ -2,7 +2,9 @@
 // Copyright 2011 Toby Zerner, Simon Zerner
 // This file is part of esoTalk. Please see the included license file for usage information.
 
-if (!defined("IN_ESOTALK")) exit;
+if (!defined("IN_ESOTALK")) {
+    exit;
+}
 
 /**
  * Displays a sheet with a list of members who have not yet been approved and controls to
@@ -16,7 +18,7 @@ $members = $data["members"];
 <div class='sheet' id='unapprovedSheet'>
 <div class='sheetContent' id='adminUnapproved'>
 
-<a href='<?php echo URL("admin/unapproved/denyall?token=".ET::$session->token); ?>' class='button denyAll'><?php echo T("Deny All"); ?></a>
+<a href='<?php echo URL("admin/unapproved/denyall?token=" . ET::$session->token); ?>' class='button denyAll'><?php echo T("Deny All"); ?></a>
 
 <h3><?php echo T("Members Awaiting Approval"); ?></h3>
 
@@ -29,8 +31,8 @@ $members = $data["members"];
 <li>
 <div class='controls'>
 <span class='buttonGroup'>
-<a href='<?php echo URL("admin/unapproved/approve/".$member["memberId"]."?token=".ET::$session->token); ?>' class='button'><?php echo T("Approve"); ?></a>
-<a href='<?php echo URL("admin/unapproved/deny/".$member["memberId"]."?token=".ET::$session->token); ?>' class='button'><?php echo T("Deny"); ?></a>
+<a href='<?php echo URL("admin/unapproved/approve/" . $member["memberId"] . "?token=" . ET::$session->token); ?>' class='button'><?php echo T("Approve"); ?></a>
+<a href='<?php echo URL("admin/unapproved/deny/" . $member["memberId"] . "?token=" . ET::$session->token); ?>' class='button'><?php echo T("Deny"); ?></a>
 </span>
 </div>
 <strong><?php echo name($member["username"]); ?></strong>

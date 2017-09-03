@@ -2,7 +2,9 @@
 // Copyright 2011 Toby Zerner, Simon Zerner
 // This file is part of esoTalk. Please see the included license file for usage information.
 
-if (!defined("IN_ESOTALK")) exit;
+if (!defined("IN_ESOTALK")) {
+    exit;
+}
 
 /**
  * Displays the conversation list, including the filter area (search form, gambits, and channel breadcrumb.)
@@ -13,11 +15,11 @@ if (!defined("IN_ESOTALK")) exit;
 
 <div id='conversationsFilter' class='bodyHeader'>
 
-<form class='search big' id='search' action='<?php echo sanitizeHTML(URL("conversations/".$data["channelSlug"])); ?>' method='get'>
+<form class='search big' id='search' action='<?php echo sanitizeHTML(URL("conversations/" . $data["channelSlug"])); ?>' method='get'>
 <fieldset>
 <i class='icon-search'></i>
 <input name='search' type='text' class='text' value='<?php echo sanitizeHTML($data["searchString"]); ?>' spellcheck='false' placeholder='<?php echo T("Search conversations..."); ?>'/>
-<a class='control-reset' href='<?php echo sanitizeHTML(URL("conversations/".$data["channelSlug"])); ?>'><i class='icon-remove'></i></a>
+<a class='control-reset' href='<?php echo sanitizeHTML(URL("conversations/" . $data["channelSlug"])); ?>'><i class='icon-remove'></i></a>
 </fieldset>
 </form>
 

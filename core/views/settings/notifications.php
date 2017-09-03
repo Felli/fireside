@@ -2,7 +2,9 @@
 // Copyright 2011 Toby Zerner, Simon Zerner
 // This file is part of esoTalk. Please see the included license file for usage information.
 
-if (!defined("IN_ESOTALK")) exit;
+if (!defined("IN_ESOTALK")) {
+    exit;
+}
 
 /**
  * Displays a list of notifications, for use in the notifications settings pane and also in the notifications
@@ -21,7 +23,10 @@ if (!defined("IN_ESOTALK")) exit;
 foreach ($data["notifications"] as $k => $notification): ?>
 <li class='notification-<?php echo $notification["type"]; ?><?php if ($notification["unread"]): ?> unread<?php endif; ?>'>
 <a href='<?php echo @$notification["link"]; ?>'>
-<?php if ($notification["fromMemberId"]) echo avatar($notification + array("memberId" => $notification["fromMemberId"], "username" => $notification["fromMemberName"])); ?>
+<?php if ($notification["fromMemberId"]) {
+    echo avatar($notification + array("memberId" => $notification["fromMemberId"], "username" => $notification["fromMemberName"]));
+}
+?>
 <div class='action'><?php echo $notification["body"]; ?></div>
 <small class='time'><?php echo ucfirst(relativeTime($notification["time"], true)); ?></small>
 </a>
@@ -33,6 +38,9 @@ foreach ($data["notifications"] as $k => $notification): ?>
 <?php endif; ?>
 </ul>
 
-<?php else: ?>
-<p class='help'><?php echo T("message.noNotifications"); ?></p>
+<?php else {
+    : ?>
+<p class='help'><?php echo T("message.noNotifications");
+}
+?></p>
 <?php endif; ?>

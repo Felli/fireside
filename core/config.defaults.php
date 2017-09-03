@@ -50,9 +50,9 @@ $config["esoTalk.database.dbName"] = "";
 $config["esoTalk.database.prefix"] = "";
 $config["esoTalk.database.characterEncoding"] = "utf8";
 $config["esoTalk.database.connectionOptions"] = array(
-	PDO::ATTR_PERSISTENT => false,
-	1000 => true, // PDO::MYSQL_ATTR_USE_BUFFERED_QUERY is missing in some PHP installations
-	1002 => "SET NAMES 'utf8'" // PDO::MYSQL_ATTR_INIT_COMMAND is missing in some PHP installations
+    PDO::ATTR_PERSISTENT => false,
+    1000 => true, // PDO::MYSQL_ATTR_USE_BUFFERED_QUERY is missing in some PHP installations
+    1002 => "SET NAMES 'utf8'" // PDO::MYSQL_ATTR_INIT_COMMAND is missing in some PHP installations
 );
 
 // Basic forum details.

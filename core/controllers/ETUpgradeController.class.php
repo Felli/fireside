@@ -2,7 +2,9 @@
 // Copyright 2011 Toby Zerner, Simon Zerner
 // This file is part of esoTalk. Please see the included license file for usage information.
 
-if (!defined("IN_ESOTALK")) exit;
+if (!defined("IN_ESOTALK")) {
+    exit;
+}
 
 /**
  * The upgrade controller runs the upgrade model's upgrade method, updates the config file with the latest
@@ -20,9 +22,9 @@ class ETUpgradeController extends ETController {
  */
 public function init()
 {
-	// Set the master view to the message master view.
-	$this->masterView = "message.master";
-	$this->title = T("Upgrade esoTalk");
+    // Set the master view to the message master view.
+    $this->masterView = "message.master";
+    $this->title = T("Upgrade esoTalk");
 }
 
 
@@ -33,23 +35,23 @@ public function init()
  */
 public function action_index()
 {
-	try {
+    try {
 
-		// Run the upgrade process.
-		ET::upgradeModel()->upgrade(C("esoTalk.version"));
+        // Run the upgrade process.
+        ET::upgradeModel()->upgrade(C("esoTalk.version"));
 
-		// Update the version and serial in the config file.
-		ET::writeConfig(array(
-			"esoTalk.version" => ESOTALK_VERSION
-		));
+        // Update the version and serial in the config file.
+        ET::writeConfig(array(
+            "esoTalk.version" => ESOTALK_VERSION
+        ));
 
-		// Show a success message and redirect.
-		$this->message(T("message.upgradeSuccessful"), "success");
-		$this->redirect(URL(""));
+        // Show a success message and redirect.
+        $this->message(T("message.upgradeSuccessful"), "success");
+        $this->redirect(URL(""));
 
-	} catch (Exception $e) {
-		$this->fatalError($e->getMessage());
-	}
+    } catch (Exception $e) {
+        $this->fatalError($e->getMessage());
+    }
 }
 
 
@@ -61,9 +63,9 @@ public function action_index()
  */
 protected function fatalError($error)
 {
-	$this->data("error", $error);
-	$this->render("install/upgradeError");
-	exit;
+    $this->data("error", $error);
+    $this->render("install/upgradeError");
+    exit;
 }
 
 }
