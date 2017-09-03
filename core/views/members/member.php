@@ -24,7 +24,7 @@ $member = $data["member"];
 // Online indicator.
 if (empty($member["preferences"]["hideOnline"])):
     $lastAction = ET::memberModel()->getLastActionInfo($member["lastActionTime"], $member["lastActionDetail"]);
-    if ($lastAction) echo "<".(!empty($lastAction[1]) ? "a href='{$lastAction[1]}'" : "span")." class='online' title='".T("Online").($lastAction[0] ? " (".sanitizeHTML($lastAction[0]).")" : "")."'><i class='icon-circle'></i></".(!empty($lastAction[1]) ? "a" : "span").">";
+    if ($lastAction) echo "<" . (!empty($lastAction[1]) ? "a href='{$lastAction[1]}'" : "span") . " class='online' title='" . T("Online") . ($lastAction[0] ? " (" . sanitizeHTML($lastAction[0]) . ")" : "") . "'><i class='icon-circle'></i></" . (!empty($lastAction[1]) ? "a" : "span") . ">";
 endif;
 ?>
 
@@ -34,8 +34,8 @@ endif;
 
 <div class='col-lastActive'>
 <span class='subText'><?php printf(T("Last active %s"), empty($member["preferences"]["hideOnline"])
-    ? "<span title='".strftime(T("date.full"), $member["lastActionTime"])."'>".relativeTime($member["lastActionTime"], true)."</span>"
-    : "[".T("hidden")."]"); ?></span>
+    ? "<span title='" . strftime(T("date.full"), $member["lastActionTime"]) . "'>" . relativeTime($member["lastActionTime"], true) . "</span>"
+    : "[" . T("hidden") . "]"); ?></span>
 </div>
 
 <div class='col-replies'>

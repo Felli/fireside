@@ -23,7 +23,9 @@ class ETConversationsController extends ETController {
  */
 public function action_index($channelSlug = false)
 {
-    if (!$this->allowed()) return;
+    if (!$this->allowed()) {
+        return;
+    }
 	
     list($channelInfo, $currentChannels, $channelIds, $includeDescendants) = $this->getSelectedChannels($channelSlug);
 
@@ -38,29 +40,37 @@ public function action_index($channelSlug = false)
     $curChannel = false;
 
     // If channels have been selected, use the first of them.
-    if (count($currentChannels)) $curChannel = $channelInfo[$currentChannels[0]];
+    if (count($currentChannels)) {
+        $curChannel = $channelInfo[$currentChannels[0]];
+    }
 
     // If the currently selected channel has no children, or if we're not including descendants, use
     // its parent as the parent channel.
-    if (($curChannel and $curChannel["lft"] >= $curChannel["rgt"] - 1) or !$includeDescendants)
-        $curChannel = @$channelInfo[$curChannel["parentId"]];
+    if (($curChannel and $curChannel["lft"] >= $curChannel["rgt"] - 1) or !$includeDescendants) {
+            $curChannel = @$channelInfo[$curChannel["parentId"]];
+    }
 
     // If no channel is selected, make a faux parent channel.
-    if (!$curChannel) $curChannel = array("lft" => 0, "rgt" => PHP_INT_MAX, "depth" => -1);
+    if (!$curChannel) {
+        $curChannel = array("lft" => 0, "rgt" => PHP_INT_MAX, "depth" => -1);
+    }
 
     // Now, finally, go through all the channels and add ancestors of the "parent" channel to the $path,
     // and direct children to the list of $channels. Make sure we don't include any channels which
     // the user has unsubscribed to.
     foreach ($channelInfo as $channel) {
-        if ($channel["lft"] > $curChannel["lft"] and $channel["rgt"] < $curChannel["rgt"] and $channel["depth"] == $curChannel["depth"] + 1 and empty($channel["unsubscribed"]))
-            $channels[] = $channel;
-        elseif ($channel["lft"] <= $curChannel["lft"] and $channel["rgt"] >= $curChannel["rgt"])
-            $path[] = $channel;
+        if ($channel["lft"] > $curChannel["lft"] and $channel["rgt"] < $curChannel["rgt"] and $channel["depth"] == $curChannel["depth"] + 1 and empty($channel["unsubscribed"])) {
+                    $channels[] = $channel;
+        } elseif ($channel["lft"] <= $curChannel["lft"] and $channel["rgt"] >= $curChannel["rgt"]) {
+                    $path[] = $channel;
+        }
     }
 
     // Store the currently selected channel in the session, so that it can be automatically selected
     // if "New conversation" is clicked.
-    if (!empty($currentChannels)) ET::$session->store("searchChannelId", $currentChannels[0]);
+    if (!empty($currentChannels)) {
+        ET::$session->store("searchChannelId", $currentChannels[0]);
+    }
 
     // Get the search string request value.
     $searchString = R("search");
@@ -83,7 +93,9 @@ public function action_index($channelSlug = false)
     }
 
     // Add fulltext keywords to be highlighted. Make sure we keep ones "in quotes" together.
-    else $this->highlight($search->fulltext);
+    else {
+        $this->highlight($search->fulltext);
+    }
 
     // Pass on a bunch of data to the view.
     $this->data("results", $results);
@@ -100,7 +112,7 @@ public function action_index($channelSlug = false)
     // Construct a canonical URL and add to the breadcrumb stack.
     $slugs = array();
     foreach ($currentChannels as $channel) $slugs[] = $channelInfo[$channel]["slug"];
-    $url = "conversations/".urlencode(($k = implode(" ", $slugs)) ? $k : "all").($searchString ? "?search=".urlencode($searchString) : "");
+    $url = "conversations/" . urlencode(($k = implode(" ", $slugs)) ? $k : "all") . ($searchString ? "?search=" . urlencode($searchString) : "");
     $this->pushNavigation("conversations", "search", URL($url));
     $this->canonicalURL = URL($url, true);
 
@@ -117,8 +129,8 @@ public function action_index($channelSlug = false)
 
         // Mark as read controls
         if (ET::$session->user) {
-            $controls->add("markAllAsRead", "<a href='".URL("conversations/markAllAsRead/?token=".ET::$session->token."' id='control-markAllAsRead'><i class='icon-check'></i> ".T("Mark all as read")."</a>"));
-            $controls->add("markListedAsRead", "<a href='".URL("conversations/$channelSlug/?search=".urlencode($searchString)."&markAsRead=1&token=".ET::$session->token."' id='control-markListedAsRead'><i class='icon-list'></i> ".T("Mark listed as read")."</a>"));
+            $controls->add("markAllAsRead", "<a href='" . URL("conversations/markAllAsRead/?token=" . ET::$session->token . "' id='control-markAllAsRead'><i class='icon-check'></i> " . T("Mark all as read") . "</a>"));
+            $controls->add("markListedAsRead", "<a href='" . URL("conversations/$channelSlug/?search=" . urlencode($searchString) . "&markAsRead=1&token=" . ET::$session->token . "' id='control-markListedAsRead'><i class='icon-list'></i> " . T("Mark listed as read") . "</a>"));
         }
 
         // Add the default gambits to the gambit cloud: gambit text => css class to apply.
@@ -135,8 +147,8 @@ public function action_index($channelSlug = false)
                 T("gambit.locked") => array("gambit-locked", "icon-lock"),
             ),
             "member" => array(
-                T("gambit.author:").T("gambit.member") => array("gambit-author", "icon-user"),
-                T("gambit.contributor:").T("gambit.member") => array("gambit-contributor", "icon-user"),
+                T("gambit.author:") . T("gambit.member") => array("gambit-author", "icon-user"),
+                T("gambit.contributor:") . T("gambit.member") => array("gambit-contributor", "icon-user"),
             ),
             "replies" => array(
                 T("gambit.has replies") => array("gambit-hasReplies", "icon-comment"),
@@ -144,7 +156,7 @@ public function action_index($channelSlug = false)
                 T("gambit.order by replies") => array("gambit-orderByReplies", "icon-list-ol"),
             ),
             "text" => array(
-                T("gambit.title:")." ?" => array("gambit-title", "icon-font")
+                T("gambit.title:") . " ?" => array("gambit-title", "icon-font")
             ),
             "misc" => array(
                 T("gambit.random") => array("gambit-random", "icon-random"),
@@ -159,22 +171,24 @@ public function action_index($channelSlug = false)
             addToArrayString($gambits["main"], T("gambit.draft"), array("gambit-draft", "icon-pencil"), 3);
             addToArrayString($gambits["main"], T("gambit.ignored"), array("gambit-ignored", "icon-eye-close"), 4);
             addToArrayString($gambits["time"], T("gambit.unread"), array("gambit-unread", "icon-inbox"), 0);
-            addToArrayString($gambits["member"], T("gambit.author:").T("gambit.myself"), array("gambit-authorMyself", "icon-smile"), 0);
-            addToArrayString($gambits["member"], T("gambit.contributor:").T("gambit.myself"), array("gambit-contributorMyself", "icon-smile"), 2);
+            addToArrayString($gambits["member"], T("gambit.author:") . T("gambit.myself"), array("gambit-authorMyself", "icon-smile"), 0);
+            addToArrayString($gambits["member"], T("gambit.contributor:") . T("gambit.myself"), array("gambit-contributorMyself", "icon-smile"), 2);
         }
 
         $this->trigger("constructGambitsMenu", array(&$gambits));
 
         // Construct the gambits menu based on the above arrays.
         $gambitsMenu = ETFactory::make("menu");
-        $linkPrefix = "conversations/".$channelSlug."/?search=".urlencode(((!empty($searchString) ? $searchString." + " : "")));
+        $linkPrefix = "conversations/" . $channelSlug . "/?search=" . urlencode(((!empty($searchString) ? $searchString . " + " : "")));
 
         foreach ($gambits as $section => $items) {
             foreach ($items as $gambit => $classes) {
-                $gambitsMenu->add($classes[0], "<a href='".URL($linkPrefix.urlencode("#".$gambit))."' class='{$classes[0]}' data-gambit='$gambit'>".(!empty($classes[1]) ? "<i class='{$classes[1]}'></i> " : "")."$gambit</a>");
+                $gambitsMenu->add($classes[0], "<a href='" . URL($linkPrefix . urlencode("#" . $gambit)) . "' class='{$classes[0]}' data-gambit='$gambit'>" . (!empty($classes[1]) ? "<i class='{$classes[1]}'></i> " : "") . "$gambit</a>");
             }
             end($gambits);
-            if ($section !== key($gambits)) $gambitsMenu->separator();
+            if ($section !== key($gambits)) {
+                $gambitsMenu->separator();
+            }
         }
 
         $this->data("controlsMenu", $controls);
@@ -183,17 +197,21 @@ public function action_index($channelSlug = false)
         // Construct a list of keywords to use in the meta tags.
         $keywords = array();
         foreach ($channelInfo as $c) {
-            if ($c["depth"] == 0) $keywords[] = strtolower($c["title"]);
+            if ($c["depth"] == 0) {
+                $keywords[] = strtolower($c["title"]);
+            }
         }
 
         // Add meta tags to the header.
-        $this->addToHead("<meta name='keywords' content='".sanitizeHTML(($k = C("esoTalk.meta.keywords")) ? $k : implode(",", $keywords))."'>");
+        $this->addToHead("<meta name='keywords' content='" . sanitizeHTML(($k = C("esoTalk.meta.keywords")) ? $k : implode(",", $keywords)) . "'>");
         $lastKeyword = reset(array_splice($keywords, count($keywords) - 1, 1));
-        $this->addToHead("<meta name='description' content='".sanitizeHTML(($d = C("esoTalk.meta.description")) ? $d
-            : sprintf(T("forumDescription"), C("esoTalk.forumTitle"), implode(", ", $keywords), $lastKeyword))."'>");
+        $this->addToHead("<meta name='description' content='" . sanitizeHTML(($d = C("esoTalk.meta.description")) ? $d
+            : sprintf(T("forumDescription"), C("esoTalk.forumTitle"), implode(", ", $keywords), $lastKeyword)) . "'>");
 
         // If this is not technically the homepage (if it's a search page) the we don't want it to be indexed.
-        if ($searchString) $this->addToHead("<meta name='robots' content='noindex, noarchive'>");
+        if ($searchString) {
+            $this->addToHead("<meta name='robots' content='noindex, noarchive'>");
+        }
 
         // Add JavaScript language definitions and variables.
         $this->addJSLanguage("Starred", "Unstarred", "gambit.member", "gambit.more results", "Filter conversations", "Jump to last");
@@ -206,7 +224,9 @@ public function action_index($channelSlug = false)
 
         // Add an array of channels in the form slug => id for the JavaScript to use.
         $channels = array();
-        foreach ($channelInfo as $id => $c) $channels[$id] = $c["slug"];
+        foreach ($channelInfo as $id => $c) {
+            $channels[$id] = $c["slug"];
+        }
         $this->addJSVar("channels", $channels);
 
         // Get a bunch of statistics...
@@ -222,7 +242,7 @@ public function action_index($channelSlug = false)
         // ...and show them in the footer.
         foreach ($stats as $k => $v) {
             $stat = Ts("statistic.$k", "statistic.$k.plural", number_format($v));
-            if ($k == "member" and (C("esoTalk.members.visibleToGuests") or ET::$session->user)) $stat = "<a href='".URL("members")."'>$stat</a>";
+            if ($k == "member" and (C("esoTalk.members.visibleToGuests") or ET::$session->user)) $stat = "<a href='" . URL("members") . "'>$stat</a>";
             $this->addToMenu("statistics", "statistic-$k", $stat, array("before" => "statistic-online"));
         }
 
@@ -305,8 +325,9 @@ protected function getSelectedChannels($channelSlug = "")
             $channelIds[] = $id;
             $rootUnsubscribed = !empty($channelInfo[$id]["unsubscribed"]);
             foreach ($channelInfo as $channel) {
-                if ($channel["lft"] > $channelInfo[$id]["lft"] and $channel["rgt"] < $channelInfo[$id]["rgt"] and (empty($channel["unsubscribed"]) or $rootUnsubscribed))
-                    $channelIds[] = $channel["channelId"];
+                if ($channel["lft"] > $channelInfo[$id]["lft"] and $channel["rgt"] < $channelInfo[$id]["rgt"] and (empty($channel["unsubscribed"]) or $rootUnsubscribed)) {
+                                    $channelIds[] = $channel["channelId"];
+                }
             }
         }
     }
@@ -315,7 +336,9 @@ protected function getSelectedChannels($channelSlug = "")
     // add all the channels.
     if (empty($channelIds)) {
         foreach ($channelInfo as $id => $channel) {
-            if (empty($channel["unsubscribed"])) $channelIds[] = $id;
+            if (empty($channel["unsubscribed"])) {
+                $channelIds[] = $id;
+            }
         }
     }
 
@@ -334,7 +357,9 @@ public function action_markAllAsRead()
     ET::$session->setPreferences(array("markedAllConversationsAsRead" => time()));
 
     // For a normal response, redirect to the conversations page.
-    if ($this->responseType === RESPONSE_TYPE_DEFAULT) $this->redirect(URL("conversations"));
+    if ($this->responseType === RESPONSE_TYPE_DEFAULT) {
+        $this->redirect(URL("conversations"));
+    }
 
     // For an ajax response, just pretend this is a normal search response.
     $this->action_index();
@@ -377,11 +402,11 @@ public function action_update($channelSlug = "", $query = "")
 
     // Make sure they are all integers.
     foreach ($conversationIds as $k => $v) {
-        if (!($conversationIds[$k] = (int)$v)) unset($conversationIds[$k]);
+        if (!($conversationIds[$k] = (int) $v)) unset($conversationIds[$k]);
     }
 
     if (!count($conversationIds)) return;
-    $conversationIds = array_slice((array)$conversationIds, 0, 20);
+    $conversationIds = array_slice((array) $conversationIds, 0, 20);
 
     // Work out if there are any new results for this channel/search query.
 
@@ -390,7 +415,9 @@ public function action_update($channelSlug = "", $query = "")
     $random = false;
     $terms = $query ? explode("+", strtolower(str_replace("-", "+!", trim($query, " +-")))) : array();
     foreach ($terms as $v) {
-        if (trim($v) == T("gambit.random"))	$random = true;
+        if (trim($v) == T("gambit.random")) {
+            $random = true;
+        }
     }
 
     if (!$random) {
@@ -399,10 +426,10 @@ public function action_update($channelSlug = "", $query = "")
 
         // Get a list of conversation IDs for the channel/query.
         $newConversationIds = $search->getConversationIDs($channelIds, $query, count($currentChannels) or !ET::$session->userId);
-        $newConversationIds = array_slice((array)$newConversationIds, 0, 20);
+        $newConversationIds = array_slice((array) $newConversationIds, 0, 20);
 
         // Get the difference of the two sets of conversationId's.
-        $diff = array_diff((array)$newConversationIds, (array)$conversationIds);
+        $diff = array_diff((array) $newConversationIds, (array) $conversationIds);
         if (count($diff)) $this->message(sprintf(T("message.newSearchResults"), "javascript:ETSearch.showNewActivity();void(0)"), array("id" => "newSearchResults"));
 
     }

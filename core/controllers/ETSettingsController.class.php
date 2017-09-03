@@ -23,8 +23,11 @@ public function init()
 {
     parent::init();
     if (!ET::$session->userId) {
-        if ($this->responseType === RESPONSE_TYPE_DEFAULT) $this->redirect(URL(""));
-        else exit;
+        if ($this->responseType === RESPONSE_TYPE_DEFAULT) {
+            $this->redirect(URL(""));
+        } else {
+            exit;
+        }
     }
 }
 
@@ -41,10 +44,10 @@ public function renderProfile($view = "")
     if (!in_array($this->responseType, array(RESPONSE_TYPE_VIEW, RESPONSE_TYPE_AJAX))) {
         $this->data("view", $view);
         parent::render("member/profile");
+    } else {
+        parent::render($view);
     }
-
-    else parent::render($view);
-}
+    }
 
 
 /**
@@ -71,9 +74,9 @@ public function profile($pane = "")
 
     // Make a list of default member panes, and highlight the currently active one.
     $panes = ETFactory::make("menu");
-    $panes->add("general", "<a href='".URL("settings/general")."'>".T("Settings")."</a>");
-    $panes->add("password", "<a href='".URL("settings/password")."'>".T("Change Password or Email")."</a>");
-    $panes->add("notifications", "<a href='".URL("settings/notifications")."'>".T("Notifications")."</a>");
+    $panes->add("general", "<a href='" . URL("settings/general") . "'>" . T("Settings") . "</a>");
+    $panes->add("password", "<a href='" . URL("settings/password") . "'>" . T("Change Password or Email") . "</a>");
+    $panes->add("notifications", "<a href='" . URL("settings/notifications") . "'>" . T("Notifications") . "</a>");
     $panes->highlight($pane);
 
     // Set the member to the current user.
@@ -84,7 +87,7 @@ public function profile($pane = "")
     $actions = ETFactory::make("menu");
 
     // Add a link to go back to the user's member profile.
-    $actions->add("viewProfile", "<a href='".URL("member/me")."'><i class='icon-eye-open'></i> ".T("View your profile")."</a>");
+    $actions->add("viewProfile", "<a href='" . URL("member/me") . "'><i class='icon-eye-open'></i> " . T("View your profile") . "</a>");
 
     $this->trigger("initProfile", array($panes, $controls, $actions));
 
@@ -163,7 +166,9 @@ public function action_general()
         // If no errors occurred, we can write the preferences to the database.
         if (!$form->errorCount()) {
 
-            if (count($preferences)) ET::$session->setPreferences($preferences);
+            if (count($preferences)) {
+                ET::$session->setPreferences($preferences);
+            }
 
             $this->message(T("message.changesSaved"), "success autoDismiss");
             $this->redirect(URL("settings/general"));
@@ -175,7 +180,7 @@ public function action_general()
     elseif ($form->validPostBack("removeAvatar")) {
 
         // Delete the avatar file and set the member's avatarFormat to null.
-        @unlink(PATH_UPLOADS."/avatars/".$member["memberId"].".".$member["avatarFormat"]);
+        @unlink(PATH_UPLOADS . "/avatars/" . $member["memberId"] . "." . $member["avatarFormat"]);
         ET::memberModel()->updateById($member["memberId"], array("avatarFormat" => null));
 
         $this->message(T("message.changesSaved"), "success autoDismiss");
@@ -196,11 +201,11 @@ public function action_general()
  */
 public function fieldAvatar($form)
 {
-    return "<div class='avatarChooser'>".
-        avatar(ET::$session->user).
-        $form->input("avatar", "file").
-        "<small>".sprintf(T("Maximum size of %s. %s."), (ET::uploader()->maxUploadSize() / (1024*1024))." MB", "JPG, GIF, PNG")."</small>".
-        (ET::$session->user["avatarFormat"] ? $form->button("removeAvatar", T("Remove avatar")) : "").
+    return "<div class='avatarChooser'>" .
+        avatar(ET::$session->user) .
+        $form->input("avatar", "file") .
+        "<small>" . sprintf(T("Maximum size of %s. %s."), (ET::uploader()->maxUploadSize() / (1024 * 1024)) . " MB", "JPG, GIF, PNG") . "</small>" .
+        (ET::$session->user["avatarFormat"] ? $form->button("removeAvatar", T("Remove avatar")) : "") .
         "</div>";
 }
 
@@ -214,7 +219,9 @@ public function fieldAvatar($form)
 public function fieldLanguage($form)
 {
     $options = array();
-    foreach (ET::getLanguages() as $language) $options[$language] = ET::$languageInfo[$language]["name"];
+    foreach (ET::getLanguages() as $language) {
+        $options[$language] = ET::$languageInfo[$language]["name"];
+    }
     return $form->select("language", $options);
 }
 
@@ -230,7 +237,9 @@ public function fieldLanguage($form)
 public function saveLanguage($form, $key, &$preferences)
 {
     $language = $form->getValue($key);
-    if (!in_array($language, ET::getLanguages()) or $language == C("esoTalk.language")) $language = null;
+    if (!in_array($language, ET::getLanguages()) or $language == C("esoTalk.language")) {
+        $language = null;
+    }
     $preferences["language"] = $language;
 }
 
@@ -244,7 +253,7 @@ public function saveLanguage($form, $key, &$preferences)
  */
 public function fieldEmailPrivateAdd($form)
 {
-    return "<label class='checkbox'>".$form->checkbox("privateAdd")." ".label("private")." ".T("Email me when I'm added to a private conversation")."</label>";
+    return "<label class='checkbox'>" . $form->checkbox("privateAdd") . " " . label("private") . " " . T("Email me when I'm added to a private conversation") . "</label>";
 }
 
 
@@ -257,7 +266,7 @@ public function fieldEmailPrivateAdd($form)
  */
 public function fieldEmailReplyToStarred($form)
 {
-    return "<label class='checkbox'>".$form->checkbox("post")." <i class='star icon-star'></i> ".T("Email me when someone posts in a conversation I have followed")."</label>";
+    return "<label class='checkbox'>" . $form->checkbox("post") . " <i class='star icon-star'></i> " . T("Email me when someone posts in a conversation I have followed") . "</label>";
 }
 
 
@@ -270,7 +279,7 @@ public function fieldEmailReplyToStarred($form)
  */
 public function fieldEmailMention($form)
 {
-    return "<label class='checkbox'>".$form->checkbox("mention")." ".T("Email me when someone mentions me in a post")."</label>";
+    return "<label class='checkbox'>" . $form->checkbox("mention") . " " . T("Email me when someone mentions me in a post") . "</label>";
 }
 
 
@@ -283,7 +292,7 @@ public function fieldEmailMention($form)
  */
 public function fieldStarOnReply($form)
 {
-    return "<label class='checkbox'>".$form->checkbox("starOnReply")." ".T("Automatically follow conversations that I reply to")."</label>";
+    return "<label class='checkbox'>" . $form->checkbox("starOnReply") . " " . T("Automatically follow conversations that I reply to") . "</label>";
 }
 
 
@@ -296,7 +305,7 @@ public function fieldStarOnReply($form)
  */
 public function fieldStarPrivate($form)
 {
-    return "<label class='checkbox'>".$form->checkbox("starPrivate")." ".T("Automatically follow private conversations that I'm added to")."</label>";
+    return "<label class='checkbox'>" . $form->checkbox("starPrivate") . " " . T("Automatically follow private conversations that I'm added to") . "</label>";
 }
 
 
@@ -309,7 +318,7 @@ public function fieldStarPrivate($form)
  */
 public function fieldHideOnline($form)
 {
-    return "<label class='checkbox'>".$form->checkbox("hideOnline")." ".T("Don't allow other users to see when I am online")."</label>";
+    return "<label class='checkbox'>" . $form->checkbox("hideOnline") . " " . T("Don't allow other users to see when I am online") . "</label>";
 }
 
 /**
@@ -322,7 +331,7 @@ public function fieldHideOnline($form)
  */
 public function saveEmailPreference($form, $key, &$preferences)
 {
-    $preferences["email.".$key] = (bool)$form->getValue($key);
+    $preferences["email." . $key] = (bool) $form->getValue($key);
 }
 
 
@@ -350,7 +359,7 @@ public function savePreference($form, $key, &$preferences)
  */
 public function saveBoolPreference($form, $key, &$preferences)
 {
-    $preferences[$key] = (bool)$form->getValue($key);
+    $preferences[$key] = (bool) $form->getValue($key);
 }
 
 
@@ -364,7 +373,9 @@ public function saveBoolPreference($form, $key, &$preferences)
  */
 public function saveAvatar($form, $key, &$preferences)
 {
-    if (empty($_FILES[$key]["tmp_name"])) return;
+    if (empty($_FILES[$key]["tmp_name"])) {
+        return;
+    }
 
     $uploader = ET::uploader();
 
@@ -374,7 +385,7 @@ public function saveAvatar($form, $key, &$preferences)
         $file = $uploader->getUploadedFile($key);
 
         // Save it as an image, cropping it to the configured avatar size.
-        $avatar = $uploader->saveAsImage($file, PATH_UPLOADS."/avatars/".ET::$session->userId, C("esoTalk.avatars.width"), C("esoTalk.avatars.height"), "crop");
+        $avatar = $uploader->saveAsImage($file, PATH_UPLOADS . "/avatars/" . ET::$session->userId, C("esoTalk.avatars.width"), C("esoTalk.avatars.height"), "crop");
 
         // Update the member's avatarFormat field to the avatar file's extension.
         ET::memberModel()->updateById(ET::$session->userId, array("avatarFormat" => pathinfo($avatar, PATHINFO_EXTENSION)));
@@ -450,21 +461,26 @@ public function action_password()
         if ($password = $form->getValue("password")) {
 
             // Do the passwords entered match?
-            if ($password != $form->getValue("confirm"))
-                $form->error("confirm", T("message.passwordsDontMatch"));
+            if ($password != $form->getValue("confirm")) {
+                            $form->error("confirm", T("message.passwordsDontMatch"));
+            }
 
             // The password stuff is good. Add the new password to be updated.
-            else $update["password"] = $password;
+            else {
+                $update["password"] = $password;
+            }
 
         }
 
         // Are we setting a new email?
-        if ($email = $form->getValue("email"))
-            $update["email"] = $email;
+        if ($email = $form->getValue("email")) {
+                    $update["email"] = $email;
+        }
 
         // Did they enter the correct "current password"?
-        if (!ET::memberModel()->checkPassword($form->getValue("currentPassword"), ET::$session->user["password"]))
-            $form->error("currentPassword", T("message.incorrectPassword"));
+        if (!ET::memberModel()->checkPassword($form->getValue("currentPassword"), ET::$session->user["password"])) {
+                    $form->error("currentPassword", T("message.incorrectPassword"));
+        }
 
         // If no preliminary errors occurred, and we have stuff to update, we can go ahead and call the model.
         if (!$form->errorCount() and count($update)) {
@@ -474,7 +490,9 @@ public function action_password()
             $model->updateById(ET::$session->userId, $update);
 
             // If the model encountered errors, pass them along to the form.
-            if ($model->errorCount()) $form->errors($model->errors());
+            if ($model->errorCount()) {
+                $form->errors($model->errors());
+            }
 
             // Otherwise, show a message and redirect.
             else {

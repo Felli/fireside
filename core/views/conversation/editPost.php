@@ -21,15 +21,15 @@ $post = $data["post"];
 <?php
 
 // Using the provided form object, construct a textarea and buttons.
-$body = $form->input("content", "textarea", array("cols" => "200", "rows" => "20"))."
-	<div id='p".$post["postId"]."-preview' class='preview'></div>";
-$footer = "<div class='editButtons'>".
-    $form->saveButton()." ".
-    $form->cancelButton()."</div>";
+$body = $form->input("content", "textarea", array("cols" => "200", "rows" => "20")) . "
+	<div id='p".$post["postId"] . "-preview' class='preview'></div>";
+$footer = "<div class='editButtons'>" .
+    $form->saveButton() . " " .
+    $form->cancelButton() . "</div>";
 
 // Construct an array for use in the conversation/post view.
 $formatted = array(
-    "id" => "p".$post["postId"],
+    "id" => "p" . $post["postId"],
     "title" => name($post["username"]),
     "controls" => $data["controls"],
     "class" => "edit",

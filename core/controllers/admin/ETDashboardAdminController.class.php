@@ -30,7 +30,7 @@ public function action_index()
     $statistics = array(
 
         // Number of members.
-        "<a href='".URL("members")."'>".T("Members")."</a>" => number_format(ET::SQL()->select("COUNT(*)")->from("member")->exec()->result()),
+        "<a href='" . URL("members") . "'>" . T("Members") . "</a>" => number_format(ET::SQL()->select("COUNT(*)")->from("member")->exec()->result()),
 
         // Number of conversations.
         T("Conversations") => number_format(ET::SQL()->select("COUNT(*)")->from("conversation")->exec()->result()),
@@ -83,18 +83,18 @@ public function action_news()
     foreach ($x->channel->item as $item) {
 
         $post = array(
-            "date" => (string)$item->pubDate,
+            "date" => (string) $item->pubDate,
             "ts" => strtotime($item->pubDate),
-            "link" => (string)$item->link,
-            "title" => (string)$item->title,
-            "text" => (string)$item->description
+            "link" => (string) $item->link,
+            "title" => (string) $item->title,
+            "text" => (string) $item->description
         );
 
         // Create summary as a shortened body and remove all tags.
         $summary = strip_tags($post["text"]);
         $maxLen = 200;
-        if(strlen($summary) > $maxLen)
-            $summary = substr($summary, 0, $maxLen)."...";
+        if (strlen($summary) > $maxLen)
+            $summary = substr($summary, 0, $maxLen) . "...";
 
         $post["summary"] = $summary;
         $posts[] = $post;

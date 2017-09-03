@@ -43,9 +43,11 @@ public function action_index()
     $form->setValue("requireConfirmation", C("esoTalk.registration.requireConfirmation"));
 
     $c = C("esoTalk.conversation.editPostTimeLimit");
-    if ($c === -1) $form->setValue("editPostMode", "forever");
-    elseif ($c === "reply") $form->setValue("editPostMode", "reply");
-    else {
+    if ($c === -1) {
+        $form->setValue("editPostMode", "forever");
+    } elseif ($c === "reply") {
+        $form->setValue("editPostMode", "reply");
+    } else {
         $form->setValue("editPostMode", "custom");
         $form->setValue("editPostTimeLimit", $c);
     }
@@ -54,10 +56,10 @@ public function action_index()
     // If the save button was clicked...
     if ($form->validPostBack("save")) {
         $forumLogo = false;
-        if ($form->getValue("forumHeader") == "image"){
-            if ($form->getValue("forumHeaderOld") != "image"){
+        if ($form->getValue("forumHeader") == "image") {
+            if ($form->getValue("forumHeaderOld") != "image") {
                 $forumLogo = $this->uploadHeaderImage($form);
-            }else{
+            } else {
                 $forumLogo = !empty($_FILES["forumHeaderImage"]['tmp_name']) ? $this->uploadHeaderImage($form) : C("esoTalk.forumLogo");
             }
         }
@@ -77,11 +79,13 @@ public function action_index()
         switch ($form->getValue("editPostMode")) {
             case "forever": $config["esoTalk.conversation.editPostTimeLimit"] = -1; break;
             case "reply": $config["esoTalk.conversation.editPostTimeLimit"] = "reply"; break;
-            case "custom": $config["esoTalk.conversation.editPostTimeLimit"] = (int)$form->getValue("editPostTimeLimit"); break;
+            case "custom": $config["esoTalk.conversation.editPostTimeLimit"] = (int) $form->getValue("editPostTimeLimit"); break;
         }
 
         // Make sure a forum title is present.
-        if (!strlen($config["esoTalk.forumTitle"])) $form->error("forumTitle", T("message.empty"));
+        if (!strlen($config["esoTalk.forumTitle"])) {
+            $form->error("forumTitle", T("message.empty"));
+        }
 
         if (!$form->errorCount()) {
             ET::writeConfig($config);
@@ -113,11 +117,13 @@ protected function uploadHeaderImage($form)
         $file = $uploader->getUploadedFile("forumHeaderImage");
 
         // Save it as an image, restricting it to a maximum size.
-        $logo = $uploader->saveAsImage($file, PATH_UPLOADS."/logo", 500, 40, "max");
+        $logo = $uploader->saveAsImage($file, PATH_UPLOADS . "/logo", 500, 40, "max");
         $logo = str_replace(PATH_UPLOADS, "uploads", $logo);
 
         // Delete the old logo (if we didn't just overwrite it.)
-        if ($logo != C("esoTalk.forumLogo")) @unlink(C("esoTalk.forumLogo"));
+        if ($logo != C("esoTalk.forumLogo")) {
+            @unlink(C("esoTalk.forumLogo"));
+        }
 
         return $logo;
 

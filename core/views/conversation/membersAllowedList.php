@@ -24,20 +24,19 @@ foreach ($conversation["membersAllowed"] as $member) {
     if ($member["type"] == "group") {
         $member["avatarFormat"] = null;
         $member["name"] = groupName($member["name"], true);
-    }
-    else {
+    } else {
         $member["name"] = name($member["name"]);
     }
 
     // Add the avatar.
-    $name = "<span class='name'>".avatar($member + array("memberId" => $member["id"]), "thumb");
+    $name = "<span class='name'>" . avatar($member + array("memberId" => $member["id"]), "thumb");
 
     // If we're able to remove entities from the list, wrap the name in links that will remove them.
     if (!empty($data["editable"])) {
 
         // Make the entity for the owner of the conversation non-removable unless it's the last name left.
         if ($count == 1 or $member["id"] != $conversation["startMemberId"] or $member["type"] != "member")
-            $name .= "<a href='".URL("conversation/removeMember/{$conversation["conversationId"]}?{$member["type"]}={$member["id"]}&token=".ET::$session->token)."' class='deleteLink' data-type='{$member["type"]}' data-id='{$member["id"]}'>{$member["name"]}</a>";
+            $name .= "<a href='" . URL("conversation/removeMember/{$conversation["conversationId"]}?{$member["type"]}={$member["id"]}&token=" . ET::$session->token) . "' class='deleteLink' data-type='{$member["type"]}' data-id='{$member["id"]}'>{$member["name"]}</a>";
         else $name .= $member["name"];
 
     }
@@ -54,6 +53,6 @@ if (count($names))
     echo implode(" ", $names);
 
 else
-    printf(T("%s ".($conversation["countPosts"] > 0 ? "can" : "will be able to")." view this conversation."), T("Everyone"));
+    printf(T("%s " . ($conversation["countPosts"] > 0 ? "can" : "will be able to") . " view this conversation."), T("Everyone"));
 
 ?>

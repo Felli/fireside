@@ -66,7 +66,7 @@ public function trigger($event, $parameters = array())
 
     // If we have a class name to use, trigger an event with that as the prefix.
     if ($this->className)
-        $return = ET::trigger($this->className."_".$event, $parameters);
+        $return = ET::trigger($this->className . "_" . $event, $parameters);
 
     // Trigger the event globally.
     $return = array_merge($return, ET::trigger($event, $parameters));

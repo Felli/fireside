@@ -13,7 +13,7 @@ if (!defined("IN_ESOTALK")) {
  */
 
 foreach ($data["labels"] as $label) {
-    echo "<span class='label label-$label' title='".T("label.$label")."'><i class='".ETConversationModel::$labels[$label][1]."'></i></span>\n";
+    echo "<span class='label label-$label' title='" . T("label.$label") . "'><i class='" . ETConversationModel::$labels[$label][1] . "'></i></span>\n";
 }
 
 ?>

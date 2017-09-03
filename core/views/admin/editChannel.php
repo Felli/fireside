@@ -101,7 +101,9 @@ $form = $data["form"];
 
 <div class='subText' id='permissions-copy'><?php echo T("Copy permissions from"); ?> <?php
 $copyOptions = array("" => "");
-foreach ($data["channels"] as $id => $channel) $copyOptions[$id] = str_repeat("&nbsp;", $channel["depth"] * 5) . $channel["title"];
+foreach ($data["channels"] as $id => $channel) {
+    $copyOptions[$id] = str_repeat("&nbsp;", $channel["depth"] * 5) . $channel["title"];
+}
 echo $form->select("copyPermissions", $copyOptions);
 ?></div>
 

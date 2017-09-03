@@ -21,7 +21,9 @@ class ETChannelsController extends ETController {
  */
 public function action_index()
 {
-    if (!$this->allowed()) return;
+    if (!$this->allowed()) {
+        return;
+    }
 
     // Set the canonical URL and push onto the navigation stack.
     $url = "channels";
@@ -57,7 +59,7 @@ public function action_subscribe($channelId = "")
     if (!ET::$session->user or !$this->validateToken()) return;
 
     // If we don't have permission to view this channel, don't proceed.
-    if (!ET::channelModel()->hasPermission((int)$channelId, "view")) return;
+    if (!ET::channelModel()->hasPermission((int) $channelId, "view")) return;
 
     // Work out if we're already unsubscribed or not, and switch to the opposite of that.
     $channel = ET::SQL()
@@ -65,7 +67,7 @@ public function action_subscribe($channelId = "")
         ->from("channel c")
         ->from("member_channel mc", "mc.channelId = c.channelId AND mc.memberId = :userId", "left")
         ->bind(":userId", ET::$session->userId)
-        ->where("c.channelId", (int)$channelId)
+        ->where("c.channelId", (int) $channelId)
         ->exec()
         ->firstRow();
 
@@ -78,13 +80,17 @@ public function action_subscribe($channelId = "")
         ->exec()
         ->allRows();
     $channelIds = array();
-    foreach ($rows as $row) $channelIds[] = $row["channelId"];
+    foreach ($rows as $row) {
+        $channelIds[] = $row["channelId"];
+    }
 
     // Write to the database.
     ET::channelModel()->setStatus($channelIds, ET::$session->userId, array("unsubscribed" => !$channel["unsubscribed"]));
 
     // Normally, redirect back to the channel list.
-    if ($this->responseType === RESPONSE_TYPE_DEFAULT) redirect(URL("channels"));
+    if ($this->responseType === RESPONSE_TYPE_DEFAULT) {
+        redirect(URL("channels"));
+    }
 
     // Otherwise, set a JSON var.
     $this->json("unsubscribed", !$channel["unsubscribed"]);
