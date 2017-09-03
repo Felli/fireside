@@ -2,7 +2,9 @@
 // Copyright 2011 Toby Zerner, Simon Zerner
 // This file is part of esoTalk. Please see the included license file for usage information.
 
-if (!defined("IN_ESOTALK")) exit;
+if (!defined("IN_ESOTALK")) {
+    exit;
+}
 
 /**
  * The unapproved admin controller allows administrators to approve newly signed up members.
@@ -20,15 +22,15 @@ class ETUnapprovedAdminController extends ETAdminController {
  */
 public function action_index()
 {
-	ET::activityModel()->markNotificationsAsRead('unapproved');
+    ET::activityModel()->markNotificationsAsRead('unapproved');
 	
-	$sql = ET::SQL();
-	$sql->where("confirmed", 0);
-	$sql->orderBy("m.memberId desc");
-	$members = ET::memberModel()->getWithSQL($sql);
+    $sql = ET::SQL();
+    $sql->where("confirmed", 0);
+    $sql->orderBy("m.memberId desc");
+    $members = ET::memberModel()->getWithSQL($sql);
 
-	$this->data("members", $members);
-	$this->render("admin/unapproved");
+    $this->data("members", $members);
+    $this->render("admin/unapproved");
 }
 
 
@@ -40,23 +42,23 @@ public function action_index()
  */
 public function action_approve($memberId)
 {
-	if (!$this->validateToken()) return;
+    if (!$this->validateToken()) return;
 
-	// Get this member's details. If it doesn't exist or is already approved, show an error.
-	if (!($member = ET::memberModel()->getById((int)$memberId)) or $member["confirmed"]) {
-		$this->redirect(URL("admin/unapproved"));
-		return;
-	}
+    // Get this member's details. If it doesn't exist or is already approved, show an error.
+    if (!($member = ET::memberModel()->getById((int)$memberId)) or $member["confirmed"]) {
+        $this->redirect(URL("admin/unapproved"));
+        return;
+    }
 
-	ET::memberModel()->updateById($memberId, array("confirmed" => true));
+    ET::memberModel()->updateById($memberId, array("confirmed" => true));
 
-	sendEmail($member["email"],
-		sprintf(T("email.approved.subject"), $member["username"]),
-		sprintf(T("email.header"), $member["username"]).sprintf(T("email.approved.body"), C("esoTalk.forumTitle"), URL("user/login", true))
-	);
+    sendEmail($member["email"],
+        sprintf(T("email.approved.subject"), $member["username"]),
+        sprintf(T("email.header"), $member["username"]).sprintf(T("email.approved.body"), C("esoTalk.forumTitle"), URL("user/login", true))
+    );
 
-	$this->message(T("message.changesSaved"), "success autoDismiss");
-	$this->redirect(URL("admin/unapproved"));
+    $this->message(T("message.changesSaved"), "success autoDismiss");
+    $this->redirect(URL("admin/unapproved"));
 }
 
 
@@ -68,18 +70,18 @@ public function action_approve($memberId)
  */
 public function action_deny($memberId)
 {
-	if (!$this->validateToken()) return;
+    if (!$this->validateToken()) return;
 
-	// Get this member's details. If it doesn't exist or is already approved, show an error.
-	if (!($member = ET::memberModel()->getById((int)$memberId)) or $member["confirmed"]) {
-		$this->redirect(URL("admin/unapproved"));
-		return;
-	}
+    // Get this member's details. If it doesn't exist or is already approved, show an error.
+    if (!($member = ET::memberModel()->getById((int)$memberId)) or $member["confirmed"]) {
+        $this->redirect(URL("admin/unapproved"));
+        return;
+    }
 
-	ET::memberModel()->deleteById($memberId);
+    ET::memberModel()->deleteById($memberId);
 
-	$this->message(T("message.changesSaved"), "success autoDismiss");
-	$this->redirect(URL("admin/unapproved"));
+    $this->message(T("message.changesSaved"), "success autoDismiss");
+    $this->redirect(URL("admin/unapproved"));
 }
 
 
@@ -90,12 +92,12 @@ public function action_deny($memberId)
  */
 public function action_denyAll()
 {
-	if (!$this->validateToken()) return;
+    if (!$this->validateToken()) return;
 
-	ET::memberModel()->delete(array("confirmed" => 0));
+    ET::memberModel()->delete(array("confirmed" => 0));
 
-	$this->message(T("message.changesSaved"), "success autoDismiss");
-	$this->redirect(URL("admin/unapproved"));
+    $this->message(T("message.changesSaved"), "success autoDismiss");
+    $this->redirect(URL("admin/unapproved"));
 }
 
 }

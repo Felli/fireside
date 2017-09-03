@@ -2,7 +2,9 @@
 // Copyright 2011 Toby Zerner, Simon Zerner
 // This file is part of esoTalk. Please see the included license file for usage information.
 
-if (!defined("IN_ESOTALK")) exit;
+if (!defined("IN_ESOTALK")) {
+    exit;
+}
 
 /**
  * Displays a page to edit or start a new conversation.
@@ -30,7 +32,7 @@ echo $form->open(); ?>
 $this->renderView("conversation/channelPath", array("conversation" => $conversation));
 ?>
 
-<a href='<?php echo URL("conversation/changeChannel/".$conversation["conversationId"]); ?>' id='control-changeChannel'><i class='icon-tag'></i> <?php echo T("Change channel"); ?></a>
+<a href='<?php echo URL("conversation/changeChannel/" . $conversation["conversationId"]); ?>' id='control-changeChannel'><i class='icon-tag'></i> <?php echo T("Change channel"); ?></a>
 
 </div>
 
@@ -53,9 +55,9 @@ if (!$conversation["conversationId"]): ?>
 <div id='conversationReply'>
 <?php
 $this->renderView("conversation/reply", array(
-	"form" => $form,
-	"conversation" => $conversation,
-	"controls" => $data["replyControls"]
+    "form" => $form,
+    "conversation" => $conversation,
+    "controls" => $data["replyControls"]
 ));
 ?>
 </div>

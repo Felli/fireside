@@ -2,7 +2,9 @@
 // Copyright 2011 Toby Zerner, Simon Zerner
 // This file is part of esoTalk. Please see the included license file for usage information.
 
-if (!defined("IN_ESOTALK")) exit;
+if (!defined("IN_ESOTALK")) {
+    exit;
+}
 
 /**
  * Conversation results. Displays a message if there are no results, or a conversation list and
@@ -24,7 +26,10 @@ if (!$data["results"]): ?>
 
 <?php
 // If there are conversations, however, show them!
-else:
+else {
+    :
 ?>
-<?php $this->renderView("conversations/list", $data); ?>
+<?php $this->renderView("conversations/list", $data);
+}
+?>
 <?php endif; ?>

@@ -2,7 +2,9 @@
 // Copyright 2011 Toby Zerner, Simon Zerner
 // This file is part of esoTalk. Please see the included license file for usage information.
 
-if (!defined("IN_ESOTALK")) exit;
+if (!defined("IN_ESOTALK")) {
+    exit;
+}
 
 /**
  * ETPluggable defines a class that can be "plugged into", i.e. that can trigger custom
@@ -38,7 +40,7 @@ public $className;
  */
 public function __construct()
 {
-	$this->className = get_class($this);
+    $this->className = get_class($this);
 }
 
 
@@ -57,19 +59,19 @@ public function __construct()
  */
 public function trigger($event, $parameters = array())
 {
-	// Add the instance of this class to the parameters.
-	array_unshift($parameters, $this);
+    // Add the instance of this class to the parameters.
+    array_unshift($parameters, $this);
 
-	$return = array();
+    $return = array();
 
-	// If we have a class name to use, trigger an event with that as the prefix.
-	if ($this->className)
-		$return = ET::trigger($this->className."_".$event, $parameters);
+    // If we have a class name to use, trigger an event with that as the prefix.
+    if ($this->className)
+        $return = ET::trigger($this->className."_".$event, $parameters);
 
-	// Trigger the event globally.
-	$return = array_merge($return, ET::trigger($event, $parameters));
+    // Trigger the event globally.
+    $return = array_merge($return, ET::trigger($event, $parameters));
 
-	return $return;
+    return $return;
 }
 
 }

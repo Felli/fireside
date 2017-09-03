@@ -2,7 +2,9 @@
 // Copyright 2011 Toby Zerner, Simon Zerner
 // This file is part of esoTalk. Please see the included license file for usage information.
 
-if (!defined("IN_ESOTALK")) exit;
+if (!defined("IN_ESOTALK")) {
+    exit;
+}
 
 /**
  * Member profile view. Displays the header area on a member's profile, pane tabs, and the current pane.
@@ -24,8 +26,8 @@ $member = $data["member"];
 <?php
 // Online indicator.
 if (empty($member["preferences"]["hideOnline"])):
-	$lastAction = ET::memberModel()->getLastActionInfo($member["lastActionTime"], $member["lastActionDetail"]);
-	if ($lastAction) echo "<".(!empty($lastAction[1]) ? "a href='{$lastAction[1]}'" : "span")." class='online' title='".T("Online").($lastAction[0] ? " (".sanitizeHTML($lastAction[0]).")" : "")."'><i class='icon-circle'></i></".(!empty($lastAction[1]) ? "a" : "span").">";
+    $lastAction = ET::memberModel()->getLastActionInfo($member["lastActionTime"], $member["lastActionDetail"]);
+    if ($lastAction) echo "<".(!empty($lastAction[1]) ? "a href='{$lastAction[1]}'" : "span")." class='online' title='".T("Online").($lastAction[0] ? " (".sanitizeHTML($lastAction[0]).")" : "")."'><i class='icon-circle'></i></".(!empty($lastAction[1]) ? "a" : "span").">";
 endif;
 ?>
 
@@ -35,8 +37,8 @@ if (ET::$session->isAdmin()): ?><p class='subText'><?php echo sanitizeHTML($memb
 
 <p id='memberGroup' class='subText'><?php echo memberGroup($member["account"], $member["groups"], true); ?></p>
 <p id='memberLastActive' class='subText'><?php printf(T("Last active %s"), empty($member["preferences"]["hideOnline"])
-	? "<span title='".strftime(T("date.full"), $member["lastActionTime"])."'>".relativeTime($member["lastActionTime"], true)."</span>"
-	: "[".T("hidden")."]"); ?></p>
+    ? "<span title='".strftime(T("date.full"), $member["lastActionTime"])."'>".relativeTime($member["lastActionTime"], true)."</span>"
+    : "[".T("hidden")."]"); ?></p>
 
 </div>
 

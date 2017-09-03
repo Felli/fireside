@@ -2,7 +2,9 @@
 // Copyright 2011 Toby Zerner, Simon Zerner
 // This file is part of esoTalk. Please see the included license file for usage information.
 
-if (!defined("IN_ESOTALK")) exit;
+if (!defined("IN_ESOTALK")) {
+    exit;
+}
 
 /**
  * Displays a sheet with a form to edit a channel's details and permissions.
@@ -67,14 +69,14 @@ $form = $data["form"];
 <tr id='permissions-guests'>
 <th><?php echo groupName("guest", true); ?></th>
 <?php foreach ($data["permissions"] as $k => $v): ?>
-<td><?php if ($k == "view"): echo $form->checkbox("permissions[".GROUP_ID_GUEST."][$k]", array("class" => "permission-$k")); endif; ?></td>
+<td><?php if ($k == "view"): echo $form->checkbox("permissions[" . GROUP_ID_GUEST . "][$k]", array("class" => "permission-$k")); endif; ?></td>
 <?php endforeach; ?>
 </tr>
 
 <tr id='permissions-members'>
 <th><?php echo groupName("member", true); ?></th>
 <?php foreach ($data["permissions"] as $k => $v): ?>
-<td><?php if ($k != "moderate"): echo $form->checkbox("permissions[".GROUP_ID_MEMBER."][$k]", array("class" => "permission-$k")); endif; ?></td>
+<td><?php if ($k != "moderate"): echo $form->checkbox("permissions[" . GROUP_ID_MEMBER . "][$k]", array("class" => "permission-$k")); endif; ?></td>
 <?php endforeach; ?>
 </tr>
 
@@ -99,7 +101,7 @@ $form = $data["form"];
 
 <div class='subText' id='permissions-copy'><?php echo T("Copy permissions from"); ?> <?php
 $copyOptions = array("" => "");
-foreach ($data["channels"] as $id => $channel) $copyOptions[$id] = str_repeat("&nbsp;", $channel["depth"] * 5).$channel["title"];
+foreach ($data["channels"] as $id => $channel) $copyOptions[$id] = str_repeat("&nbsp;", $channel["depth"] * 5) . $channel["title"];
 echo $form->select("copyPermissions", $copyOptions);
 ?></div>
 
