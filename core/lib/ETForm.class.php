@@ -187,8 +187,9 @@ public function open()
 {
     $this->addHidden("token", ET::$session->token);
     $hidden = "";
-    foreach ($this->hiddenInputs as $field)
-        $hidden .= "<input type='hidden' name='$field' value='" . htmlentities($this->getValue($field), ENT_QUOTES, "UTF-8") . "'/>\n";
+    foreach ($this->hiddenInputs as $field) {
+            $hidden .= "<input type='hidden' name='$field' value='" . htmlentities($this->getValue($field), ENT_QUOTES, "UTF-8") . "'/>\n";
+    }
 
     return "<form action='" . sanitizeHTML($this->action) . "' method='post' enctype='multipart/form-data'>\n" . $hidden;
 }
@@ -237,9 +238,10 @@ public function isPostBack($field = "")
  */
 public function getError($field)
 {
-    if (!empty($this->errors[$field]))
-        return "<div class='error'>" . $this->errors[$field] . "</div>";
-}
+    if (!empty($this->errors[$field])) {
+            return "<div class='error'>" . $this->errors[$field] . "</div>";
+    }
+    }
 
 
 /**
@@ -387,7 +389,9 @@ public function input($name, $type = "text", $attributes = array())
     }
 
     // Append an error if there is one.
-    if (!empty($this->errors[$name])) $input .= " " . $this->getError($name);
+    if (!empty($this->errors[$name])) {
+        $input .= " " . $this->getError($name);
+    }
 
     return $input;
 }
@@ -444,13 +448,16 @@ public function select($name, $options, $attributes = array())
     $values = (array) $this->getValue($name);
 
     // Loop through the options and add a tag for each one, selecting the appropriate one.
-    foreach ($options as $k => $v)
-        $select .= "<option value='$k'" . (in_array($k, $values) ? " selected='selected'" : "") . ">$v</option>\n";
+    foreach ($options as $k => $v) {
+            $select .= "<option value='$k'" . (in_array($k, $values) ? " selected='selected'" : "") . ">$v</option>\n";
+    }
 
     $select .= "</select>";
 
     // Append an error if there is one.
-    if (!empty($this->errors[$name])) $select .= " " . $this->getError($name);
+    if (!empty($this->errors[$name])) {
+        $select .= " " . $this->getError($name);
+    }
 
     return $select;
 }
@@ -509,11 +516,12 @@ public function radio($name, $value, $attributes = array())
 public function button($name, $label = "", $attributes = array())
 {
     $this->addClass($attributes, "button");
-    if (isset($attributes["tag"]) and $attributes["tag"] == "button")
-        return "<button type='submit' name='$name'" . $this->getAttributes($attributes) . ">$label</button>";
-    else
-        return "<input type='submit' name='$name' value='$label'" . $this->getAttributes($attributes) . "/>";
-}
+    if (isset($attributes["tag"]) and $attributes["tag"] == "button") {
+            return "<button type='submit' name='$name'" . $this->getAttributes($attributes) . ">$label</button>";
+    } else {
+            return "<input type='submit' name='$name' value='$label'" . $this->getAttributes($attributes) . "/>";
+    }
+    }
 
 
 /**

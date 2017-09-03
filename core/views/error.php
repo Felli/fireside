@@ -62,17 +62,21 @@ if (!defined("IN_ESOTALK")) {
 		<li><label>PHP Version</label> ".PHP_VERSION . " 
 		<li><label>Operating System</label> ".PHP_OS . " \n";
 
-    if (array_key_exists('SERVER_SOFTWARE', $_SERVER))
-        echo '<li><label>Server Software</label> ' . $_SERVER['SERVER_SOFTWARE'] . " \n";
+    if (array_key_exists('SERVER_SOFTWARE', $_SERVER)) {
+            echo '<li><label>Server Software</label> ' . $_SERVER['SERVER_SOFTWARE'] . " \n";
+    }
 
-    if (array_key_exists('HTTP_REFERER', $_SERVER))
-        echo '<li><label>Referer</label> ' . $_SERVER['HTTP_REFERER'] . " \n";
+    if (array_key_exists('HTTP_REFERER', $_SERVER)) {
+            echo '<li><label>Referer</label> ' . $_SERVER['HTTP_REFERER'] . " \n";
+    }
 
-    if (array_key_exists('HTTP_USER_AGENT', $_SERVER))
-        echo '<li><label>User Agent</label> ' . $_SERVER['HTTP_USER_AGENT'] . " \n";
+    if (array_key_exists('HTTP_USER_AGENT', $_SERVER)) {
+            echo '<li><label>User Agent</label> ' . $_SERVER['HTTP_USER_AGENT'] . " \n";
+    }
 
-    if (array_key_exists('REQUEST_URI', $_SERVER))
-        echo '<li><label>Request URI</label> ' . $_SERVER['REQUEST_URI'] . " \n";
+    if (array_key_exists('REQUEST_URI', $_SERVER)) {
+            echo '<li><label>Request URI</label> ' . $_SERVER['REQUEST_URI'] . " \n";
+    }
 
     echo "</ul>
 

@@ -61,10 +61,15 @@ public static function addLabel($label, $expression, $icon = "")
 public static function addLabels(&$sql)
 {
     $expressions = array();
-    foreach (self::$labels as $label) $expressions[] = $label[0];
-    if (count($expressions)) $sql->select("CONCAT_WS(','," . implode(",", $expressions) . ")", "labels");
-    else $sql->select("NULL", "labels");
-}
+    foreach (self::$labels as $label) {
+        $expressions[] = $label[0];
+    }
+    if (count($expressions)) {
+        $sql->select("CONCAT_WS(','," . implode(",", $expressions) . ")", "labels");
+    } else {
+        $sql->select("NULL", "labels");
+    }
+    }
 
 
 /**
@@ -639,15 +644,20 @@ public function create($data, $membersAllowed = array(), $isDraft = false)
     unset($data["content"]);
 
     // Flood control!
-    if (ET::$session->isFlooding()) $this->error("flooding", sprintf(T("message.waitToReply"), C("esoTalk.conversation.timeBetweenPosts")));
+    if (ET::$session->isFlooding()) {
+        $this->error("flooding", sprintf(T("message.waitToReply"), C("esoTalk.conversation.timeBetweenPosts")));
+    }
 
     // Make sure that we have permission to post in this channel.
     $data["channelId"] = (int) $data["channelId"];
-    if (!ET::channelModel()->hasPermission($data["channelId"], "start"))
-        $this->error("channelId", "invalidChannel");
+    if (!ET::channelModel()->hasPermission($data["channelId"], "start")) {
+            $this->error("channelId", "invalidChannel");
+    }
 
     // Did we encounter any errors? Don't continue.
-    if ($this->errorCount()) return false;
+    if ($this->errorCount()) {
+        return false;
+    }
 
     // Start a notification group. This means that for all notifications sent out until endNotifcationGroup
     // is called, each individual user will receive a maximum of one.

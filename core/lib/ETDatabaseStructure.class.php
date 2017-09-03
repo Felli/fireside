@@ -144,14 +144,18 @@ public function key($columns, $type = "")
 
     // If this is a primary key, and there's only one column, and that column's type is an int, set auto
     // increment on it.
-    if ($type == "primary" and count($columns) == 1 and substr($this->columns[$columns[0]]["type"], 0, 3) == "int")
-        $this->columns[$columns[0]]["autoIncrement"] = true;
+    if ($type == "primary" and count($columns) == 1 and substr($this->columns[$columns[0]]["type"], 0, 3) == "int") {
+            $this->columns[$columns[0]]["autoIncrement"] = true;
+    }
 
     // If it's not a primary key, we must work out a name for the key.
-    if ($type != "primary") $name = $this->tableName . "_" . implode("_", $columns);
-    else {
+    if ($type != "primary") {
+        $name = $this->tableName . "_" . implode("_", $columns);
+    } else {
         $name = "PRIMARY";
-        foreach ($columns as $column) $this->columns[$column]["null"] = false;
+        foreach ($columns as $column) {
+            $this->columns[$column]["null"] = false;
+        }
     }
 
     // Add the key to the keys array.
@@ -195,7 +199,9 @@ public function exec($drop = false)
 
         // Put it all together.
         $sql .= implode(",\n\t", $lines) . "\n)";
-        if ($this->engine) $sql .= " ENGINE=$this->engine";
+        if ($this->engine) {
+            $sql .= " ENGINE=$this->engine";
+        }
         $sql .= " DEFAULT CHARSET=" . C("esoTalk.database.characterEncoding");
 
         ET::SQL($sql);
@@ -208,8 +214,9 @@ public function exec($drop = false)
         // Set the table's engine and character set if necessary.
         $engine = ET::SQL("SHOW TABLE STATUS LIKE '" . ET::$database->tablePrefix . $this->tableName . "'")->firstRow();
         $engine = $engine["Engine"];
-        if ($engine != $this->engine)
-            ET::SQL($alterPrefix . " ENGINE=$this->engine");
+        if ($engine != $this->engine) {
+                    ET::SQL($alterPrefix . " ENGINE=$this->engine");
+        }
 
         // Go through the columns and add/modify them as necessary.
         $existingColumns = $this->existingColumns();
@@ -271,9 +278,15 @@ public function exec($drop = false)
 protected function columnDefinition($column)
 {
     $definition = $column["type"];
-    if (!$column["null"]) $definition .= " NOT NULL";
-    if ($column["default"] !== false) $definition .= " DEFAULT " . ET::$database->escapeValue(is_null($column["default"]) ? null : (string) $column["default"]);
-    if (!empty($column["autoIncrement"])) $definition .= " AUTO_INCREMENT";
+    if (!$column["null"]) {
+        $definition .= " NOT NULL";
+    }
+    if ($column["default"] !== false) {
+        $definition .= " DEFAULT " . ET::$database->escapeValue(is_null($column["default"]) ? null : (string) $column["default"]);
+    }
+    if (!empty($column["autoIncrement"])) {
+        $definition .= " AUTO_INCREMENT";
+    }
     return $definition;
 }
 
@@ -287,12 +300,15 @@ protected function columnDefinition($column)
  */
 protected function keyDefinition($name, $key)
 {
-    foreach ($key["columns"] as &$column) $column = "`$column`";
-    if ($name == "PRIMARY")
-        return "PRIMARY KEY (" . implode(",", $key["columns"]) . ")";
-    else
-        return ($key["type"] ? strtoupper($key["type"]) . " " : "") . "KEY `$name` (" . implode(",", $key["columns"]) . ")";
-}
+    foreach ($key["columns"] as &$column) {
+        $column = "`$column`";
+    }
+    if ($name == "PRIMARY") {
+            return "PRIMARY KEY (" . implode(",", $key["columns"]) . ")";
+    } else {
+            return ($key["type"] ? strtoupper($key["type"]) . " " : "") . "KEY `$name` (" . implode(",", $key["columns"]) . ")";
+    }
+    }
 
 
 /**
@@ -403,8 +419,9 @@ public function drop()
  */
 public function dropColumn($name)
 {
-    if ($this->columnExists($name))
-        ET::SQL("ALTER TABLE `" . ET::$database->tablePrefix . $this->tableName . "` DROP COLUMN `$name`");
+    if ($this->columnExists($name)) {
+            ET::SQL("ALTER TABLE `" . ET::$database->tablePrefix . $this->tableName . "` DROP COLUMN `$name`");
+    }
     return $this;
 }
 
@@ -417,8 +434,9 @@ public function dropColumn($name)
  */
 public function dropKey($name)
 {
-    if ($this->keyExists($name))
-        ET::SQL("ALTER TABLE `" . ET::$database->tablePrefix . $this->tableName . "` DROP " . ($name == "primary" ? "PRIMARY KEY" : "KEY `$name`"));
+    if ($this->keyExists($name)) {
+            ET::SQL("ALTER TABLE `" . ET::$database->tablePrefix . $this->tableName . "` DROP " . ($name == "primary" ? "PRIMARY KEY" : "KEY `$name`"));
+    }
     return $this;
 }
 
@@ -431,8 +449,9 @@ public function dropKey($name)
  */
 public function rename($newName)
 {
-    if ($this->exists())
-        ET::SQL("ALTER TABLE `" . ET::$database->tablePrefix . $this->tableName . "` RENAME TO `$newName`");
+    if ($this->exists()) {
+            ET::SQL("ALTER TABLE `" . ET::$database->tablePrefix . $this->tableName . "` RENAME TO `$newName`");
+    }
     return $this;
 }
 

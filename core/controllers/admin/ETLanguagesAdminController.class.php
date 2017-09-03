@@ -23,7 +23,9 @@ public function action_index()
 {
     $languages = ET::getLanguages();
     $languagesNew = array();
-    foreach ($languages as $k => $v) $languagesNew[$v] = ET::$languageInfo[$v];
+    foreach ($languages as $k => $v) {
+        $languagesNew[$v] = ET::$languageInfo[$v];
+    }
 
     $this->title = T("Languages");
     $this->data("languages", $languagesNew);
@@ -46,7 +48,7 @@ public function action_uninstall($language = "")
     if (!$language or !in_array($language, $languages)) return;
 
     // Attempt to remove the directory. If we couldn't, show a "not writable" message.
-    if (!is_writable($file = PATH_LANGUAGES) or !is_writable($file = PATH_LANGUAGES."/$language") or !rrmdir($file))
+    if (!is_writable($file = PATH_LANGUAGES) or !is_writable($file = PATH_LANGUAGES . "/$language") or !rrmdir($file))
         $this->message(sprintf(T("message.notWritable"), $file), "warning");
 
     // Otherwise, show a success message.

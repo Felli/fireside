@@ -61,8 +61,9 @@ public function getAll()
 
             // Define the permission columns that we need to get.
             $permissionColumns = array("view", "reply", "start", "moderate");
-            foreach ($permissionColumns as $column)
-                $sql->select("GROUP_CONCAT(g.$column)", $column);
+            foreach ($permissionColumns as $column) {
+                            $sql->select("GROUP_CONCAT(g.$column)", $column);
+            }
 
             // Get the channels, indexed by channel ID.
             $channels = $sql->exec()->allRows("channelId");
@@ -91,7 +92,9 @@ public function getAll()
                 // permission type's array if it does have permission.
                 foreach ($groupIds as $i => $id) {
                     foreach ($permissionColumns as $column) {
-                        if ($permissions[$column][$i]) $channel["permissions"][$column][] = $id;
+                        if ($permissions[$column][$i]) {
+                            $channel["permissions"][$column][] = $id;
+                        }
                     }
                 }
 
@@ -123,12 +126,14 @@ public function get($permission = "view")
     $groupModel = ET::groupModel();
     $groupIds = ET::$session->getGroupIds();
     foreach ($channels as $k => $channel) {
-        if (!$groupModel->groupIdsAllowedInGroupIds($groupIds, $channel["permissions"][$permission], true))
-            unset($channels[$k]);
+        if (!$groupModel->groupIdsAllowedInGroupIds($groupIds, $channel["permissions"][$permission], true)) {
+                    unset($channels[$k]);
+        }
     }
 
-    if (empty($channels))
-        return false;
+    if (empty($channels)) {
+            return false;
+    }
 
     // Add user data (eg. unsubscribed) into the channel array.
     $this->joinUserData($channels);
@@ -148,13 +153,16 @@ public function joinUserData(&$channels)
     // If there's no user logged in, we don't need to add anything.
     if (!ET::$session->userId) {
         foreach ($channels as &$channel) {
-            if ($channel["attributes"]["defaultUnsubscribed"])
-                $channel["unsubscribed"] = true;
+            if ($channel["attributes"]["defaultUnsubscribed"]) {
+                            $channel["unsubscribed"] = true;
+            }
         }
         return;
     }
 
-    if (!count($channels)) return;
+    if (!count($channels)) {
+        return;
+    }
 
     // Get the user data from the database for all channel IDs in the array.
     $result = ET::SQL()
@@ -187,11 +195,11 @@ public function hasPermission($channelId, $permission = "view")
         ->select("COUNT(1)")
         ->from("channel c")
         ->where("channelId=:channelId")
-        ->bind(":channelId", (int)$channelId);
+        ->bind(":channelId", (int) $channelId);
 
     $this->addPermissionPredicate($sql, $permission);
 
-    return (bool)$sql->exec()->result();
+    return (bool) $sql->exec()->result();
 }
 
 
@@ -212,7 +220,7 @@ public function addPermissionPredicate(&$sql, $field = "view", $member = false, 
     if (!$member) $member = ET::$session->user;
 
     // Get an array of group IDs for this member.
-    $groups = ET::groupModel()->getGroupIds($member["account"], array_keys((array)$member["groups"]));
+    $groups = ET::groupModel()->getGroupIds($member["account"], array_keys((array) $member["groups"]));
 
     // If the user is an administrator, don't add any SQL, as admins can do anything!
     if (in_array(GROUP_ID_ADMINISTRATOR, $groups)) return;
@@ -240,11 +248,15 @@ public function addPermissionPredicate(&$sql, $field = "view", $member = false, 
 public function create($values)
 {
     // Check that a channel title has been entered.
-    if (!isset($values["title"])) $values["title"] = "";
+    if (!isset($values["title"])) {
+        $values["title"] = "";
+    }
     $this->validate("title", $values["title"], array($this, "validateTitle"));
 
     // Check that a channel slug has been entered and isn't already in use.
-    if (!isset($values["slug"])) $values["slug"] = "";
+    if (!isset($values["slug"])) {
+        $values["slug"] = "";
+    }
     $this->validate("slug", $values["slug"], array($this, "validateSlug"));
     $values["slug"] = slug($values["slug"]);
 
@@ -254,9 +266,13 @@ public function create($values)
     $values["rgt"] = ++$right;
 
     // Collapse the attributes.
-    if (isset($values["attributes"])) $values["attributes"] = serialize($values["attributes"]);
+    if (isset($values["attributes"])) {
+        $values["attributes"] = serialize($values["attributes"]);
+    }
 
-    if ($this->errorCount()) return false;
+    if ($this->errorCount()) {
+        return false;
+    }
 
     $channelId = parent::create($values);
 
@@ -276,8 +292,9 @@ public function create($values)
  */
 public function update($values, $wheres = array())
 {
-    if (isset($values["title"]))
-        $this->validate("title", $values["title"], array($this, "validateTitle"));
+    if (isset($values["title"])) {
+            $this->validate("title", $values["title"], array($this, "validateTitle"));
+    }
 
     if (isset($values["slug"])) {
         $this->validate("slug", $values["slug"], array($this, "validateSlug"));
@@ -285,9 +302,13 @@ public function update($values, $wheres = array())
     }
 
     // Collapse the attributes.
-    if (isset($values["attributes"])) $values["attributes"] = serialize($values["attributes"]);
+    if (isset($values["attributes"])) {
+        $values["attributes"] = serialize($values["attributes"]);
+    }
 
-    if ($this->errorCount()) return false;
+    if ($this->errorCount()) {
+        return false;
+    }
 
     // Reset channels in the global cache.
     ET::$cache->remove(self::CACHE_KEY);
@@ -316,7 +337,9 @@ public function setPermissions($channelId, $permissions)
     foreach ($permissions as $groupId => $types) {
         $set = array();
         foreach ($types as $type => $v) {
-            if ($v) $set[$type] = 1;
+            if ($v) {
+                $set[$type] = 1;
+            }
         }
         ET::SQL()
             ->insert("channel_group")
@@ -341,8 +364,8 @@ public function setPermissions($channelId, $permissions)
  */
 public function setStatus($channelIds, $memberIds, $data)
 {
-    $channelIds = (array)$channelIds;
-    $memberIds = (array)$memberIds;
+    $channelIds = (array) $channelIds;
+    $memberIds = (array) $memberIds;
 
     $keys = array_merge(array("memberId", "channelId"), array_keys($data));
     $inserts = array();
@@ -352,7 +375,9 @@ public function setStatus($channelIds, $memberIds, $data)
         }
     }
 
-    if (empty($inserts)) return;
+    if (empty($inserts)) {
+        return;
+    }
 
     ET::SQL()
         ->insert("member_channel")
@@ -371,30 +396,36 @@ public function setStatus($channelIds, $memberIds, $data)
  */
 public function deleteById($channelId, $moveToChannelId = false)
 {
-    $channelId = (int)$channelId;
+    $channelId = (int) $channelId;
 
     // Do we want to move the conversations to another channel?
     if ($moveToChannelId !== false) {
 
         // If the channel does exist, move all the conversation over to it.
-        if (array_key_exists((int)$moveToChannelId, $this->getAll())) {
+        if (array_key_exists((int) $moveToChannelId, $this->getAll())) {
             ET::SQL()
                 ->update("conversation")
-                ->set("channelId", (int)$moveToChannelId)
+                ->set("channelId", (int) $moveToChannelId)
                 ->where("channelId=:channelId")
                 ->bind(":channelId", $channelId)
                 ->exec();
         }
 
         // But if it doesn't, set an error.
-        else $this->error("moveToChannelId", "invalidChannel");
+        else {
+            $this->error("moveToChannelId", "invalidChannel");
+        }
 
     }
 
     // Or do we want to simply delete the conversations?
-    else ET::conversationModel()->delete(array("channelId" => $channelId));
+    else {
+        ET::conversationModel()->delete(array("channelId" => $channelId));
+    }
 
-    if ($this->errorCount()) return false;
+    if ($this->errorCount()) {
+        return false;
+    }
 
     $result = parent::deleteById($channelId);
 
@@ -413,8 +444,10 @@ public function deleteById($channelId, $moveToChannelId = false)
  */
 public function validateTitle($title)
 {
-    if (!strlen($title)) return "empty";
-}
+    if (!strlen($title)) {
+        return "empty";
+    }
+    }
 
 
 /**
@@ -425,15 +458,18 @@ public function validateTitle($title)
  */
 public function validateSlug($slug)
 {
-    if (!strlen($slug)) return "empty";
+    if (!strlen($slug)) {
+        return "empty";
+    }
     if (ET::SQL()
         ->select("COUNT(channelId)")
         ->from("channel")
         ->where("slug=:slug")
         ->bind(":slug", $slug)
         ->exec()
-        ->result() > 0)
-        return "channelSlugTaken";
-}
+        ->result() > 0) {
+            return "channelSlugTaken";
+    }
+    }
 
 }

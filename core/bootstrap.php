@@ -156,9 +156,7 @@ ETFactory::register("upgradeModel", "ETUpgradeModel", PATH_MODELS . "/ETUpgradeM
 if (!C("esoTalk.installed")) {
     ETFactory::registerController("install", "ETInstallController", PATH_CONTROLLERS . "/ETInstallController.class.php");
     ET::$config["esoTalk.defaultRoute"] = "install";
-}
-
-elseif (C("esoTalk.version") != ESOTALK_VERSION) {
+} elseif (C("esoTalk.version") != ESOTALK_VERSION) {
     ETFactory::registerController("upgrade", "ETUpgradeController", PATH_CONTROLLERS . "/ETUpgradeController.class.php");
 }
 
@@ -182,9 +180,10 @@ else {
     ETFactory::registerAdminController("plugins", "ETPluginsAdminController", PATH_CONTROLLERS . "/admin/ETPluginsAdminController.class.php");
     ETFactory::registerAdminController("groups", "ETGroupsAdminController", PATH_CONTROLLERS . "/admin/ETGroupsAdminController.class.php");
     ETFactory::registerAdminController("languages", "ETLanguagesAdminController", PATH_CONTROLLERS . "/admin/ETLanguagesAdminController.class.php");
-    if (C("esoTalk.registration.requireConfirmation") == "approval")
-        ETFactory::registerAdminController("unapproved", "ETUnapprovedAdminController", PATH_CONTROLLERS . "/admin/ETUnapprovedAdminController.class.php");
-}
+    if (C("esoTalk.registration.requireConfirmation") == "approval") {
+            ETFactory::registerAdminController("unapproved", "ETUnapprovedAdminController", PATH_CONTROLLERS . "/admin/ETUnapprovedAdminController.class.php");
+    }
+    }
 
 
 //***** 5. SET UP PLUGINS
@@ -192,9 +191,13 @@ else {
 if (C("esoTalk.installed")) {
 
     foreach (C("esoTalk.enabledPlugins") as $v) {
-        if (file_exists($file = PATH_PLUGINS . "/" . sanitizeFileName($v) . "/plugin.php")) include_once $file;
+        if (file_exists($file = PATH_PLUGINS . "/" . sanitizeFileName($v) . "/plugin.php")) {
+            include_once $file;
+        }
         $className = "ETPlugin_$v";
-        if (!class_exists($className)) continue;
+        if (!class_exists($className)) {
+            continue;
+        }
         ET::$plugins[$v] = new $className("addons/plugins/" . $v);
         ET::$plugins[$v]->boot();
     }
@@ -244,23 +247,31 @@ elseif (C("esoTalk.urls.friendly") and isset($_SERVER["REQUEST_URI"])) {
 
     // If there is a querystring, remove it.
     $selfURL = $request;
-    if (($pos = strpos($request, "?")) !== false) $request = substr_replace($request, "", $pos);
+    if (($pos = strpos($request, "?")) !== false) {
+        $request = substr_replace($request, "", $pos);
+    }
 
     // Explode the request string. Make sure index.php is not the first item.
     $parts = explode("/", trim(urldecode($request), "/"));
-    if ($parts[0] == "index.php") array_shift($parts);
+    if ($parts[0] == "index.php") {
+        array_shift($parts);
+    }
     $request = implode("/", $parts);
 }
 
 // If we have no request information, use the default route.
-if (empty($request)) $request = C("esoTalk.defaultRoute");
+if (empty($request)) {
+    $request = C("esoTalk.defaultRoute");
+}
 
 // We need to work out what the URL to this exact page is and set it to the controller later.
 // If we didn't work it out above, set it to $request and append any GET variables.
 if (empty($selfURL)) {
     $selfURL = $request;
-    if (!empty($_GET)) $selfURL .= "?" . http_build_query($_GET);
-}
+    if (!empty($_GET)) {
+        $selfURL .= "?" . http_build_query($_GET);
+    }
+    }
 
 $requestParts = explode("/", $request);
 
@@ -271,24 +282,36 @@ $requestParts = explode("/", $request);
 if (C("esoTalk.installed")) {
 
     // If the user is an administrator and we're in the admin section, use the admin skin.
-    if (ET::$session->isAdmin() and $requestParts[0] == "admin") $skinName = C("esoTalk.adminSkin");
+    if (ET::$session->isAdmin() and $requestParts[0] == "admin") {
+        $skinName = C("esoTalk.adminSkin");
+    }
 
     // If it's a mobile browser, use the mobile skin.
-    elseif (isMobileBrowser()) $skinName = C("esoTalk.mobileSkin");
+    elseif (isMobileBrowser()) {
+        $skinName = C("esoTalk.mobileSkin");
+    }
 
     // Otherwise, use the default skin.
-    else $skinName = C("esoTalk.skin");
+    else {
+        $skinName = C("esoTalk.skin");
+    }
 
     // Include the skin file and instantiate its class.
     ET::$skinName = $skinName;
-    if (file_exists($file = PATH_SKINS . "/$skinName/skin.php")) include_once $file;
+    if (file_exists($file = PATH_SKINS . "/$skinName/skin.php")) {
+        include_once $file;
+    }
     $skinClass = "ETSkin_" . $skinName;
-    if (class_exists($skinClass)) ET::$skin = new $skinClass("addons/skins/" . $skinName);
+    if (class_exists($skinClass)) {
+        ET::$skin = new $skinClass("addons/skins/" . $skinName);
+    }
 	
 }
 
 // If we haven't got a working skin, just use the base class. It'll be ugly, but it'll do.
-if (empty(ET::$skin)) ET::$skin = new ETSkin("");
+if (empty(ET::$skin)) {
+    ET::$skin = new ETSkin("");
+}
 
 // Add the class as a plugin as well so that its event handlers are called through the normal process.
 array_unshift(ET::$plugins, ET::$skin);

@@ -93,13 +93,16 @@ public function action_news()
         // Create summary as a shortened body and remove all tags.
         $summary = strip_tags($post["text"]);
         $maxLen = 200;
-        if (strlen($summary) > $maxLen)
-            $summary = substr($summary, 0, $maxLen) . "...";
+        if (strlen($summary) > $maxLen) {
+                    $summary = substr($summary, 0, $maxLen) . "...";
+        }
 
         $post["summary"] = $summary;
         $posts[] = $post;
 
-        if (count($posts) >= 3) break;
+        if (count($posts) >= 3) {
+            break;
+        }
 
     }
 

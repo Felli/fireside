@@ -38,24 +38,29 @@ foreach ($conversation["labels"] as $label) {
 $conversationURL = conversationURL($conversation["conversationId"], $conversation["title"]);
 
 // Output an "unread indicator", allowing the user to mark the conversation as read.
-if (ET::$session->user and $conversation["unread"])
+if (ET::$session->user and $conversation["unread"]) {
     echo " <a href='" . URL("conversation/markAsRead/" . $conversation["conversationId"] . "?token=" . ET::$session->token . "&return=" . urlencode(ET::$controller->selfURL)) . "' class='unreadIndicator' title='" . T("Mark as read") . "'>" . $conversation["unread"] . "</a> ";
+}
 
 // Output the conversation's labels.
 echo "<span class='labels'>";
-foreach ($conversation["labels"] as $label) echo label($label, $label == "draft" ? URL($conversationURL . "#reply") : "");
+foreach ($conversation["labels"] as $label) {
+    echo label($label, $label == "draft" ? URL($conversationURL . "#reply") : "");
+}
 echo "</span> ";
 
 // Output the conversation title, highlighting search keywords.
 echo "<strong class='title'><a href='" . URL($conversationURL . ((ET::$session->user and $conversation["unread"]) ? "/unread" : "")) . "'>" . highlight(sanitizeHTML($conversation["title"]), ET::$session->get("highlight")) . "</a></strong> ";
 
 // If we're highlighting search terms (i.e. if we did a fulltext search), then output a "show matching posts" link.
-if (ET::$session->get("highlight"))
+if (ET::$session->get("highlight")) {
     echo "<span class='controls'><a href='" . URL($conversationURL . "/?search=" . urlencode($data["fulltextString"])) . "' class='showMatchingPosts'>" . T("Show matching posts") . "</a></span>";
+}
 
 // If this conversation is stickied, output an excerpt from its first post.
-if ($conversation["firstPost"])
+if ($conversation["firstPost"]) {
     echo "<div class='excerpt'>" . ET::formatter()->init($conversation["firstPost"])->inline(true)->firstLine()->clip(200)->format()->get() . "</div>";
+}
 
 ?></div>
 <div class='col-channel'><?php
