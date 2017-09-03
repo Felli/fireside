@@ -137,9 +137,12 @@ if (!function_exists("memberLink")) {
 function memberLink($memberId, $username = "")
 {
     $displayName = name($username);
-    if ($username) return "<a href='" . URL(memberURL($memberId, $username)) . "' title='" . sprintf(sanitizeHTML(T("View %s's profile")), $displayName) . "'>$displayName</a>";
-    else return $displayName;
-}
+    if ($username) {
+        return "<a href='" . URL(memberURL($memberId, $username)) . "' title='" . sprintf(sanitizeHTML(T("View %s's profile")), $displayName) . "'>$displayName</a>";
+    } else {
+        return $displayName;
+    }
+    }
 
 }
 
@@ -158,7 +161,9 @@ if (!function_exists("name")) {
  */
 function name($username, $sanitize = true)
 {
-    if (!$username) $username = "[" . T("deleted") . "]";
+    if (!$username) {
+        $username = "[" . T("deleted") . "]";
+    }
     return $sanitize ? sanitizeHTML($username) : $username;
 }
 
@@ -207,18 +212,23 @@ if (!function_exists("memberGroup")) {
 function memberGroup($account, $groups = array(), $showMember = false)
 {
     // If the member isn't a Member, groups don't matter - just display their account type.
-    if ($account and $account != ACCOUNT_MEMBER) return "<span class='group-$account'>" . groupName($account) . "</span>";
-    else {
+    if ($account and $account != ACCOUNT_MEMBER) {
+        return "<span class='group-$account'>" . groupName($account) . "</span>";
+    } else {
 
         // Otherwise, show a comma-separated list of the groups that they're in.
         $groups = array_filter((array) $groups);
         if (count($groups)) {
-            foreach ($groups as $k => $v) $groups[$k] = "<span class='group-$k'>" . groupName($v) . "</span>";
+            foreach ($groups as $k => $v) {
+                $groups[$k] = "<span class='group-$k'>" . groupName($v) . "</span>";
+            }
             return implode(", ", $groups);
         }
 
         // If they're not in any groups, either show them as a "Member" or just show nothing at all.
-        else return $showMember ? groupName(ACCOUNT_MEMBER) : "";
+        else {
+            return $showMember ? groupName(ACCOUNT_MEMBER) : "";
+        }
 
     }
 }

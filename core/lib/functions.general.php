@@ -116,8 +116,11 @@ function rrmdir($dir)
         $objects = scandir($dir);
         foreach ($objects as $object) {
             if ($object != "." and $object != "..") {
-                if (filetype($dir . "/" . $object) == "dir") rrmdir($dir . "/" . $object);
-                else unlink($dir . "/" . $object);
+                if (filetype($dir . "/" . $object) == "dir") {
+                    rrmdir($dir . "/" . $object);
+                } else {
+                    unlink($dir . "/" . $object);
+                }
             }
         }
         return rmdir($dir);
@@ -139,8 +142,9 @@ function file_force_contents($file, $contents) {
     $parts = explode("/", $file);
     $file = array_pop($parts);
     $dir = "";
-    foreach ($parts as $part)
-        if (!is_dir($dir .= "$part/")) mkdir($dir);
+    foreach ($parts as $part) {
+            if (!is_dir($dir .= "$part/")) mkdir($dir);
+    }
     return file_put_contents("$dir$file", $contents);
 }
 
@@ -523,7 +527,9 @@ function undoRegisterGlobals()
         $array = array("_REQUEST", "_SESSION", "_SERVER", "_ENV", "_FILES");
         foreach ($array as $value) {
             foreach ((array) $GLOBALS[$value] as $key => $var) {
-                if (isset($GLOBALS[$key]) and $var === $GLOBALS[$key]) unset($GLOBALS[$key]);
+                if (isset($GLOBALS[$key]) and $var === $GLOBALS[$key]) {
+                    unset($GLOBALS[$key]);
+                }
             }
         }
     }
@@ -657,15 +663,25 @@ if (!function_exists("json_encode")) {
 
 function json_encode($a = false)
 {
-    if (is_null($a)) return "null";
-    if ($a === false) return "false";
-    if ($a === true) return "true";
+    if (is_null($a)) {
+        return "null";
+    }
+    if ($a === false) {
+        return "false";
+    }
+    if ($a === true) {
+        return "true";
+    }
     if (is_scalar($a)) {
-        if (is_float($a)) return floatval(str_replace(",", ".", strval($a)));
+        if (is_float($a)) {
+            return floatval(str_replace(",", ".", strval($a)));
+        }
         if (is_string($a)) {
             static $jsonReplaces = array(array("\\", "/", "\n", "\t", "\r", "\b", "\f", '"'), array('\\\\', '\\/', '\\n', '\\t', '\\r', '\\b', '\\f', '\"'));
             return '"' . str_replace($jsonReplaces[0], $jsonReplaces[1], $a) . '"';
-        } else return $a;
+        } else {
+            return $a;
+        }
     }
 
     $isList = true;
@@ -677,10 +693,14 @@ function json_encode($a = false)
     }
     $result = array();
     if ($isList) {
-        foreach ($a as $v) $result[] = json_encode($v);
+        foreach ($a as $v) {
+            $result[] = json_encode($v);
+        }
         return '[' . implode(',', $result) . ']';
     } else {
-        foreach ($a as $k => $v) $result[] = '"' . ($k) . '":' . json_encode($v);
+        foreach ($a as $k => $v) {
+            $result[] = '"' . ($k) . '":' . json_encode($v);
+        }
         return '{' . implode(',', $result) . '}';
     }
 }
@@ -741,28 +761,39 @@ function json_decode($json)
  */
 function URL($url = "", $absolute = false)
 {
-    if (preg_match('/^(https?\:)?\/\//', $url)) return $url;
+    if (preg_match('/^(https?\:)?\/\//', $url)) {
+        return $url;
+    }
 	
     // Strip off the hash.
     $hash = strstr($url, "#");
-    if ($hash) $url = substr($url, 0, -strlen($hash));
+    if ($hash) {
+        $url = substr($url, 0, -strlen($hash));
+    }
 
     // Strip off the query string.
     $query = strstr($url, "?");
-    if ($query) $url = substr($url, 0, -strlen($query));
+    if ($query) {
+        $url = substr($url, 0, -strlen($query));
+    }
 
     // If we don't have nice urls, use ?p=controller/method/argument instead.
     if (!C("esoTalk.urls.friendly") and $url) {
         $link = "?p=" . $url;
-        if ($query) $query[0] = "&";
+        if ($query) {
+            $query[0] = "&";
+        }
+    } else {
+        $link = $url;
     }
-    else $link = $url;
 
     // Re-add the query string and has to the URL.
     $link .= $query . $hash;
 
     // If we're not using mod_rewrite, we need to prepend "index.php/" to the link.
-    if (C("esoTalk.urls.friendly") and !C("esoTalk.urls.rewrite")) $link = "index.php/$link";
+    if (C("esoTalk.urls.friendly") and !C("esoTalk.urls.rewrite")) {
+        $link = "index.php/$link";
+    }
     return $absolute ? rtrim(C("esoTalk.baseURL"), "/") . "/" . $link : getWebPath($link);
 }
 
@@ -825,8 +856,11 @@ function getResource($path, $absolute = false)
 
         // Prepend the web path.
         $path = ltrim($path, "/");
-        if ($c = C("esoTalk.resourceURL")) $path = $c . $path;
-        else $path = $absolute ? rtrim(C("esoTalk.baseURL"), "/") . "/" . $path : ET::$webPath . "/" . $path;
+        if ($c = C("esoTalk.resourceURL")) {
+            $path = $c . $path;
+        } else {
+            $path = $absolute ? rtrim(C("esoTalk.baseURL"), "/") . "/" . $path : ET::$webPath . "/" . $path;
+        }
 
     }
     return $path;
@@ -946,14 +980,20 @@ function smartTime($then, $precise = false)
     $ago = time() - $then;
 
     // If the time was within the last 48 hours, show a relative time (eg. 2 hours ago.)
-    if ($ago >= 0 and $ago < 48 * 60 * 60) return relativeTime($then, $precise);
+    if ($ago >= 0 and $ago < 48 * 60 * 60) {
+        return relativeTime($then, $precise);
+    }
 
     // If the time is within the last half a year or the next half a year, show just a month and a day.
-    elseif ($ago < 180 * 24 * 60 * 60) return strftime("%b %e", $then);
+    elseif ($ago < 180 * 24 * 60 * 60) {
+        return strftime("%b %e", $then);
+    }
 
     // Otherwise, show the month, day, and year.
-    else return strftime(($precise ? "%e " : "") . "%b %Y", $then);
-}
+    else {
+        return strftime(($precise ? "%e " : "") . "%b %Y", $then);
+    }
+    }
 
 
 /**
@@ -1100,11 +1140,17 @@ function addToArrayString(&$array, $key, $value, $position = false)
     // If the key doesn't exist, then we'll add the element to the end of the array.
     if (is_array($position)) {
         $index = array_search(reset($position), $keys, true);
-        if ($index === false) $index = count($array);
-        if (key($position) == "after") $index++;
+        if ($index === false) {
+            $index = count($array);
+        }
+        if (key($position) == "after") {
+            $index++;
+        }
     }
     // If the position is just an integer, then we already have the index.
-    else $index = (int) $position;
+    else {
+        $index = (int) $position;
+    }
 
     // Add the key/value to their respective arrays at the appropriate index.
     array_splice($keys, $index, 0, $key);

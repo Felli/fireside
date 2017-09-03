@@ -2,7 +2,9 @@
 // Copyright 2011 Toby Zerner, Simon Zerner
 // This file is part of esoTalk. Please see the included license file for usage information.
 
-if (!defined("IN_ESOTALK")) exit;
+if (!defined("IN_ESOTALK")) {
+    exit;
+}
 
 /**
  * Simple object that represents a raw SQL expression. If this is passed as a value in a query
@@ -22,13 +24,13 @@ public $expression = "";
 
 public function __construct($expression = "")
 {
-	$this->expression = $expression;
+    $this->expression = $expression;
 }
 
 
 public function __toString()
 {
-	return $this->expression;
+    return $this->expression;
 }
 
 
