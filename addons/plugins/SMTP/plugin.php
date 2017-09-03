@@ -25,7 +25,7 @@ class ETPlugin_SMTP extends ETPlugin {
         }
 
         $mail->IsSMTP();
-        $mail->SMTPAuth   = true;
+        $mail->SMTPAuth = true;
         if (C("plugin.SMTP.auth")) {
             $mail->SMTPSecure = C("plugin.SMTP.auth");
         }
