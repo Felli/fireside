@@ -51,12 +51,16 @@ public $ip;
 public function __construct()
 {
     // Start a session.
-    session_name(C("esoTalk.cookie.name")."_session");
+    session_name(C("esoTalk.cookie.name") . "_session");
     session_start();
-    if (empty($_SESSION["token"])) $this->regenerateToken();
+    if (empty($_SESSION["token"])) {
+        $this->regenerateToken();
+    }
 
     // Complicate session highjacking - check the current user agent against the one that initiated the session.
-    if (md5($_SERVER["HTTP_USER_AGENT"]) != $_SESSION["userAgent"]) session_destroy();
+    if (md5($_SERVER["HTTP_USER_AGENT"]) != $_SESSION["userAgent"]) {
+        session_destroy();
+    }
 
     // Set the class properties to reference session variables.
     $this->token = &$_SESSION["token"];
@@ -68,7 +72,7 @@ public function __construct()
 
         // Get the token and member ID from the cookie.
         $token = substr($cookie, -32);
-        $memberId = (int)substr($cookie, 0, -32);
+        $memberId = (int) substr($cookie, 0, -32);
 
         // Find a user with this memberId and token.
         $member = ET::memberModel()->get(array(
@@ -83,8 +87,10 @@ public function __construct()
     }
 
     // If there's a user logged in, get their user data.
-    if ($this->userId and C("esoTalk.installed")) $this->refreshUserData();
-}
+    if ($this->userId and C("esoTalk.installed")) {
+        $this->refreshUserData();
+    }
+    }
 
 
 /**
@@ -94,7 +100,9 @@ public function __construct()
  */
 public function refreshUserData()
 {
-    if (!$this->userId) return;
+    if (!$this->userId) {
+        return;
+    }
     $this->user = ET::memberModel()->getById($this->userId);
 }
 
@@ -119,7 +127,9 @@ public function preference($key, $default = false)
  */
 public function setPreferences($values)
 {
-    if (!$this->userId) return;
+    if (!$this->userId) {
+        return;
+    }
     $this->user["preferences"] = ET::memberModel()->setPreferences($this->user, $values);
 }
 
@@ -134,8 +144,11 @@ protected function processLogin($member)
 {
     // If registrations require confirmation but the user's account hasn't been confirmed, return a message.
     if (!$member["confirmed"] and ($type = C("esoTalk.registration.requireConfirmation"))) {
-        if ($type == "email") $this->error("emailNotYetConfirmed");
-        elseif ($type == "approval") $this->error("accountNotYetApproved");
+        if ($type == "email") {
+            $this->error("emailNotYetConfirmed");
+        } elseif ($type == "approval") {
+            $this->error("accountNotYetApproved");
+        }
         return false;
     }
 
@@ -173,7 +186,9 @@ public function loginWithMemberId($memberId)
 public function login($name, $password, $remember = false)
 {
     $return = $this->trigger("login", array($name, $password, $remember));
-    if (count($return)) return reset($return);
+    if (count($return)) {
+        return reset($return);
+    }
 
     // Get the member with this username or email.
     $sql = ET::SQL()
@@ -232,8 +247,10 @@ protected function clearRememberToken($memberId)
     ET::memberModel()->updateById($memberId, array("rememberToken" => null));
 
     // Eat the persistent login cookie. OM NOM NOM
-    if ($this->getCookie("persistent")) $this->setCookie("persistent", false, -1);
-}
+    if ($this->getCookie("persistent")) {
+        $this->setCookie("persistent", false, -1);
+    }
+    }
 
 
 /**
@@ -245,7 +262,7 @@ protected function clearRememberToken($memberId)
  */
 public function setCookie($name, $value, $expire = 0)
 {
-    return setcookie(C("esoTalk.cookie.name")."_".$name, $value, $expire, C("esoTalk.cookie.path", getWebPath('')), C("esoTalk.cookie.domain"), C("esoTalk.https"), true);
+    return setcookie(C("esoTalk.cookie.name") . "_" . $name, $value, $expire, C("esoTalk.cookie.path", getWebPath('')), C("esoTalk.cookie.domain"), C("esoTalk.https"), true);
 }
 
 
@@ -258,7 +275,7 @@ public function setRememberCookie($userId)
 {
     $token = $this->getRememberToken($userId);
 
-    $this->setCookie("persistent", $userId.$token, time() + C("esoTalk.cookie.expire"));
+    $this->setCookie("persistent", $userId . $token, time() + C("esoTalk.cookie.expire"));
 }
 
 
@@ -271,7 +288,7 @@ public function setRememberCookie($userId)
  */
 public function getCookie($name, $default = null)
 {
-    $name = C("esoTalk.cookie.name")."_".$name;
+    $name = C("esoTalk.cookie.name") . "_" . $name;
     return isset($_COOKIE[$name]) ? $_COOKIE[$name] : $default;
 }
 
@@ -347,7 +364,9 @@ public function regenerateToken()
 public function pushNavigation($id, $type, $url)
 {
     $navigation = $this->get("navigation");
-    if (!is_array($navigation)) $navigation = array();
+    if (!is_array($navigation)) {
+        $navigation = array();
+    }
 
     // Look for an item with this $id that might already by in the navigation. If found, delete everything after it.
     foreach ($navigation as $k => $item) {
@@ -374,11 +393,14 @@ public function getNavigation($currentId)
     $navigation = $this->get("navigation");
     if (!empty($navigation)) {
         $return = end($navigation);
-        if ($return["id"] == $currentId) $return = prev($navigation);
+        if ($return["id"] == $currentId) {
+            $return = prev($navigation);
+        }
         return $return;
+    } else {
+        return false;
     }
-    else return false;
-}
+    }
 
 
 /**
@@ -411,17 +433,19 @@ public function isSuspended()
 public function isFlooding()
 {
     // If there's no wait time between posting configured, they're not flooding.
-    if (C("esoTalk.conversation.timeBetweenPosts") <= 0) return false;
+    if (C("esoTalk.conversation.timeBetweenPosts") <= 0) {
+        return false;
+    }
 
     // Otherwise, make sure the time of their most recent conversation/post is more than the time limit ago.
     $time = time() - C("esoTalk.conversation.timeBetweenPosts");
-    $recentConversation = (bool)ET::SQL()
+    $recentConversation = (bool) ET::SQL()
         ->select("MAX(startTime)>$time")
         ->from("conversation")
         ->where("startMemberId", $this->userId)
         ->exec()
         ->result();
-    $recentPost = (bool)ET::SQL()
+    $recentPost = (bool) ET::SQL()
         ->select("MAX(time)>$time")
         ->from("post p")
         ->where("memberId", $this->userId)
@@ -439,9 +463,12 @@ public function isFlooding()
  */
 public function getGroupIds()
 {
-    if ($this->user) return ET::groupModel()->getGroupIds($this->user["account"], array_keys($this->user["groups"]));
-    else return ET::groupModel()->getGroupIds(false, false);
-}
+    if ($this->user) {
+        return ET::groupModel()->getGroupIds($this->user["account"], array_keys($this->user["groups"]));
+    } else {
+        return ET::groupModel()->getGroupIds(false, false);
+    }
+    }
 
 
 /**

@@ -54,8 +54,9 @@ public function __construct($pdoStatement)
  */
 protected function rows()
 {
-    if ($this->rows === null)
-        $this->rows = $this->pdoStatement->fetchAll(PDO::FETCH_ASSOC);
+    if ($this->rows === null) {
+            $this->rows = $this->pdoStatement->fetchAll(PDO::FETCH_ASSOC);
+    }
     return $this->rows;
 }
 
@@ -86,7 +87,9 @@ public function allRows($keyColumn = false)
 
     if ($keyColumn) {
         $newRows = array();
-        foreach ($rows as $row) $newRows[$row[$keyColumn]] = $row;
+        foreach ($rows as $row) {
+            $newRows[$row[$keyColumn]] = $row;
+        }
         return $newRows;
     }
 
