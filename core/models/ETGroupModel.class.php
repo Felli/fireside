@@ -121,10 +121,14 @@ public function deleteById($id)
 public function groupIdsAllowedInGroupIds($groupIds, $allowedGroupIds, $adminAlwaysAllowed = false)
 {
     // If the group IDs contains the administrator group, then we may not need to go any further.
-    if (in_array(GROUP_ID_ADMINISTRATOR, (array) $groupIds) and $adminAlwaysAllowed) return true;
+    if (in_array(GROUP_ID_ADMINISTRATOR, (array) $groupIds) and $adminAlwaysAllowed) {
+        return true;
+    }
 
     // If guests are allowed, then everyone is allowed!
-    if (in_array(GROUP_ID_GUEST, (array) $allowedGroupIds)) return true;
+    if (in_array(GROUP_ID_GUEST, (array) $allowedGroupIds)) {
+        return true;
+    }
 
     // Return whether or not any of the group IDs in each array match.
     return (bool) count(array_intersect((array) $groupIds, (array) $allowedGroupIds));

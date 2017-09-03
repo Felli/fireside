@@ -241,16 +241,22 @@ public static function config($key, $default = null)
 public static function writeConfig($values)
 {
     // Include the config file so we can re-write the values contained within it.
-    if (file_exists($file = PATH_CONFIG . "/config.php")) include $file;
+    if (file_exists($file = PATH_CONFIG . "/config.php")) {
+        include $file;
+    }
 
     // Now add the $values to the $config array.
-    if (!isset($config) or !is_array($config)) $config = array();
+    if (!isset($config) or !is_array($config)) {
+        $config = array();
+    }
     $config = array_merge($config, $values);
     self::$config = array_merge(self::$config, $values);
 
     // Finally, loop through and write the config array to the config file.
     $contents = "<?php\n";
-    foreach ($config as $k => $v) $contents .= '$config["' . $k . '"] = ' . var_export($v, true) . ";\n";
+    foreach ($config as $k => $v) {
+        $contents .= '$config["' . $k . '"] = ' . var_export($v, true) . ";\n";
+    }
     $contents .= "\n// Last updated by: " . ET::$session->user["username"] . " (" . ET::$session->ip . ") @ " . date("r") . "\n?>";
     file_put_contents($file, $contents);
 }
@@ -308,18 +314,22 @@ public static function loadLanguage($language = "")
     self::loadDefinitions("$languagePath/definitions.php");
 
     // Set the locale.
-    if (isset(ET::$languageInfo[self::$language]["locale"])) setlocale(LC_ALL, ET::$languageInfo[self::$language]["locale"]);
+    if (isset(ET::$languageInfo[self::$language]["locale"])) {
+        setlocale(LC_ALL, ET::$languageInfo[self::$language]["locale"]);
+    }
 
     // Loop through the loaded plugins and include their definition files, if they exist.
     foreach (C("esoTalk.enabledPlugins") as $plugin) {
-        if (file_exists($file = "$languagePath/definitions." . sanitizeFileName($plugin) . ".php"))
-            self::loadDefinitions($file);
+        if (file_exists($file = "$languagePath/definitions." . sanitizeFileName($plugin) . ".php")) {
+                    self::loadDefinitions($file);
+        }
     }
 
     // Re-define runtime definitions.
-    foreach (self::$runtimeDefinitions as $k => $v)
-        ET::define($k, $v, true);
-}
+    foreach (self::$runtimeDefinitions as $k => $v) {
+            ET::define($k, $v, true);
+    }
+    }
 
 
 /**
@@ -542,10 +552,11 @@ public static function fatalError($exception)
     ob_end_clean();
 
     // Render the master view, or just output the content if we can't find one.
-    if ($responseType === RESPONSE_TYPE_DEFAULT and file_exists($view = PATH_VIEWS . "/message.master.php"))
-        include $view;
-    else
-        echo $data["content"];
+    if ($responseType === RESPONSE_TYPE_DEFAULT and file_exists($view = PATH_VIEWS . "/message.master.php")) {
+            include $view;
+    } else {
+            echo $data["content"];
+    }
 
     exit;
 }

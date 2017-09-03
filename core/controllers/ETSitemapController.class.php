@@ -34,7 +34,9 @@ if (!file_exists("sitemap.xml") or filemtime("sitemap.xml") < time() - $config["
     // Connect to the database.
     require "lib/database.php";
     $db = new Database();
-    if (!$db->connect($config["mysqlHost"], $config["mysqlUser"], $config["mysqlPass"], $config["mysqlDB"])) exit;
+    if (!$db->connect($config["mysqlHost"], $config["mysqlUser"], $config["mysqlPass"], $config["mysqlDB"])) {
+        exit;
+    }
 
     // Does sitemap.general.xml exist? If not, create it.
     if (!file_exists("sitemap.general.xml")) {
@@ -56,7 +58,9 @@ if (!file_exists("sitemap.xml") or filemtime("sitemap.xml") < time() - $config["
         $r = mysql_query("SELECT conversationId, slug, posts / ((UNIX_TIMESTAMP() - startTime) / 86400) AS postsPerDay, IF(lastActionTime, lastActionTime, startTime) AS lastUpdated, posts FROM " . config("esoTalk.database.prefix") . "conversations WHERE !private LIMIT " . (($i - 1) * URLS_PER_SITEMAP) . "," . URLS_PER_SITEMAP);
 
         // If there are no conversations left, break from the loop.
-        if (!mysql_num_rows($r)) break;
+        if (!mysql_num_rows($r)) {
+            break;
+        }
 
         // Otherwise let's make the sitemap file.
         else {
@@ -76,7 +80,7 @@ if (!file_exists("sitemap.xml") or filemtime("sitemap.xml") < time() - $config["
                 $urlset .= "</changefreq>";
 
                 // Estimate the conversation's importance based upon the number of posts.
-                if ($posts < 50) ; // Default priority is 0.5, so specifying it is redundant.
+                if ($posts < 50); // Default priority is 0.5, so specifying it is redundant.
                 elseif ($posts < 100) $urlset .= "<priority>0.6</priority>";
                 elseif ($posts < 500) $urlset .= "<priority>0.7</priority>";
                 elseif ($posts < 1000) $urlset .= "<priority>0.8</priority>";
@@ -98,7 +102,9 @@ if (!file_exists("sitemap.xml") or filemtime("sitemap.xml") < time() - $config["
     // Now we're gonna generate the sitemap index.
     $sitemap = "<?xml version='1.0' encoding='UTF-8'?><sitemapindex xmlns='http://www.sitemaps.org/schemas/sitemap/0.9'><sitemap><loc>{$config["baseURL"]}sitemap.general.xml</loc></sitemap>";
     // For each conversation sitemap that we wrote, up until we break'd, add a <sitemap> entry to the index.
-    for ($j = 1; $j < $i; $j++) $sitemap .= "<sitemap><loc>{$config["baseURL"]}sitemap.conversations.$j.xml" . ZLIB . "</loc><lastmod>" . gmdate("Y-m-d\TH:i:s+00:00") . "</lastmod></sitemap>";
+    for ($j = 1; $j < $i; $j++) {
+        $sitemap .= "<sitemap><loc>{$config["baseURL"]}sitemap.conversations.$j.xml" . ZLIB . "</loc><lastmod>" . gmdate("Y-m-d\TH:i:s+00:00") . "</lastmod></sitemap>";
+    }
     $sitemap .= "</sitemapindex>";
 
     // And write out!

@@ -56,10 +56,14 @@ public function action_index()
  */
 public function action_subscribe($channelId = "")
 {
-    if (!ET::$session->user or !$this->validateToken()) return;
+    if (!ET::$session->user or !$this->validateToken()) {
+        return;
+    }
 
     // If we don't have permission to view this channel, don't proceed.
-    if (!ET::channelModel()->hasPermission((int) $channelId, "view")) return;
+    if (!ET::channelModel()->hasPermission((int) $channelId, "view")) {
+        return;
+    }
 
     // Work out if we're already unsubscribed or not, and switch to the opposite of that.
     $channel = ET::SQL()

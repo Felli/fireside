@@ -217,13 +217,17 @@ public function hasPermission($channelId, $permission = "view")
 public function addPermissionPredicate(&$sql, $field = "view", $member = false, $table = "c")
 {
     // If no member was specified, use the current user.
-    if (!$member) $member = ET::$session->user;
+    if (!$member) {
+        $member = ET::$session->user;
+    }
 
     // Get an array of group IDs for this member.
     $groups = ET::groupModel()->getGroupIds($member["account"], array_keys((array) $member["groups"]));
 
     // If the user is an administrator, don't add any SQL, as admins can do anything!
-    if (in_array(GROUP_ID_ADMINISTRATOR, $groups)) return;
+    if (in_array(GROUP_ID_ADMINISTRATOR, $groups)) {
+        return;
+    }
 
     // Construct a query that will fetch all channelIds for which this member has the specified permission.
     $query = ET::SQL()

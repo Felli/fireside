@@ -30,7 +30,7 @@
  * 
  ************************************************************************************/ 
   
-$language_data = array ( 
+$language_data = array( 
     'LANG_NAME' => 'MySQL', 
     'COMMENT_SINGLE' => array(1 =>'--', 2 => '#'), 
     'COMMENT_MULTI' => array('/*' => '*/'), 
@@ -85,15 +85,15 @@ $language_data = array (
     ), 
     2 => array( 
     'INTEGER', 'SMALLINT', 'DECIMAL', 'NUMERIC', 'FLOAT', 'REAL', 'DOUBLE PRECISION', 
-    'DOUBLE', 'INT', 'DEC', 'BIT' ,'TINYINT', 'SMALLINT', 'MEDIUMINT', 'BIGINT',  
+    'DOUBLE', 'INT', 'DEC', 'BIT', 'TINYINT', 'SMALLINT', 'MEDIUMINT', 'BIGINT',  
     'DATETIME', 'DATE', 'TIMESTAMP', 'TIME', 'YEAR',  
     'CHAR', 'VARCHAR', 'BINARY', 'CHARACTER VARYING', 'VARBINARY', 'TINYBLOB', 'TINYTEXT', 
-    'BLOB', 'TEXT','MEDIUMBLOB', 'MEDIUMTEXT', 'LONGBLOB', 'LONGTEXT', 'ENUM', 'SET', 
+    'BLOB', 'TEXT', 'MEDIUMBLOB', 'MEDIUMTEXT', 'LONGBLOB', 'LONGTEXT', 'ENUM', 'SET', 
     'SERIAL DEFAULT VALUE', 'SERIAL', 'FIXED' 
     ), 
     3 => array( 
     'ZEROFILL', 'NOT NULL', 'UNSIGNED', 'AUTO_INCREMENT', 'UNIQUE', 'NOT', 'NULL', 'CHARACTER SET', 'CHARSET', 
-    'ASCII', 'UNICODE', 'NATIONAL', 'BOTH', 'LEADING', 'TRAILING','DEFAULT' 
+    'ASCII', 'UNICODE', 'NATIONAL', 'BOTH', 'LEADING', 'TRAILING', 'DEFAULT' 
     ), 
     4 => array( 
     'MICROSECOND', 'SECOND', 'MINUTE', 'HOUR', 'DAY', 'WEEK', 'MONTH', 'QUARTER', 'YEAR', 'SECOND_MICROSECOND',  
