@@ -184,7 +184,9 @@ public function dispatch($method, $arguments)
     }
 
     // If one wasn't found, call the method on $this.
-    if (!$called) call_user_func_array(array($this, "action_" . $method), $arguments);
+    if (!$called) {
+        call_user_func_array(array($this, "action_" . $method), $arguments);
+    }
 
     // Trigger an "after" event for this method.
     ET::trigger($eventName . "_after", $eventArguments);
@@ -286,27 +288,28 @@ public function init()
 
     // Check for updates to the esoTalk software, but only if we're the root admin and we haven't checked in
     // a while.
-    if (ET::$session->userId == C("esoTalk.rootAdmin") and C("esoTalk.admin.lastUpdateCheckTime") + C("esoTalk.updateCheckInterval") < time())
-        ET::upgradeModel()->checkForUpdates();
+    if (ET::$session->userId == C("esoTalk.rootAdmin") and C("esoTalk.admin.lastUpdateCheckTime") + C("esoTalk.updateCheckInterval") < time()) {
+            ET::upgradeModel()->checkForUpdates();
+    }
 
     if ($this->responseType === RESPONSE_TYPE_DEFAULT) {
 
         // If the user IS NOT logged in, add the 'login' and 'sign up' links to the bar.
         if (!ET::$session->user) {
-            $this->addToMenu("user", "join", "<a href='".URL("user/join?return=".urlencode($this->selfURL))."' class='link-join'>".T("Sign Up")."</a>");
-            $this->addToMenu("user", "login", "<a href='".URL("user/login?return=".urlencode($this->selfURL))."' class='link-login'>".T("Log In")."</a>");
+            $this->addToMenu("user", "join", "<a href='" . URL("user/join?return=" . urlencode($this->selfURL)) . "' class='link-join'>" . T("Sign Up") . "</a>");
+            $this->addToMenu("user", "login", "<a href='" . URL("user/login?return=" . urlencode($this->selfURL)) . "' class='link-login'>" . T("Log In") . "</a>");
         }
 
         // If the user IS logged in, we want to display their name and appropriate links.
         else {
-            $this->addToMenu("user", "user", "<a href='".URL("member/me")."'>".avatar(ET::$session->user, "thumb").name(ET::$session->user["username"])."</a>");
+            $this->addToMenu("user", "user", "<a href='" . URL("member/me") . "'>" . avatar(ET::$session->user, "thumb") . name(ET::$session->user["username"]) . "</a>");
 
-            $this->addToMenu("user", "settings", "<a href='".URL("settings")."' class='link-settings'>".T("Settings")."</a>");
+            $this->addToMenu("user", "settings", "<a href='" . URL("settings") . "' class='link-settings'>" . T("Settings") . "</a>");
 
             if (ET::$session->isAdmin())
-                $this->addToMenu("user", "administration", "<a href='".URL("admin")."' class='link-administration'>".T("Administration")."</a>");
+                $this->addToMenu("user", "administration", "<a href='" . URL("admin") . "' class='link-administration'>" . T("Administration") . "</a>");
 
-            $this->addToMenu("user", "logout", "<a href='".URL("user/logout?token=".ET::$session->token)."' class='link-logout'>".T("Log Out")."</a>");
+            $this->addToMenu("user", "logout", "<a href='" . URL("user/logout?token=" . ET::$session->token) . "' class='link-logout'>" . T("Log Out") . "</a>");
         }
 
         // Get the number of members currently online and add it as a statistic.
@@ -319,11 +322,11 @@ public function init()
                 ->exec()
                 ->result();
             $stat = Ts("statistic.online", "statistic.online.plural", number_format($online));
-            $stat = "<a href='".URL("members/online")."' class='link-membersOnline'>$stat</a>";
+            $stat = "<a href='" . URL("members/online") . "' class='link-membersOnline'>$stat</a>";
             $this->addToMenu("statistics", "statistic-online", $stat);
         }
 
-        $this->addToMenu("meta", "copyright", "<a href='http://esotalk.org/' target='_blank'>".T("Powered by")." esoTalk</a>");
+        $this->addToMenu("meta", "copyright", "<a href='http://esotalk.org/' target='_blank'>" . T("Powered by") . " esoTalk</a>");
 
         // Set up some default JavaScript files and language definitions.
         $this->addJSFile("core/js/lib/jquery.js", true);
@@ -430,7 +433,7 @@ public function render($view = "")
         // Fetch all unread notifications so we have a count for the notifications button.
         $notifications = ET::activityModel()->getNotifications(-1);
         $count = count($notifications);
-        $this->addToMenu("user", "notifications", "<a href='".URL("settings/notifications")."' id='notifications' class='button popupButton ".($count ? "new" : "")."'><span>$count</span></a>");
+        $this->addToMenu("user", "notifications", "<a href='" . URL("settings/notifications") . "' id='notifications' class='button popupButton " . ($count ? "new" : "") . "'><span>$count</span></a>");
 
         // Show messages with these notifications.
         $this->notificationMessages($notifications);
@@ -490,22 +493,29 @@ public function render($view = "")
             // Add the <head> contents and the page title.
             $data["head"] = $this->head();
             $titleParts = array();
-            if ($this->title) $titleParts[] = $this->title;
-            if ($t = C("esoTalk.forumTitle")) $titleParts[] = $t;
+            if ($this->title) {
+                $titleParts[] = $this->title;
+            }
+            if ($t = C("esoTalk.forumTitle")) {
+                $titleParts[] = $t;
+            }
             $data["pageTitle"] = implode(" - ", $titleParts);
 
             // Add the forum title, or logo if the forum has one.
             $logo = C("esoTalk.forumLogo");
             $title = C("esoTalk.forumTitle");
-            if ($logo) $size = getimagesize($logo);
+            if ($logo) {
+                $size = getimagesize($logo);
+            }
             $data["forumTitle"] = $logo ? "<img src='" . getWebPath($logo) . "' {$size[3]} alt='$title'/>" : $title;
 
             // Add the details for the "back" button.
             $data["backButton"] = ET::$session->getNavigation($this->navigationId);
 
             // Get common menu items.
-            foreach ($this->menus as $menu => $items)
-                $data[$menu . "MenuItems"] = $items->getContents();
+            foreach ($this->menus as $menu => $items) {
+                            $data[$menu . "MenuItems"] = $items->getContents();
+            }
 
             // Add the body class.
             $data["bodyClass"] = $this->bodyClass;
@@ -779,11 +789,11 @@ public function addToHead($string)
 protected function aggregateFiles($files, $type)
 {
 
-    require_once PATH_LIBRARY."/vendor/converter/Converter.php";
-    require_once PATH_LIBRARY."/vendor/minify/src/Minify.php";
-    require_once PATH_LIBRARY."/vendor/minify/src/JS.php";
-    require_once PATH_LIBRARY."/vendor/minify/src/CSS.php";
-    require_once PATH_LIBRARY."/vendor/minify/src/Exception.php";
+    require_once PATH_LIBRARY . "/vendor/converter/Converter.php";
+    require_once PATH_LIBRARY . "/vendor/minify/src/Minify.php";
+    require_once PATH_LIBRARY . "/vendor/minify/src/JS.php";
+    require_once PATH_LIBRARY . "/vendor/minify/src/CSS.php";
+    require_once PATH_LIBRARY . "/vendor/minify/src/Exception.php";
 
     $jsmin = new Minify\JS();
     $cssmin = new Minify\CSS();
@@ -793,11 +803,11 @@ protected function aggregateFiles($files, $type)
     $lastModTime = 0;
     foreach ($files as $filename) {
         $filenames[] = str_replace(".", "", pathinfo($filename, PATHINFO_FILENAME));
-        $lastModTime = max($lastModTime, filemtime(PATH_ROOT."/".$filename));
+        $lastModTime = max($lastModTime, filemtime(PATH_ROOT . "/" . $filename));
     }
 
     // Construct a filename for the aggregation file based on the individual filenames.
-    $file = PATH_ROOT."/cache/$type/".implode(",", $filenames).".$type";
+    $file = PATH_ROOT . "/cache/$type/" . implode(",", $filenames) . ".$type";
 
     // If this file doesn't exist, or if it is out of date, generate and write it.
     if (!file_exists($file) or filemtime($file) < $lastModTime) {
@@ -805,10 +815,10 @@ protected function aggregateFiles($files, $type)
         // Get the contents of each of the files, fixing up image URL paths for CSS files.
         foreach ($files as $f) {
             if ($type == "css") {
-                $cssmin->add(PATH_ROOT."/".$f);
+                $cssmin->add(PATH_ROOT . "/" . $f);
             }
             else if ($type == "js") {
-                $jsmin->add(PATH_ROOT."/".$f);
+                $jsmin->add(PATH_ROOT . "/" . $f);
             }
             /*$content = file_get_contents(PATH_ROOT."/".$f);
 			if ($type == "css") $content = preg_replace("/url\(('?)/i", "url($1".getResource(pathinfo($f, PATHINFO_DIRNAME)."/"), $content);
@@ -818,8 +828,7 @@ protected function aggregateFiles($files, $type)
         // Minify and write the contents.
         if ($type == "css") {
             $cssmin->minify($file);
-        }
-        else if ($type == "js") {
+        } else if ($type == "js") {
             $jsmin->minify($file);
         }
         //file_force_contents($file, $type == "css" ? minifyCSS($contents) : minifyJS($contents));
@@ -856,16 +865,20 @@ public function head()
     foreach ($this->cssFiles as $key => $files) {
 
         // If CSS aggregation is enabled, and there's more than one file in this "group", proceed with aggregation.
-        if (count($files) > 1 and C("esoTalk.aggregateCSS") and !(ET::$controller instanceof ETAdminController))
-            $files = $this->aggregateFiles($files, "css");
+        if (count($files) > 1 and C("esoTalk.aggregateCSS") and !(ET::$controller instanceof ETAdminController)) {
+                    $files = $this->aggregateFiles($files, "css");
+        }
 
         // Otherwise, we need to prepend the full path to each of the files.
-        else foreach ($files as &$file) $file = PATH_ROOT . "/" . $file;
+        else {
+            foreach ($files as &$file) $file = PATH_ROOT . "/" . $file;
+        }
         unset($file);
 
         // For each of the files that we need to include in the page, add a <link> tag.
-        foreach ($files as $file)
-            $head .= "<link rel='stylesheet' href='" . getResource($file) . "?" . @filemtime($file) . "'>\n";
+        foreach ($files as $file) {
+                    $head .= "<link rel='stylesheet' href='" . getResource($file) . "?" . @filemtime($file) . "'>\n";
+        }
 
     }
 
@@ -891,16 +904,20 @@ public function head()
     foreach ($this->jsFiles as $files) {
 
         // If JS aggregation is enabled, and there's more than one file in this "group", proceed with aggregation.
-        if (count($files) > 1 and C("esoTalk.aggregateJS") and !(ET::$controller instanceof ETAdminController))
-            $files = $this->aggregateFiles($files, "js");
+        if (count($files) > 1 and C("esoTalk.aggregateJS") and !(ET::$controller instanceof ETAdminController)) {
+                    $files = $this->aggregateFiles($files, "js");
+        }
 
         // Otherwise, we need to prepend the full path to each of the files.
-        else foreach ($files as &$file) $file = PATH_ROOT . "/" . $file;
+        else {
+            foreach ($files as &$file) $file = PATH_ROOT . "/" . $file;
+        }
         unset($file);
 
         // For each of the files that we need to include in the page, add a <script> tag.
-        foreach ($files as $file)
-            $head .= "<script src='" . getResource($file) . "?" . filemtime($file) . "'></script>\n";
+        foreach ($files as $file) {
+                    $head .= "<script src='" . getResource($file) . "?" . filemtime($file) . "'></script>\n";
+        }
     }
 
     // Finally, append the custom HTML string constructed via $this->addToHead().
