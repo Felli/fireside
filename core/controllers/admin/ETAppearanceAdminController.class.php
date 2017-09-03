@@ -2,7 +2,9 @@
 // Copyright 2011 Toby Zerner, Simon Zerner
 // This file is part of esoTalk. Please see the included license file for usage information.
 
-if (!defined("IN_ESOTALK")) exit;
+if (!defined("IN_ESOTALK")) {
+    exit;
+}
 
 /**
  * This controller handles changing of the forum appearance, including the management of skins and skin
@@ -20,12 +22,12 @@ class ETAppearanceAdminController extends ETAdminController {
  */
 public function action_index()
 {
-	$skins = $this->getSkins();
+    $skins = $this->getSkins();
 
-	$this->title = T("Appearance");
-	$this->data("skins", $skins);
-	$this->data("skin", C("esoTalk.skin") ? $skins[C("esoTalk.skin")] : array());
-	$this->render("admin/appearance");
+    $this->title = T("Appearance");
+    $this->data("skins", $skins);
+    $this->data("skin", C("esoTalk.skin") ? $skins[C("esoTalk.skin")] : array());
+    $this->render("admin/appearance");
 }
 
 
@@ -36,34 +38,34 @@ public function action_index()
  */
 protected function getSkins()
 {
-	$skins = array();
+    $skins = array();
 
-	// Get the installed skins and their details by reading the skins/ directory.
-	if ($handle = opendir(PATH_SKINS)) {
-	    while (false !== ($file = readdir($handle))) {
+    // Get the installed skins and their details by reading the skins/ directory.
+    if ($handle = opendir(PATH_SKINS)) {
+        while (false !== ($file = readdir($handle))) {
 
-			// Make sure the skin is valid, and include its skin.php file.
-	        if ($file[0] != "." and file_exists($skinFile = PATH_SKINS."/$file/skin.php") and (include_once $skinFile)) {
+            // Make sure the skin is valid, and include its skin.php file.
+            if ($file[0] != "." and file_exists($skinFile = PATH_SKINS."/$file/skin.php") and (include_once $skinFile)) {
 
-	        	// Add the skin's information and status to the array.
-				$skins[$file] = array(
-					"info" => ET::$skinInfo[$file],
-					"selected" => $file == C("esoTalk.skin"),
-					"selectedMobile" => $file == C("esoTalk.mobileSkin"),
-					"settingsView" => false
-				);
+                // Add the skin's information and status to the array.
+                $skins[$file] = array(
+                    "info" => ET::$skinInfo[$file],
+                    "selected" => $file == C("esoTalk.skin"),
+                    "selectedMobile" => $file == C("esoTalk.mobileSkin"),
+                    "settingsView" => false
+                );
 
-				// If this skin's settings function returns a view path, then store it.
-				if ($skins[$file]["selected"]) $skins[$file]["settingsView"] = ET::$skin->settings($this);
+                // If this skin's settings function returns a view path, then store it.
+                if ($skins[$file]["selected"]) $skins[$file]["settingsView"] = ET::$skin->settings($this);
 
-			}
+            }
 
-	    }
-	    closedir($handle);
-	}
-	ksort($skins);
+        }
+        closedir($handle);
+    }
+    ksort($skins);
 
-	return $skins;
+    return $skins;
 }
 
 
@@ -71,24 +73,24 @@ protected function getSkins()
  * Activate a skin so it is used as the default skin.
  *
  * @param string $skin The name of the skin.
- * @return void
+ * @return null|false
  */
 public function action_activate($skin = "")
 {
-	if (!$this->validateToken()) return;
+    if (!$this->validateToken()) return;
 
-	// Get the skins and make sure this one exists.
-	$skins = $this->getSkins();
-	if (!$skin or !array_key_exists($skin, $skins)) return false;
+    // Get the skins and make sure this one exists.
+    $skins = $this->getSkins();
+    if (!$skin or !array_key_exists($skin, $skins)) return false;
 
-	// Write the new setting to the config file.
-	ET::writeConfig(array("esoTalk.skin" => $skin));
+    // Write the new setting to the config file.
+    ET::writeConfig(array("esoTalk.skin" => $skin));
 
-	// Clear skin cache.
-	$files = glob(PATH_CACHE.'/css/*.*');
-	foreach ($files as $file) unlink(realpath($file));
+    // Clear skin cache.
+    $files = glob(PATH_CACHE.'/css/*.*');
+    foreach ($files as $file) unlink(realpath($file));
 
-	$this->redirect(URL("admin/appearance"));
+    $this->redirect(URL("admin/appearance"));
 }
 
 
@@ -96,24 +98,24 @@ public function action_activate($skin = "")
  * Activate a skin so it is used as the mobile skin.
  *
  * @param string $skin The name of the skin.
- * @return void
+ * @return null|false
  */
 public function action_activateMobile($skin = "")
 {
-	if (!$this->validateToken()) return;
+    if (!$this->validateToken()) return;
 
-	// Get the skins and make sure this one exists.
-	$skins = $this->getSkins();
-	if (!$skin or !array_key_exists($skin, $skins)) return false;
+    // Get the skins and make sure this one exists.
+    $skins = $this->getSkins();
+    if (!$skin or !array_key_exists($skin, $skins)) return false;
 
-	// Write the new setting to the config file.
-	ET::writeConfig(array("esoTalk.mobileSkin" => $skin));
+    // Write the new setting to the config file.
+    ET::writeConfig(array("esoTalk.mobileSkin" => $skin));
 
-	// Clear skin cache.
-	$files = glob(PATH_CACHE.'/css/*.*');
-	foreach ($files as $file) unlink(realpath($file));
+    // Clear skin cache.
+    $files = glob(PATH_CACHE.'/css/*.*');
+    foreach ($files as $file) unlink(realpath($file));
 
-	$this->redirect(URL("admin/appearance"));
+    $this->redirect(URL("admin/appearance"));
 }
 
 
@@ -121,31 +123,31 @@ public function action_activateMobile($skin = "")
  * Uninstall a skin by removing its directory.
  *
  * @param string $skin The name of the skin.
- * @return void
+ * @return null|false
  */
 public function action_uninstall($skin = "")
 {
-	if (!$this->validateToken()) return;
+    if (!$this->validateToken()) return;
 
-	// Get the skins and make sure this one exists.
-	$skins = $this->getSkins();
-	if (!$skin or !array_key_exists($skin, $skins)) return false;
-	unset($skins[$skin]);
+    // Get the skins and make sure this one exists.
+    $skins = $this->getSkins();
+    if (!$skin or !array_key_exists($skin, $skins)) return false;
+    unset($skins[$skin]);
 
-	// Attempt to remove the directory. If we couldn't, show a "not writable" message.
-	if (!is_writable($file = PATH_SKINS) or !is_writable($file = PATH_SKINS."/$skin") or !rrmdir($file))
-		$this->message(sprintf(T("message.notWritable"), $file), "warning");
+    // Attempt to remove the directory. If we couldn't, show a "not writable" message.
+    if (!is_writable($file = PATH_SKINS) or !is_writable($file = PATH_SKINS."/$skin") or !rrmdir($file))
+        $this->message(sprintf(T("message.notWritable"), $file), "warning");
 
-	// Otherwise, show a success message.
-	else $this->message(T("message.skinUninstalled"), "success");
+    // Otherwise, show a success message.
+    else $this->message(T("message.skinUninstalled"), "success");
 
-	// If one of the skin config options is set to this skin, change it.
-	$config = array();
-	if (C("esoTalk.skin") == $skin) $config["esoTalk.skin"] = reset(array_keys($skins));
-	if (C("esoTalk.mobileSkin") == $skin) $config["esoTalk.mobileSkin"] = reset(array_keys($skins));
-	if (count($config)) ET::writeConfig($config);
+    // If one of the skin config options is set to this skin, change it.
+    $config = array();
+    if (C("esoTalk.skin") == $skin) $config["esoTalk.skin"] = reset(array_keys($skins));
+    if (C("esoTalk.mobileSkin") == $skin) $config["esoTalk.mobileSkin"] = reset(array_keys($skins));
+    if (count($config)) ET::writeConfig($config);
 
-	$this->redirect(URL("admin/appearance"));
+    $this->redirect(URL("admin/appearance"));
 }
 
 

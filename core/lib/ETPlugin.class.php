@@ -2,7 +2,9 @@
 // Copyright 2011 Toby Zerner, Simon Zerner
 // This file is part of esoTalk. Please see the included license file for usage information.
 
-if (!defined("IN_ESOTALK")) exit;
+if (!defined("IN_ESOTALK")) {
+    exit;
+}
 
 /**
  * The ETPlugin class defines a plugin. All plugins should extend this class.
@@ -27,7 +29,7 @@ protected $path;
  */
 public function __construct($path)
 {
-	$this->path = $path;
+    $this->path = $path;
 }
 
 
@@ -58,7 +60,7 @@ public function init()
  */
 public function setup($oldVersion = "")
 {
-	return true;
+    return true;
 }
 
 
@@ -80,9 +82,12 @@ public function uninstall()
 }
 
 
+/**
+ * @param string $file
+ */
 public function file($file, $absolute = false)
 {
-	return ($absolute ? PATH_ROOT."/" : "").$this->path."/".$file;
+    return ($absolute ? PATH_ROOT."/" : "").$this->path."/".$file;
 }
 
 
@@ -94,19 +99,19 @@ public function file($file, $absolute = false)
  */
 public function resource($file)
 {
-	return $this->file("resources/".$file);
+    return $this->file("resources/".$file);
 }
 
 
 /**
  * Get the full path to a view contained within the plugin folder.
  *
- * @param string $view The name of the view.
+ * @param string $file
  * @return string The absolute path to the view.
  */
 public function view($file)
 {
-	return $this->file("views/".$file.".php", true);
+    return $this->file("views/".$file.".php", true);
 }
 
 }
