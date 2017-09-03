@@ -306,8 +306,9 @@ public function init()
 
             $this->addToMenu("user", "settings", "<a href='" . URL("settings") . "' class='link-settings'>" . T("Settings") . "</a>");
 
-            if (ET::$session->isAdmin())
-                $this->addToMenu("user", "administration", "<a href='" . URL("admin") . "' class='link-administration'>" . T("Administration") . "</a>");
+            if (ET::$session->isAdmin()) {
+                            $this->addToMenu("user", "administration", "<a href='" . URL("admin") . "' class='link-administration'>" . T("Administration") . "</a>");
+            }
 
             $this->addToMenu("user", "logout", "<a href='" . URL("user/logout?token=" . ET::$session->token) . "' class='link-logout'>" . T("Log Out") . "</a>");
         }
@@ -816,8 +817,7 @@ protected function aggregateFiles($files, $type)
         foreach ($files as $f) {
             if ($type == "css") {
                 $cssmin->add(PATH_ROOT . "/" . $f);
-            }
-            else if ($type == "js") {
+            } else if ($type == "js") {
                 $jsmin->add(PATH_ROOT . "/" . $f);
             }
             /*$content = file_get_contents(PATH_ROOT."/".$f);
@@ -871,7 +871,9 @@ public function head()
 
         // Otherwise, we need to prepend the full path to each of the files.
         else {
-            foreach ($files as &$file) $file = PATH_ROOT . "/" . $file;
+            foreach ($files as &$file) {
+                $file = PATH_ROOT . "/" . $file;
+            }
         }
         unset($file);
 
@@ -910,7 +912,9 @@ public function head()
 
         // Otherwise, we need to prepend the full path to each of the files.
         else {
-            foreach ($files as &$file) $file = PATH_ROOT . "/" . $file;
+            foreach ($files as &$file) {
+                $file = PATH_ROOT . "/" . $file;
+            }
         }
         unset($file);
 
