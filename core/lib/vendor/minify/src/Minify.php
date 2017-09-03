@@ -108,12 +108,12 @@ abstract class Minify
     {
         // create file & open for writing
         if (($handler = @fopen($path, 'w')) === false) {
-            throw new Exception('The file "'.$path.'" could not be opened. Check if PHP has enough permissions.');
+            throw new Exception('The file "' . $path . '" could not be opened. Check if PHP has enough permissions.');
         }
 
         // write to file
         if (@fwrite($handler, $content) === false) {
-            throw new Exception('The file "'.$path.'" could not be written to. Check if PHP has enough permissions.');
+            throw new Exception('The file "' . $path . '" could not be written to. Check if PHP has enough permissions.');
         }
 
         // close the file
@@ -315,7 +315,7 @@ abstract class Minify
     {
         // PHP only supports $this inside anonymous functions since 5.4
         $minifier = $this;
-        $callback = function ($match) use ($minifier) {
+        $callback = function($match) use ($minifier) {
             if (!$match[1]) {
                 /*
                  * Empty strings need no placeholder; they can't be confused for
@@ -327,8 +327,8 @@ abstract class Minify
             }
 
             $count = count($minifier->extracted);
-            $placeholder = $match[1].$count.$match[1];
-            $minifier->extracted[$placeholder] = $match[1].$match[2].$match[1];
+            $placeholder = $match[1] . $count . $match[1];
+            $minifier->extracted[$placeholder] = $match[1] . $match[2] . $match[1];
 
             return $placeholder;
         };
@@ -345,7 +345,7 @@ abstract class Minify
          * considered as escape-char (times 2) and to get it in the regex,
          * escaped (times 2)
          */
-        $this->registerPattern('/(['.$chars.'])(.*?(?<!\\\\)(\\\\\\\\)*+)\\1/s', $callback);
+        $this->registerPattern('/([' . $chars . '])(.*?(?<!\\\\)(\\\\\\\\)*+)\\1/s', $callback);
     }
 
     /**
