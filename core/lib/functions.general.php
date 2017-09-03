@@ -31,7 +31,9 @@ if (!defined("E_USER_DEPRECATED")) {
 function deprecated($oldFunction, $newFunction = false)
 {
     $message = "$oldFunction is deprecated.";
-    if ($newFunction) $message .= " Use $newFunction instead.";
+    if ($newFunction) {
+        $message .= " Use $newFunction instead.";
+    }
     trigger_error($message, E_USER_DEPRECATED);
 }
 
@@ -60,7 +62,7 @@ function T($string, $default = false)
  */
 function Ts($string, $pluralString, $amount)
 {
-    $number = (float)str_replace(",", "", $amount);
+    $number = (float) str_replace(",", "", $amount);
     return sprintf(T($number == 1 ? $string : $pluralString), $amount);
 }
 
@@ -90,10 +92,14 @@ function C($string, $default = false)
  */
 function R($key, $default = "")
 {
-    if (!empty($_POST[$key])) return $_POST[$key];
-    elseif (isset($_GET[$key])) return $_GET[$key];
-    else return $default;
-}
+    if (!empty($_POST[$key])) {
+        return $_POST[$key];
+    } elseif (isset($_GET[$key])) {
+        return $_GET[$key];
+    } else {
+        return $default;
+    }
+    }
 
 
 /**
@@ -110,8 +116,8 @@ function rrmdir($dir)
         $objects = scandir($dir);
         foreach ($objects as $object) {
             if ($object != "." and $object != "..") {
-                if (filetype($dir."/".$object) == "dir") rrmdir($dir."/".$object);
-                else unlink($dir."/".$object);
+                if (filetype($dir . "/" . $object) == "dir") rrmdir($dir . "/" . $object);
+                else unlink($dir . "/" . $object);
             }
         }
         return rmdir($dir);
@@ -129,11 +135,11 @@ function rrmdir($dir)
  *
  * @package esoTalk
  */
-function file_force_contents($file, $contents){
+function file_force_contents($file, $contents) {
     $parts = explode("/", $file);
     $file = array_pop($parts);
     $dir = "";
-    foreach($parts as $part)
+    foreach ($parts as $part)
         if (!is_dir($dir .= "$part/")) mkdir($dir);
     return file_put_contents("$dir$file", $contents);
 }
@@ -151,7 +157,7 @@ function iniToBytes($value)
 {
     $l = substr($value, -1);
     $ret = substr($value, 0, -1);
-    switch(strtoupper($l)){
+    switch (strtoupper($l)) {
         case "P":
             $ret *= 1024;
         case "T":
@@ -198,7 +204,7 @@ function minifyCSS($css)
  */
 function minifyJS($js)
 {
-    require_once PATH_LIBRARY."/vendor/jsmin.php";
+    require_once PATH_LIBRARY . "/vendor/jsmin.php";
     return JSMin::minify($js);
 }
 
@@ -216,11 +222,13 @@ function minifyJS($js)
 function sendEmail($to, $subject, $body)
 {
     try {
-        $phpmailer = PATH_LIBRARY.'/vendor/class.phpmailer.php';
+        $phpmailer = PATH_LIBRARY . '/vendor/class.phpmailer.php';
         require_once($phpmailer);
         $mail = new PHPMailer(true);
 
-        if ($return = ET::first("sendEmailBefore", array($mail, &$to, &$subject, &$body))) return $return;
+        if ($return = ET::first("sendEmailBefore", array($mail, &$to, &$subject, &$body))) {
+            return $return;
+        }
 
         $mail->CharSet = 'UTF-8';
         $mail->IsHTML(true);
@@ -261,7 +269,9 @@ function parseRequest($parts, $controllers)
     $type = RESPONSE_TYPE_DEFAULT;
 
     // If the specified controller doesn't exist, 404.
-    if (!isset($controllers[$c])) ET::notFound();
+    if (!isset($controllers[$c])) {
+        ET::notFound();
+    }
 
     // Make an instance of the controller.
     $controller = ETFactory::make($controllers[$c]);
@@ -274,7 +284,9 @@ function parseRequest($parts, $controllers)
         // If there's a period in the method string, use the first half as the method and the second half as the response type.
         if (strpos($method, ".") !== false) {
             list($method, $suffix) = explode(".", $method, 2);
-            if (in_array($suffix, array(RESPONSE_TYPE_VIEW, RESPONSE_TYPE_JSON, RESPONSE_TYPE_AJAX, RESPONSE_TYPE_ATOM))) $type = $suffix;
+            if (in_array($suffix, array(RESPONSE_TYPE_VIEW, RESPONSE_TYPE_JSON, RESPONSE_TYPE_AJAX, RESPONSE_TYPE_ATOM))) {
+                $type = $suffix;
+            }
         }
 
         // Get all of the action methods in the controller class.
@@ -293,7 +305,7 @@ function parseRequest($parts, $controllers)
             // Search for a plugin with this method. If found, use that.
             $found = false;
             foreach (ET::$plugins as $plugin) {
-                if (method_exists($plugin, "action_".$c."Controller_".$method)) {
+                if (method_exists($plugin, "action_" . $c . "Controller_" . $method)) {
                     $found = true;
                     break;
                 }
@@ -368,13 +380,18 @@ function sort2d($array, $index, $order = "asc", $natSort = false, $caseSensitive
         $temp = array();
         foreach (array_keys($array) as $key) {
             $temp[$key] = $array[$key][$index];
-            if (!$natSort) ($order == "asc") ? asort($temp) : arsort($temp);
-            else {
+            if (!$natSort) {
+                ($order == "asc") ? asort($temp) : arsort($temp);
+            } else {
                 ($caseSensitive) ? natsort($temp) : natcasesort($temp);
-                if ($order != "asc") $temp = array_reverse($temp, true);
+                if ($order != "asc") {
+                    $temp = array_reverse($temp, true);
+                }
             }
         }
-        foreach (array_keys($temp) as $key) $sorted[$key] = $array[$key];
+        foreach (array_keys($temp) as $key) {
+            $sorted[$key] = $array[$key];
+        }
         return $sorted;
     }
     return $array;
@@ -425,14 +442,13 @@ function slug($string)
             // transliterated as “sz”, in this context “ss” is preferred, as it's the most popular 
             // method among German speakers.
             $src = array('œ', 'æ', 'đ', 'ø', 'ł', 'ß', 'Œ', 'Æ', 'Đ', 'Ø', 'Ł');
-            $dst = array('oe','ae','d', 'o', 'l', 'ss', 'OE', 'AE', 'D', 'O', 'L');
+            $dst = array('oe', 'ae', 'd', 'o', 'l', 'ss', 'OE', 'AE', 'D', 'O', 'L');
             $string = str_replace($src, $dst, $string);
 
             // Using transliterator to get rid of accents and convert non-Latin to Latin
             $string = transliterator_transliterate("Any-Latin; NFD; [:Nonspacing Mark:] Remove; NFC; [:Punctuation:] Remove; Lower();", $string);
 
-        } 
-        else {
+        } else {
 
             // A fallback to old method.
             // Convert special Latin letters and other characters to HTML entities.
@@ -449,7 +465,7 @@ function slug($string)
     ET::trigger("slug", array(&$string));
 
     // Now replace non-alphanumeric characters with a hyphen, and remove multiple hyphens.
-    $slug = str_replace(' ','-',trim(preg_replace('~[^\\pL\d]+~u',' ',mb_strtolower($string, "UTF-8"))));
+    $slug = str_replace(' ', '-', trim(preg_replace('~[^\\pL\d]+~u', ' ', mb_strtolower($string, "UTF-8"))));
 
     return mb_substr($slug, 0, 63, "UTF-8");
 }
@@ -466,7 +482,9 @@ function slug($string)
 function generateRandomString($numOfChars, $possibleChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890~!@#%^&*()_+=-{}[]:;<,>.?/`")
 {
     $salt = "";
-    for ($i = 0; $i < $numOfChars; $i++) $salt .= $possibleChars[rand(0, strlen($possibleChars) - 1)];
+    for ($i = 0; $i < $numOfChars; $i++) {
+        $salt .= $possibleChars[rand(0, strlen($possibleChars) - 1)];
+    }
     return $salt;
 }
 
@@ -482,8 +500,11 @@ function generateRandomString($numOfChars, $possibleChars = "abcdefghijklmnopqrs
 function undoMagicQuotes($value)
 {
 
-    if (!is_array($value)) return stripslashes($value);
-    else array_map("undoMagicQuotes", $value);
+    if (!is_array($value)) {
+        return stripslashes($value);
+    } else {
+        array_map("undoMagicQuotes", $value);
+    }
     return $value;
 }
 
@@ -501,7 +522,7 @@ function undoRegisterGlobals()
     if (ini_get("register_globals")) {
         $array = array("_REQUEST", "_SESSION", "_SERVER", "_ENV", "_FILES");
         foreach ($array as $value) {
-            foreach ((array)$GLOBALS[$value] as $key => $var) {
+            foreach ((array) $GLOBALS[$value] as $key => $var) {
                 if (isset($GLOBALS[$key]) and $var === $GLOBALS[$key]) unset($GLOBALS[$key]);
             }
         }
@@ -513,7 +534,7 @@ function undoRegisterGlobals()
  * Convert an RGB triplet to an HSL triplet.
  *
  * @param integer[] $rgb The RGB triplet.
- * @return array The HSL triplet.
+ * @return integer[] The HSL triplet.
  *
  * @package esoTalk
  */
@@ -560,7 +581,7 @@ function hsl2rgb($hsl)
     $h = $hsl[0];
     $s = $hsl[1];
     $l = $hsl[2];
-    $m2 = ($l <= 0.5) ? $l * ($s + 1) : $l + $s - $l*$s;
+    $m2 = ($l <= 0.5) ? $l * ($s + 1) : $l + $s - $l * $s;
     $m1 = $l * 2 - $m2;
     return array(hue2rgb($m1, $m2, $h + 0.33333),
             hue2rgb($m1, $m2, $h),
@@ -577,9 +598,15 @@ function hsl2rgb($hsl)
 function hue2rgb($m1, $m2, $h)
 {
     $h = ($h < 0) ? $h + 1 : (($h > 1) ? $h - 1 : $h);
-    if ($h * 6 < 1) return $m1 + ($m2 - $m1) * $h * 6;
-    if ($h * 2 < 1) return $m2;
-    if ($h * 3 < 2) return $m1 + ($m2 - $m1) * (0.66666 - $h) * 6;
+    if ($h * 6 < 1) {
+        return $m1 + ($m2 - $m1) * $h * 6;
+    }
+    if ($h * 2 < 1) {
+        return $m2;
+    }
+    if ($h * 3 < 2) {
+        return $m1 + ($m2 - $m1) * (0.66666 - $h) * 6;
+    }
     return $m1;
 }
 
@@ -621,7 +648,7 @@ function colorPack($rgb, $normalize = false)
     foreach ($rgb as $k => $v) {
         $out |= (($v * ($normalize ? 255 : 1)) << (16 - $k * 8));
     }
-    return "#".str_pad(dechex($out), 6, 0, STR_PAD_LEFT);
+    return "#" . str_pad(dechex($out), 6, 0, STR_PAD_LEFT);
 }
 
 
@@ -637,7 +664,7 @@ function json_encode($a = false)
         if (is_float($a)) return floatval(str_replace(",", ".", strval($a)));
         if (is_string($a)) {
             static $jsonReplaces = array(array("\\", "/", "\n", "\t", "\r", "\b", "\f", '"'), array('\\\\', '\\/', '\\n', '\\t', '\\r', '\\b', '\\f', '\"'));
-            return '"'.str_replace($jsonReplaces[0], $jsonReplaces[1], $a).'"';
+            return '"' . str_replace($jsonReplaces[0], $jsonReplaces[1], $a) . '"';
         } else return $a;
     }
 
@@ -651,10 +678,10 @@ function json_encode($a = false)
     $result = array();
     if ($isList) {
         foreach ($a as $v) $result[] = json_encode($v);
-        return '['.implode(',', $result).']';
+        return '[' . implode(',', $result) . ']';
     } else {
-        foreach ($a as $k => $v) $result[] = '"'.($k).'":'.json_encode($v);
-        return '{'.implode(',', $result).'}';
+        foreach ($a as $k => $v) $result[] = '"' . ($k) . '":' . json_encode($v);
+        return '{' . implode(',', $result) . '}';
     }
 }
 
@@ -687,10 +714,10 @@ function json_decode($json)
                 default:
                     return null;
             }
-        }
-        else {
-            if ((substr($part, 0, 1) != "\"") || (substr($part, -1, 1) != "\""))
-                return null;
+        } else {
+            if ((substr($part, 0, 1) != "\"") || (substr($part, -1, 1) != "\"")) {
+                            return null;
+            }
         }
     }
     $json = str_replace(array("&#92;", "&#34;", "$"), array("\\\\", "\\\"", "\\$"), implode("", $parts));
@@ -726,7 +753,7 @@ function URL($url = "", $absolute = false)
 
     // If we don't have nice urls, use ?p=controller/method/argument instead.
     if (!C("esoTalk.urls.friendly") and $url) {
-        $link = "?p=".$url;
+        $link = "?p=" . $url;
         if ($query) $query[0] = "&";
     }
     else $link = $url;
@@ -736,7 +763,7 @@ function URL($url = "", $absolute = false)
 
     // If we're not using mod_rewrite, we need to prepend "index.php/" to the link.
     if (C("esoTalk.urls.friendly") and !C("esoTalk.urls.rewrite")) $link = "index.php/$link";
-    return $absolute ? rtrim(C("esoTalk.baseURL"), "/")."/".$link : getWebPath($link);
+    return $absolute ? rtrim(C("esoTalk.baseURL"), "/") . "/" . $link : getWebPath($link);
 }
 
 
@@ -750,7 +777,9 @@ function URL($url = "", $absolute = false)
  */
 function getRelativePath($path)
 {
-    if (strpos($path, PATH_ROOT) === 0) $path = substr($path, strlen(PATH_ROOT) + 1);
+    if (strpos($path, PATH_ROOT) === 0) {
+        $path = substr($path, strlen(PATH_ROOT) + 1);
+    }
     return $path;
 }
 
@@ -771,7 +800,7 @@ function getWebPath($path)
         $path = getRelativePath($path);
 
         // Prepend the web path.
-        $path = ET::$webPath."/".ltrim($path, "/");
+        $path = ET::$webPath . "/" . ltrim($path, "/");
 
     }
     return $path;
@@ -796,8 +825,8 @@ function getResource($path, $absolute = false)
 
         // Prepend the web path.
         $path = ltrim($path, "/");
-        if ($c = C("esoTalk.resourceURL")) $path = $c.$path;
-        else $path = $absolute ? rtrim(C("esoTalk.baseURL"), "/")."/".$path : ET::$webPath."/".$path;
+        if ($c = C("esoTalk.resourceURL")) $path = $c . $path;
+        else $path = $absolute ? rtrim(C("esoTalk.baseURL"), "/") . "/" . $path : ET::$webPath . "/" . $path;
 
     }
     return $path;
@@ -816,11 +845,13 @@ function getResource($path, $absolute = false)
 function redirect($destination, $code = 302)
 {
     // Close the database connection.
-    if (ET::$database) ET::$database->close();
+    if (ET::$database) {
+        ET::$database->close();
+    }
 
     // Clear the output buffer, and send the location header.
     @ob_end_clean();
-    header("Location: ".sanitizeForHTTP($destination), true, $code);
+    header("Location: " . sanitizeForHTTP($destination), true, $code);
     exit;
 }
 
@@ -837,13 +868,17 @@ function redirect($destination, $code = 302)
 function relativeTime($then, $precise = false)
 {
     // If there is no $then, we can only assume that whatever it is never happened...
-    if (!$then) return T("never");
+    if (!$then) {
+        return T("never");
+    }
 
     // Work out how many seconds it has been since $then.
     $ago = time() - $then;
 
     // If $then happened less than 1 second ago, say "Just now".
-    if ($ago < 1) return T("just now");
+    if ($ago < 1) {
+        return T("just now");
+    }
 
     // If this happened over a year ago, return "x years ago".
     if ($ago >= ($period = 60 * 60 * 24 * 365.25)) {
@@ -885,7 +920,9 @@ function relativeTime($then, $precise = false)
         }
 
         // Return "x seconds ago".
-        elseif ($ago >= 1) return Ts("%d second ago", "%d seconds ago", $ago);
+        elseif ($ago >= 1) {
+            return Ts("%d second ago", "%d seconds ago", $ago);
+        }
 
     }
 
@@ -915,7 +952,7 @@ function smartTime($then, $precise = false)
     elseif ($ago < 180 * 24 * 60 * 60) return strftime("%b %e", $then);
 
     // Otherwise, show the month, day, and year.
-    else return strftime(($precise ? "%e " : "")."%b %Y", $then);
+    else return strftime(($precise ? "%e " : "") . "%b %Y", $then);
 }
 
 
@@ -937,10 +974,15 @@ function unzip($filename)
     @fseek($handle, $size - 22);
 
     // Error checking.
-    if (ftell($handle) != $size - 22) return false; // Can't seek to end of central directory?
+    if (ftell($handle) != $size - 22) {
+        return false;
+    }
+    // Can't seek to end of central directory?
     // Check end of central directory signature.
     $data = unpack("Vid", fread($handle, 4));
-    if ($data["id"] != 0x06054b50) return false;
+    if ($data["id"] != 0x06054b50) {
+        return false;
+    }
 
     // Extract the central directory information.
     $centralDir = unpack("vdisk/vdiskStart/vdiskEntries/ventries/Vsize/Voffset/vcommentSize", fread($handle, 18));
@@ -970,14 +1012,21 @@ function unzip($filename)
         // Get the filename.
         $localHeader["filename"] = fread($handle, $localHeader["filenameLen"]);
         // Skip the extra bit.
-        if ($localHeader["extraLen"] > 0) fread($handle, $localHeader["extraLen"]);
+        if ($localHeader["extraLen"] > 0) {
+            fread($handle, $localHeader["extraLen"]);
+        }
 
         // Extract the file (if it's not a folder.)
         $directory = substr($header["filename"], -1) == "/";
         if (!$directory and $header["compressedSize"] > 0) {
-            if ($header["compression"] == 0) $content = fread($handle, $header["compressedSize"]);
-            else $content = gzinflate(fread($handle, $header["compressedSize"]));
-        } else $content = "";
+            if ($header["compression"] == 0) {
+                $content = fread($handle, $header["compressedSize"]);
+            } else {
+                $content = gzinflate(fread($handle, $header["compressedSize"]));
+            }
+        } else {
+            $content = "";
+        }
 
         // Add to the files array.
         $files[] = array(
@@ -1055,7 +1104,7 @@ function addToArrayString(&$array, $key, $value, $position = false)
         if (key($position) == "after") $index++;
     }
     // If the position is just an integer, then we already have the index.
-    else $index = (int)$position;
+    else $index = (int) $position;
 
     // Add the key/value to their respective arrays at the appropriate index.
     array_splice($keys, $index, 0, $key);

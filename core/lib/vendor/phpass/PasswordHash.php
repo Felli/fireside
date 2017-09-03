@@ -79,6 +79,7 @@ class PasswordHash {
 
 	/**
 	 * @param integer $count
+	 * @param string $input
 	 */
 	function encode64($input, $count)
 	{
@@ -120,6 +121,10 @@ class PasswordHash {
 		return $output;
 	}
 
+	/**
+	 * @param string $password
+	 * @param string $setting
+	 */
 	function crypt_private($password, $setting)
 	{
 		$output = '*0';

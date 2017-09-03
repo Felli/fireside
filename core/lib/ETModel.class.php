@@ -49,7 +49,7 @@ protected $primaryKey;
 public function __construct($table = "", $primaryKey = "")
 {
     $this->table = $table;
-    $this->primaryKey = $primaryKey ? $primaryKey : $table."Id";
+    $this->primaryKey = $primaryKey ? $primaryKey : $table . "Id";
 }
 
 
@@ -234,8 +234,9 @@ public function error($field, $code = null)
  */
 public function validate($field, $value, $callback)
 {
-    if ($message = call_user_func($callback, $value))
-        $this->error($field, $message);
-}
+    if ($message = call_user_func($callback, $value)) {
+            $this->error($field, $message);
+    }
+    }
 
 }
