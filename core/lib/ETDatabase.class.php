@@ -2,7 +2,9 @@
 // Copyright 2011 Toby Zerner, Simon Zerner
 // This file is part of esoTalk. Please see the included license file for usage information.
 
-if (!defined("IN_ESOTALK")) exit;
+if (!defined("IN_ESOTALK")) {
+    exit;
+}
 
 /**
  * The database class handles the database connection and the running of queries against the database.
@@ -96,8 +98,10 @@ public $queries = array();
  */
 public function structure()
 {
-	if (!$this->structure) $this->structure = ETFactory::make("databaseStructure");
-	return $this->structure;
+    if (!$this->structure) {
+        $this->structure = ETFactory::make("databaseStructure");
+    }
+    return $this->structure;
 }
 
 
@@ -108,7 +112,7 @@ public function structure()
  */
 public function SQL()
 {
-	return ETFactory::make("sqlQuery");
+    return ETFactory::make("sqlQuery");
 }
 
 
@@ -119,11 +123,11 @@ public function SQL()
  */
 public function connection()
 {
-	if (!$this->pdoConnection) {
-		$dsn = "mysql:host=".$this->host.($this->port ? ";port=".$this->port : "").";dbname=".$this->dbName;
-		$this->pdoConnection = @new PDO($dsn, $this->user, $this->password, $this->connectionOptions);
-	}
-	return $this->pdoConnection;
+    if (!$this->pdoConnection) {
+        $dsn = "mysql:host=" . $this->host . ($this->port ? ";port=" . $this->port : "") . ";dbname=" . $this->dbName;
+        $this->pdoConnection = @new PDO($dsn, $this->user, $this->password, $this->connectionOptions);
+    }
+    return $this->pdoConnection;
 }
 
 
@@ -134,7 +138,7 @@ public function connection()
  */
 public function getVersion()
 {
-	return $this->query("SELECT VERSION()")->result();
+    return $this->query("SELECT VERSION()")->result();
 }
 
 
@@ -152,19 +156,19 @@ public function getVersion()
  */
 public function init($host, $user, $password, $dbName, $tablePrefix = "", $connectionOptions = array(), $port = null)
 {
-	$this->pdoConnection = null;
+    $this->pdoConnection = null;
 
-	$this->host = $host;
-	$this->port = $port;
-	$this->user = $user;
-	$this->password = $password;
-	$this->dbName = $dbName;
-	$this->tablePrefix = $tablePrefix;
-	$this->connectionOptions = $connectionOptions;
+    $this->host = $host;
+    $this->port = $port;
+    $this->user = $user;
+    $this->password = $password;
+    $this->dbName = $dbName;
+    $this->tablePrefix = $tablePrefix;
+    $this->connectionOptions = $connectionOptions;
 
-	// We don't use PDO's prepared statements as they have some flaws. We emulate parameter binding behaviour
-	// (see ETSQLQuery and escapeValue()), and then send direct queries.
-	$this->connectionOptions[PDO::MYSQL_ATTR_DIRECT_QUERY] = true;
+    // We don't use PDO's prepared statements as they have some flaws. We emulate parameter binding behaviour
+    // (see ETSQLQuery and escapeValue()), and then send direct queries.
+    $this->connectionOptions[PDO::MYSQL_ATTR_DIRECT_QUERY] = true;
 }
 
 
@@ -175,8 +179,8 @@ public function init($host, $user, $password, $dbName, $tablePrefix = "", $conne
  */
 public function close()
 {
-	$this->commitTransaction();
-	unset($this->pdoConnection);
+    $this->commitTransaction();
+    unset($this->pdoConnection);
 }
 
 
@@ -187,8 +191,8 @@ public function close()
  */
 public function beginTransaction()
 {
-	$this->connection()->beginTransaction();
-	$this->inTransaction = true;
+    $this->connection()->beginTransaction();
+    $this->inTransaction = true;
 }
 
 
@@ -199,9 +203,11 @@ public function beginTransaction()
  */
 public function rollbackTransaction()
 {
-	if (!$this->inTransaction) return;
-	$this->connection()->rollback();
-	$this->inTransaction = false;
+    if (!$this->inTransaction) {
+        return;
+    }
+    $this->connection()->rollback();
+    $this->inTransaction = false;
 }
 
 
@@ -212,9 +218,11 @@ public function rollbackTransaction()
  */
 public function commitTransaction()
 {
-	if (!$this->inTransaction) return;
-	$this->connection()->commit();
-	$this->inTransaction = false;
+    if (!$this->inTransaction) {
+        return;
+    }
+    $this->connection()->commit();
+    $this->inTransaction = false;
 }
 
 
@@ -225,7 +233,7 @@ public function commitTransaction()
  */
 public function lastInsertId()
 {
-	return $this->query("SELECT LAST_INSERT_ID()")->result();
+    return $this->query("SELECT LAST_INSERT_ID()")->result();
 }
 
 
@@ -239,39 +247,48 @@ public function lastInsertId()
  */
 public function escapeValue($value, $dataType = null)
 {
-	// If the value is a raw SQL query object, don't sanitize it.
-	if ($value instanceof ETSQLRaw) return $value;
+    // If the value is a raw SQL query object, don't sanitize it.
+    if ($value instanceof ETSQLRaw) {
+        return $value;
+    }
 
-	// If the value is an array, escape each element individually and return a comma-separated string.
-	if (is_array($value)) {
-		foreach ($value as &$v) $v = $this->escapeValue($v, $dataType);
-    	return implode(",", $value);
-	}
+    // If the value is an array, escape each element individually and return a comma-separated string.
+    if (is_array($value)) {
+        foreach ($value as &$v) {
+            $v = $this->escapeValue($v, $dataType);
+        }
+        return implode(",", $value);
+    }
 
-	// If no data type was specified, work it out based on the variable content.
-	if ($dataType === null) {
-		if ($value === true or $value === false) $dataType = PDO::PARAM_BOOL;
-		elseif ($value === null) $dataType = PDO::PARAM_NULL;
-		elseif (is_int($value)) $dataType = PDO::PARAM_INT;
-		else $dataType = PDO::PARAM_STR;
-	}
+    // If no data type was specified, work it out based on the variable content.
+    if ($dataType === null) {
+        if ($value === true or $value === false) {
+            $dataType = PDO::PARAM_BOOL;
+        } elseif ($value === null) {
+            $dataType = PDO::PARAM_NULL;
+        } elseif (is_int($value)) {
+            $dataType = PDO::PARAM_INT;
+        } else {
+            $dataType = PDO::PARAM_STR;
+        }
+    }
 
-	// Now escape the value according to the data type.
-	switch ($dataType) {
-		case PDO::PARAM_BOOL:
-			return $value ? "1" : "0";
+    // Now escape the value according to the data type.
+    switch ($dataType) {
+        case PDO::PARAM_BOOL:
+            return $value ? "1" : "0";
 
-		case PDO::PARAM_NULL:
-			return "NULL";
+        case PDO::PARAM_NULL:
+            return "NULL";
 
-		case PDO::PARAM_INT:
-			$value = (int)$value;
-			return $value ? (string)$value : "0";
+        case PDO::PARAM_INT:
+            $value = (int) $value;
+            return $value ? (string) $value : "0";
 
-		default:
-			$value = str_replace(array('\\', "\0", "\n", "\r", "'", '"', "\x1a"), array('\\\\', '\\0', '\\n', '\\r', "\\'", '\\"', '\\Z'), $value);
-			return "'".$value."'";
-	}
+        default:
+            $value = str_replace(array('\\', "\0", "\n", "\r", "'", '"', "\x1a"), array('\\\\', '\\0', '\\n', '\\r', "\\'", '\\"', '\\Z'), $value);
+            return "'" . $value . "'";
+    }
 }
 
 
@@ -283,30 +300,32 @@ public function escapeValue($value, $dataType = null)
  */
 public function query($query)
 {
-	// If the query is empty, don't bother proceeding.
-	if (!$query) return false;
+    // If the query is empty, don't bother proceeding.
+    if (!$query) {
+        return false;
+    }
 
-	// Get the database connection.
-	$connection = $this->connection();
+    // Get the database connection.
+    $connection = $this->connection();
 
-	$this->trigger("beforeQuery", array(&$query));
-	$this->queries[] = $query;
+    $this->trigger("beforeQuery", array(&$query));
+    $this->queries[] = $query;
 
-	// Execute the query.
-	$statement = $connection->query($query);
+    // Execute the query.
+    $statement = $connection->query($query);
 
-	// Was there an error?
-	if (!$statement) {
-		$error = $connection->errorInfo();
-		throw new Exception("SQL Error (".$error[0].", ".$error[1]."): ".$error[2]."<br><br><pre>".$this->highlightQueryErrors($query, $error[2])."</pre>");
-	}
+    // Was there an error?
+    if (!$statement) {
+        $error = $connection->errorInfo();
+        throw new Exception("SQL Error (" . $error[0] . ", " . $error[1] . "): " . $error[2] . "<br><br><pre>" . $this->highlightQueryErrors($query, $error[2]) . "</pre>");
+    }
 
-	// Set up a new ETSQLResult object with the result statement.
-	$result = ETFactory::make("sqlResult", $statement);
+    // Set up a new ETSQLResult object with the result statement.
+    $result = ETFactory::make("sqlResult", $statement);
 
-	$this->trigger("afterQuery", array($result));
+    $this->trigger("afterQuery", array($result));
 
-	return $result;
+    return $result;
 }
 
 
@@ -320,10 +339,12 @@ public function query($query)
  */
 protected function highlightQueryErrors($query, $error)
 {
-	$query = sanitizeHTML($query);
-	preg_match("/'(.+?)'/", $error, $matches);
-	if (!empty($matches[1])) $query = str_replace($matches[1], "<span class='highlight'>{$matches[1]}</span>", $query);
-	return $query;
+    $query = sanitizeHTML($query);
+    preg_match("/'(.+?)'/", $error, $matches);
+    if (!empty($matches[1])) {
+        $query = str_replace($matches[1], "<span class='highlight'>{$matches[1]}</span>", $query);
+    }
+    return $query;
 }
 
 }

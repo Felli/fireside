@@ -2,7 +2,9 @@
 // Copyright 2011 Toby Zerner, Simon Zerner
 // This file is part of esoTalk. Please see the included license file for usage information.
 
-if (!defined("IN_ESOTALK")) exit;
+if (!defined("IN_ESOTALK")) {
+    exit;
+}
 
 /**
  * Displays the activity pane in a member's profile, which contains a list of activity items and a "view more"
@@ -36,11 +38,14 @@ if (!isset($activity[$k - 1]["time"]) or relativeTime($activity[$k - 1]["time"],
 </ol>
 
 <?php if ($data["showViewMoreLink"]):
-echo "<a href='".URL(memberURL($member["memberId"], $member["username"], "activity")."/".($data["page"] + 2))."' class='button' id='viewMoreActivity'>".T("View more")."</a>";
+echo "<a href='" . URL(memberURL($member["memberId"], $member["username"], "activity") . "/" . ($data["page"] + 2)) . "' class='button' id='viewMoreActivity'>" . T("View more") . "</a>";
 endif; ?>
 
 <?php
 // Otherwise, output a "no activity" message.
-else: ?>
-<p class='help'><?php printf(T("message.noActivity"), $member["username"]); ?></p>
+else {
+    : ?>
+<p class='help'><?php printf(T("message.noActivity"), $member["username"]);
+}
+?></p>
 <?php endif; ?>

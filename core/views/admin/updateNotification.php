@@ -2,7 +2,9 @@
 // Copyright 2011 Toby Zerner, Simon Zerner
 // This file is part of esoTalk. Please see the included license file for usage information.
 
-if (!defined("IN_ESOTALK")) exit;
+if (!defined("IN_ESOTALK")) {
+    exit;
+}
 
 /**
  * Shows the "update notification" box at the top of the dashboard.
@@ -19,8 +21,11 @@ if (version_compare($info["version"], ESOTALK_VERSION, ">")): ?>
 <p><?php echo T("message.esoTalkUpdateAvailableHelp"); ?></p>
 <p><a href='<?php echo $info["releaseNotes"]; ?>' target='_blank' class='button'><?php echo T("Upgrade Now"); ?></a></p>
 
-<?php else: ?>
-<h3><?php echo T("message.esoTalkUpToDate"); ?></h3>
+<?php else {
+    : ?>
+<h3><?php echo T("message.esoTalkUpToDate");
+}
+?></h3>
 <p><?php printf(T("message.esoTalkUpToDateHelp"), "http://esotalk.org/donate"); ?></p>
 <?php endif; ?>
 

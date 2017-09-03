@@ -87,7 +87,7 @@ public function uninstall()
  */
 public function file($file, $absolute = false)
 {
-    return ($absolute ? PATH_ROOT."/" : "").$this->path."/".$file;
+    return ($absolute ? PATH_ROOT."/" : "") . $this->path . "/" . $file;
 }
 
 
@@ -99,7 +99,7 @@ public function file($file, $absolute = false)
  */
 public function resource($file)
 {
-    return $this->file("resources/".$file);
+    return $this->file("resources/" . $file);
 }
 
 
@@ -111,7 +111,7 @@ public function resource($file)
  */
 public function view($file)
 {
-    return $this->file("views/".$file.".php", true);
+    return $this->file("views/" . $file . ".php", true);
 }
 
 }

@@ -2,7 +2,9 @@
 // Copyright 2011 Toby Zerner, Simon Zerner
 // This file is part of esoTalk. Please see the included license file for usage information.
 
-if (!defined("IN_ESOTALK")) exit;
+if (!defined("IN_ESOTALK")) {
+    exit;
+}
 
 /**
  * A model which provides functions to perform searches for conversations. Handles the implementation
@@ -105,7 +107,7 @@ public $fulltext = array();
  */
 public function __construct()
 {
-	parent::__construct("search");
+    parent::__construct("search");
 }
 
 
@@ -124,7 +126,7 @@ public function __construct()
  */
 public static function addGambit($condition, $function)
 {
-	self::$gambits[] = array($condition, $function);
+    self::$gambits[] = array($condition, $function);
 }
 
 
@@ -138,7 +140,7 @@ public static function addGambit($condition, $function)
  */
 public static function addAlias($term, $realTerm)
 {
-	self::$aliases[$term] = $realTerm;
+    self::$aliases[$term] = $realTerm;
 }
 
 
@@ -155,7 +157,7 @@ public static function addAlias($term, $realTerm)
  */
 public function addIDFilter($sql, $negate = false)
 {
-	$this->idFilters[] = array($sql, $negate);
+    $this->idFilters[] = array($sql, $negate);
 }
 
 
@@ -167,7 +169,7 @@ public function addIDFilter($sql, $negate = false)
  */
 public function fulltext($term)
 {
-	$this->fulltext[] = $term;
+    $this->fulltext[] = $term;
 }
 
 
@@ -180,9 +182,11 @@ public function fulltext($term)
  */
 public function orderBy($order)
 {
-	$direction = substr($order, strrpos($order, " ") + 1);
-	if ($direction != "ASC" and $direction != "DESC") $order .= " ASC";
-	$this->orderBy[] = $order;
+    $direction = substr($order, strrpos($order, " ") + 1);
+    if ($direction != "ASC" and $direction != "DESC") {
+        $order .= " ASC";
+    }
+    $this->orderBy[] = $order;
 }
 
 
@@ -194,7 +198,7 @@ public function orderBy($order)
  */
 public function limit($limit)
 {
-	$this->limit = $limit;
+    $this->limit = $limit;
 }
 
 
@@ -205,15 +209,15 @@ public function limit($limit)
  */
 protected function reset()
 {
-	$this->resultCount = 0;
-	$this->areMoreResults = false;
-	$this->sql = null;
-	$this->idFilters = array();
-	$this->orderBy = array();
-	$this->orderReverse = false;
-	$this->limit = false;
-	$this->includeIgnored = false;
-	$this->fulltext = array();
+    $this->resultCount = 0;
+    $this->areMoreResults = false;
+    $this->sql = null;
+    $this->idFilters = array();
+    $this->orderBy = array();
+    $this->orderReverse = false;
+    $this->limit = false;
+    $this->includeIgnored = false;
+    $this->fulltext = array();
 }
 
 
@@ -226,53 +230,59 @@ protected function reset()
  */
 public function isFlooding()
 {
-	if (C("esoTalk.search.searchesPerMinute") <= 0) return false;
-	$time = time();
-	$period = 60;
+    if (C("esoTalk.search.searchesPerMinute") <= 0) {
+        return false;
+    }
+    $time = time();
+    $period = 60;
 
-	// If we have a record of their searches in the session, check how many searches they've performed in the last minute.
-	$searches = ET::$session->get("searches");
-	if (!empty($searches)) {
+    // If we have a record of their searches in the session, check how many searches they've performed in the last minute.
+    $searches = ET::$session->get("searches");
+    if (!empty($searches)) {
 
-		// Clean anything older than $period seconds out of the searches array.
-		foreach ($searches as $k => $v) {
-			if ($v < $time - $period) unset($searches[$k]);
-		}
+        // Clean anything older than $period seconds out of the searches array.
+        foreach ($searches as $k => $v) {
+            if ($v < $time - $period) {
+                unset($searches[$k]);
+            }
+        }
 
-		// Have they performed >= [searchesPerMinute] searches in the last minute? If so, they are flooding.
-		if (count($searches) >= C("esoTalk.search.searchesPerMinute"))
-			return $period - $time + min($searches);
-	}
+        // Have they performed >= [searchesPerMinute] searches in the last minute? If so, they are flooding.
+        if (count($searches) >= C("esoTalk.search.searchesPerMinute")) {
+                    return $period - $time + min($searches);
+        }
+    }
 
-	// However, if we don't have a record in the session, query the database searches table.
-	else {
+    // However, if we don't have a record in the session, query the database searches table.
+    else {
 
-		// Get the user's IP address.
-		$ip = (int)ip2long(ET::$session->ip);
+        // Get the user's IP address.
+        $ip = (int) ip2long(ET::$session->ip);
 
-		// Have they performed >= $config["searchesPerMinute"] searches in the last minute?
-		$sql = ET::SQL()
-			->select("COUNT(ip)")
-			->from("search")
-			->where("type='conversations'")
-			->where("ip=:ip")->bind(":ip", $ip)
-			->where("time>:time")->bind(":time", $time - $period);
+        // Have they performed >= $config["searchesPerMinute"] searches in the last minute?
+        $sql = ET::SQL()
+            ->select("COUNT(ip)")
+            ->from("search")
+            ->where("type='conversations'")
+            ->where("ip=:ip")->bind(":ip", $ip)
+            ->where("time>:time")->bind(":time", $time - $period);
 
-		if ($sql->exec()->result() >= C("esoTalk.search.searchesPerMinute"))
-			return $period;
+        if ($sql->exec()->result() >= C("esoTalk.search.searchesPerMinute")) {
+                    return $period;
+        }
 
-		// Log this search in the searches table.
-		ET::SQL()->insert("search")->set("type", "conversations")->set("ip", $ip)->set("time", $time)->exec();
+        // Log this search in the searches table.
+        ET::SQL()->insert("search")->set("type", "conversations")->set("ip", $ip)->set("time", $time)->exec();
 
-		// Proactively clean the searches table of searches older than $period seconds.
-		ET::SQL()->delete()->from("search")->where("type", "conversations")->where("time<:time")->bind(":time", $time - $period)->exec();
-	}
+        // Proactively clean the searches table of searches older than $period seconds.
+        ET::SQL()->delete()->from("search")->where("type", "conversations")->where("time<:time")->bind(":time", $time - $period)->exec();
+    }
 
-	// Log this search in the session array.
-	$searches[] = $time;
-	ET::$session->store("searches", $searches);
+    // Log this search in the session array.
+    $searches[] = $time;
+    ET::$session->store("searches", $searches);
 
-	return false;
+    return false;
 }
 
 
@@ -286,161 +296,192 @@ public function isFlooding()
  */
 public function getConversationIDs($channelIDs = array(), $searchString = "", $orderBySticky = false)
 {
-	$this->reset();
+    $this->reset();
 
-	$this->trigger("getConversationIDsBefore", array(&$channelIDs, &$searchString, &$orderBySticky));
+    $this->trigger("getConversationIDsBefore", array(&$channelIDs, &$searchString, &$orderBySticky));
 
-	if ($searchString and ($seconds = $this->isFlooding())) {
-		$this->error("search", sprintf(T("message.waitToSearch"), $seconds));
-		return false;
-	}
+    if ($searchString and ($seconds = $this->isFlooding())) {
+        $this->error("search", sprintf(T("message.waitToSearch"), $seconds));
+        return false;
+    }
 
-	// Initialize the SQL query that will return the resulting conversation IDs.
-	$this->sql = ET::SQL()->select("c.conversationId")->from("conversation c");
+    // Initialize the SQL query that will return the resulting conversation IDs.
+    $this->sql = ET::SQL()->select("c.conversationId")->from("conversation c");
 
-	// Only get conversations in the specified channels.
-	if ($channelIDs) {
-		$this->sql->where("c.channelId IN (:channelIds)")->bind(":channelIds", $channelIDs);
-	}
+    // Only get conversations in the specified channels.
+    if ($channelIDs) {
+        $this->sql->where("c.channelId IN (:channelIds)")->bind(":channelIds", $channelIDs);
+    }
 
-	// Process the search string into individial terms. Replace all "-" signs with "+!", and then
-	// split the string by "+". Negated terms will then be prefixed with "!". Only keep the first
-	// 5 terms, just to keep the load on the database down!
-	$terms = !empty($searchString) ? explode("+", strtolower(str_replace("-", "+!", trim($searchString, " +-")))) : array();
-	$terms = array_slice(array_filter($terms), 0, 5);
+    // Process the search string into individial terms. Replace all "-" signs with "+!", and then
+    // split the string by "+". Negated terms will then be prefixed with "!". Only keep the first
+    // 5 terms, just to keep the load on the database down!
+    $terms = !empty($searchString) ? explode("+", strtolower(str_replace("-", "+!", trim($searchString, " +-")))) : array();
+    $terms = array_slice(array_filter($terms), 0, 5);
 
-	// Take each term, match it with a gambit, and execute the gambit's function.
-	foreach ($terms as $term) {
+    // Take each term, match it with a gambit, and execute the gambit's function.
+    foreach ($terms as $term) {
 
-		// Are we dealing with a negated search term, ie. prefixed with a "!"?
-		$term = trim($term);
-		if ($negate = ($term[0] == "!")) $term = trim($term, "! ");
+        // Are we dealing with a negated search term, ie. prefixed with a "!"?
+        $term = trim($term);
+        if ($negate = ($term[0] == "!")) {
+            $term = trim($term, "! ");
+        }
 
-		if ($term[0] == "#") {
-			$term = ltrim($term, "#");
+        if ($term[0] == "#") {
+            $term = ltrim($term, "#");
 
-			// If the term is an alias, translate it into the appropriate gambit.
-			if (array_key_exists($term, self::$aliases)) $term = self::$aliases[$term];
+            // If the term is an alias, translate it into the appropriate gambit.
+            if (array_key_exists($term, self::$aliases)) {
+                $term = self::$aliases[$term];
+            }
 
-			// Find a matching gambit by evaluating each gambit's condition, and run its callback function.
-			foreach (self::$gambits as $gambit) {
-				list($condition, $function) = $gambit;
-				if (eval($condition)) {
-					call_user_func_array($function, array(&$this, $term, $negate));
-					continue 2;
-				}
-			}
-		}
+            // Find a matching gambit by evaluating each gambit's condition, and run its callback function.
+            foreach (self::$gambits as $gambit) {
+                list($condition, $function) = $gambit;
+                if (eval($condition)) {
+                    call_user_func_array($function, array(&$this, $term, $negate));
+                    continue 2;
+                }
+            }
+        }
 
-		// If we didn't find a gambit, use this term as a fulltext term.
-		if ($negate) $term = "-".str_replace(" ", " -", $term);
-		$this->fulltext($term);
-	}
+        // If we didn't find a gambit, use this term as a fulltext term.
+        if ($negate) {
+            $term = "-" . str_replace(" ", " -", $term);
+        }
+        $this->fulltext($term);
+    }
 
-	// If an order for the search results has not been specified, apply a default.
-	// Order by sticky and then last post time.
-	if (!count($this->orderBy)) {
-		if ($orderBySticky) $this->orderBy("c.sticky DESC");
-		$this->orderBy("c.lastPostTime DESC");
-	}
+    // If an order for the search results has not been specified, apply a default.
+    // Order by sticky and then last post time.
+    if (!count($this->orderBy)) {
+        if ($orderBySticky) {
+            $this->orderBy("c.sticky DESC");
+        }
+        $this->orderBy("c.lastPostTime DESC");
+    }
 
-	// If we're not including ignored conversations, add a where predicate to the query to exclude them.
-	if (!$this->includeIgnored and ET::$session->user) {
-		$q = ET::SQL()->select("conversationId")->from("member_conversation")->where("type='member'")->where("id=:memberIdIgnored")->where("ignored=1")->get();
-		$this->sql->where("conversationId NOT IN ($q)")->bind(":memberIdIgnored", ET::$session->userId);
-	}
+    // If we're not including ignored conversations, add a where predicate to the query to exclude them.
+    if (!$this->includeIgnored and ET::$session->user) {
+        $q = ET::SQL()->select("conversationId")->from("member_conversation")->where("type='member'")->where("id=:memberIdIgnored")->where("ignored=1")->get();
+        $this->sql->where("conversationId NOT IN ($q)")->bind(":memberIdIgnored", ET::$session->userId);
+    }
 
-	// Now we need to loop through the ID filters and run them one-by-one. When a query returns a selection
-	// of conversation IDs, subsequent queries are restricted to filtering those conversation IDs,
-	// and so on, until we have a list of IDs to pass to the final query.
-	$goodConversationIDs = array();
-	$badConversationIDs = array();
-	$idCondition = "";
-	foreach ($this->idFilters as $v) {
-		list($sql, $negate) = $v;
+    // Now we need to loop through the ID filters and run them one-by-one. When a query returns a selection
+    // of conversation IDs, subsequent queries are restricted to filtering those conversation IDs,
+    // and so on, until we have a list of IDs to pass to the final query.
+    $goodConversationIDs = array();
+    $badConversationIDs = array();
+    $idCondition = "";
+    foreach ($this->idFilters as $v) {
+        list($sql, $negate) = $v;
 
-		// Apply the list of good IDs to the query.
-		$sql->where($idCondition);
+        // Apply the list of good IDs to the query.
+        $sql->where($idCondition);
 
-		// Get the list of conversation IDs so that the next condition can use it in its query.
-		$result = $sql->exec();
-		$ids = array();
-		while ($row = $result->nextRow()) $ids[] = (int)reset($row);
+        // Get the list of conversation IDs so that the next condition can use it in its query.
+        $result = $sql->exec();
+        $ids = array();
+        while ($row = $result->nextRow()) {
+            $ids[] = (int) reset($row);
+        }
 
-		// If this condition is negated, then add the IDs to the list of bad conversations.
-		// If the condition is not negated, set the list of good conversations to the IDs, provided there are some.
-		if ($negate) $badConversationIDs = array_merge($badConversationIDs, $ids);
-		elseif (count($ids)) $goodConversationIDs = $ids;
-		else return false;
+        // If this condition is negated, then add the IDs to the list of bad conversations.
+        // If the condition is not negated, set the list of good conversations to the IDs, provided there are some.
+        if ($negate) {
+            $badConversationIDs = array_merge($badConversationIDs, $ids);
+        } elseif (count($ids)) {
+            $goodConversationIDs = $ids;
+        } else {
+            return false;
+        }
 
-		// Strip bad conversation IDs from the list of good conversation IDs.
-		if (count($goodConversationIDs)) {
-			$goodConversationIds = array_diff($goodConversationIDs, $badConversationIDs);
-			if (!count($goodConversationIDs)) return false;
-		}
+        // Strip bad conversation IDs from the list of good conversation IDs.
+        if (count($goodConversationIDs)) {
+            $goodConversationIds = array_diff($goodConversationIDs, $badConversationIDs);
+            if (!count($goodConversationIDs)) {
+                return false;
+            }
+        }
 
-		// This will be the condition for the next query that restricts or eliminates conversation IDs.
-		if (count($goodConversationIDs))
-			$idCondition = "conversationId IN (".implode(",", $goodConversationIDs).")";
-		elseif (count($badConversationIDs))
-			$idCondition = "conversationId NOT IN (".implode(",", $badConversationIDs).")";
-	}
+        // This will be the condition for the next query that restricts or eliminates conversation IDs.
+        if (count($goodConversationIDs)) {
+                    $idCondition = "conversationId IN (" . implode(",", $goodConversationIDs) . ")";
+        } elseif (count($badConversationIDs)) {
+                    $idCondition = "conversationId NOT IN (" . implode(",", $badConversationIDs) . ")";
+        }
+    }
 
-	// Reverse the order if necessary - swap DESC and ASC.
-	if ($this->orderReverse) {
-		foreach ($this->orderBy as $k => $v)
-			$this->orderBy[$k] = strtr($this->orderBy[$k], array("DESC" => "ASC", "ASC" => "DESC"));
-	}
+    // Reverse the order if necessary - swap DESC and ASC.
+    if ($this->orderReverse) {
+        foreach ($this->orderBy as $k => $v) {
+                    $this->orderBy[$k] = strtr($this->orderBy[$k], array("DESC" => "ASC", "ASC" => "DESC"));
+        }
+    }
 
-	// Now check if there are any fulltext keywords to filter by.
-	if (count($this->fulltext)) {
+    // Now check if there are any fulltext keywords to filter by.
+    if (count($this->fulltext)) {
 
-		// Run a query against the posts table to get matching conversation IDs.
-		$fulltextString = implode(" ", $this->fulltext);
-		$fulltextQuery = ET::SQL()
-			->select("DISTINCT conversationId")
-			->from("post")
-			->where("MATCH (title, content) AGAINST (:fulltext IN BOOLEAN MODE)")
-			->where($idCondition)
-			->orderBy("MATCH (title, content) AGAINST (:fulltextOrder) DESC")
-			->bind(":fulltext", $fulltextString)
-			->bind(":fulltextOrder", $fulltextString);
+        // Run a query against the posts table to get matching conversation IDs.
+        $fulltextString = implode(" ", $this->fulltext);
+        $fulltextQuery = ET::SQL()
+            ->select("DISTINCT conversationId")
+            ->from("post")
+            ->where("MATCH (title, content) AGAINST (:fulltext IN BOOLEAN MODE)")
+            ->where($idCondition)
+            ->orderBy("MATCH (title, content) AGAINST (:fulltextOrder) DESC")
+            ->bind(":fulltext", $fulltextString)
+            ->bind(":fulltextOrder", $fulltextString);
 
-		$this->trigger("fulltext", array($fulltextQuery, $this->fulltext));
+        $this->trigger("fulltext", array($fulltextQuery, $this->fulltext));
 
-		$result = $fulltextQuery->exec();
-		$ids = array();
-		while ($row = $result->nextRow()) $ids[] = reset($row);
+        $result = $fulltextQuery->exec();
+        $ids = array();
+        while ($row = $result->nextRow()) {
+            $ids[] = reset($row);
+        }
 
-		// Change the ID condition to this list of matching IDs, and order by relevance.
-		if (count($ids)) $idCondition = "conversationId IN (".implode(",", $ids).")";
-		else return false;
-		$this->orderBy = array("FIELD(c.conversationId,".implode(",", $ids).")");
-	}
+        // Change the ID condition to this list of matching IDs, and order by relevance.
+        if (count($ids)) {
+            $idCondition = "conversationId IN (" . implode(",", $ids) . ")";
+        } else {
+            return false;
+        }
+        $this->orderBy = array("FIELD(c.conversationId," . implode(",", $ids) . ")");
+    }
 
-	// Set a default limit if none has previously been set.
-	if (!$this->limit) $this->limit = C("esoTalk.search.limit");
+    // Set a default limit if none has previously been set.
+    if (!$this->limit) {
+        $this->limit = C("esoTalk.search.limit");
+    }
 
-	// Finish constructing the final query using the ID whitelist/blacklist we've come up with.
-	// Get one more result than we'll actually need so we can see if there are "more results."
-	if ($idCondition) $this->sql->where($idCondition);
-	$this->sql->orderBy($this->orderBy)->limit($this->limit + 1);
+    // Finish constructing the final query using the ID whitelist/blacklist we've come up with.
+    // Get one more result than we'll actually need so we can see if there are "more results."
+    if ($idCondition) {
+        $this->sql->where($idCondition);
+    }
+    $this->sql->orderBy($this->orderBy)->limit($this->limit + 1);
 
-	// Make sure conversations that the user isn't allowed to see are filtered out.
-	ET::conversationModel()->addAllowedPredicate($this->sql);
+    // Make sure conversations that the user isn't allowed to see are filtered out.
+    ET::conversationModel()->addAllowedPredicate($this->sql);
 
-	// Execute the query, and collect the final set of conversation IDs.
-	$result = $this->sql->exec();
-	$conversationIDs = array();
-	while ($row = $result->nextRow()) $conversationIDs[] = reset($row);
+    // Execute the query, and collect the final set of conversation IDs.
+    $result = $this->sql->exec();
+    $conversationIDs = array();
+    while ($row = $result->nextRow()) {
+        $conversationIDs[] = reset($row);
+    }
 
-	// If there's one more result than we actually need, indicate that there are "more results."
-	if (count($conversationIDs) == $this->limit + 1) {
-		array_pop($conversationIDs);
-		if ($this->limit < C("esoTalk.search.limitMax")) $this->areMoreResults = true;
-	}
+    // If there's one more result than we actually need, indicate that there are "more results."
+    if (count($conversationIDs) == $this->limit + 1) {
+        array_pop($conversationIDs);
+        if ($this->limit < C("esoTalk.search.limitMax")) {
+            $this->areMoreResults = true;
+        }
+    }
 
-	return count($conversationIDs) ? $conversationIDs : false;
+    return count($conversationIDs) ? $conversationIDs : false;
 }
 
 
@@ -453,59 +494,61 @@ public function getConversationIDs($channelIDs = array(), $searchString = "", $o
  */
 public function getResults($conversationIDs, $checkForPermission = false)
 {
-	// Construct a query to get details for all of the specified conversations.
-	$sql = ET::SQL()
-		->select("s.*") // Select the status fields first so that the conversation fields take precedence.
-		->select("c.*")
-		->select("sm.memberId", "startMemberId")
-		->select("sm.username", "startMember")
-		->select("sm.avatarFormat", "startMemberAvatarFormat")
-		->select("lpm.memberId", "lastPostMemberId")
-		->select("lpm.username", "lastPostMember")
-		->select("lpm.email", "lastPostMemberEmail")
-		->select("lpm.avatarFormat", "lastPostMemberAvatarFormat")
-		->select("IF((IF(c.lastPostTime IS NOT NULL,c.lastPostTime,c.startTime)>:markedAsRead AND (s.lastRead IS NULL OR s.lastRead<c.countPosts)),(c.countPosts - IF(s.lastRead IS NULL,0,s.lastRead)),0)", "unread")
-		->select("p.content", "firstPost")
-		->from("conversation c")
-		->from("member_conversation s", "s.conversationId=c.conversationId AND s.type='member' AND s.id=:memberId", "left")
-		->from("member sm", "c.startMemberId=sm.memberId", "left")
-		->from("member lpm", "c.lastPostMemberId=lpm.memberId", "left")
-		->from("channel ch", "c.channelId=ch.channelId", "left")
-		->from("post p", "c.sticky AND c.conversationId=p.conversationId AND c.startTime=p.time", "left")
-		->bind(":markedAsRead", ET::$session->preference("markedAllConversationsAsRead"))
-		->bind(":memberId", ET::$session->userId);
+    // Construct a query to get details for all of the specified conversations.
+    $sql = ET::SQL()
+        ->select("s.*") // Select the status fields first so that the conversation fields take precedence.
+        ->select("c.*")
+        ->select("sm.memberId", "startMemberId")
+        ->select("sm.username", "startMember")
+        ->select("sm.avatarFormat", "startMemberAvatarFormat")
+        ->select("lpm.memberId", "lastPostMemberId")
+        ->select("lpm.username", "lastPostMember")
+        ->select("lpm.email", "lastPostMemberEmail")
+        ->select("lpm.avatarFormat", "lastPostMemberAvatarFormat")
+        ->select("IF((IF(c.lastPostTime IS NOT NULL,c.lastPostTime,c.startTime)>:markedAsRead AND (s.lastRead IS NULL OR s.lastRead<c.countPosts)),(c.countPosts - IF(s.lastRead IS NULL,0,s.lastRead)),0)", "unread")
+        ->select("p.content", "firstPost")
+        ->from("conversation c")
+        ->from("member_conversation s", "s.conversationId=c.conversationId AND s.type='member' AND s.id=:memberId", "left")
+        ->from("member sm", "c.startMemberId=sm.memberId", "left")
+        ->from("member lpm", "c.lastPostMemberId=lpm.memberId", "left")
+        ->from("channel ch", "c.channelId=ch.channelId", "left")
+        ->from("post p", "c.sticky AND c.conversationId=p.conversationId AND c.startTime=p.time", "left")
+        ->bind(":markedAsRead", ET::$session->preference("markedAllConversationsAsRead"))
+        ->bind(":memberId", ET::$session->userId);
 
-	// If we need to, filter out all conversations that the user isn't allowed to see.
-	if ($checkForPermission) ET::conversationModel()->addAllowedPredicate($sql);
+    // If we need to, filter out all conversations that the user isn't allowed to see.
+    if ($checkForPermission) {
+        ET::conversationModel()->addAllowedPredicate($sql);
+    }
 
-	// Add a labels column to the query.
-	ET::conversationModel()->addLabels($sql);
+    // Add a labels column to the query.
+    ET::conversationModel()->addLabels($sql);
 
-	// Limit the results to the specified conversation IDs
-	$sql->where("c.conversationId IN (:conversationIds)")->orderBy("FIELD(c.conversationId,:conversationIdsOrder)");
-	$sql->bind(":conversationIds", $conversationIDs, PDO::PARAM_INT);
-	$sql->bind(":conversationIdsOrder", $conversationIDs, PDO::PARAM_INT);
+    // Limit the results to the specified conversation IDs
+    $sql->where("c.conversationId IN (:conversationIds)")->orderBy("FIELD(c.conversationId,:conversationIdsOrder)");
+    $sql->bind(":conversationIds", $conversationIDs, PDO::PARAM_INT);
+    $sql->bind(":conversationIdsOrder", $conversationIDs, PDO::PARAM_INT);
 
-	$this->trigger("beforeGetResults", array(&$sql));
+    $this->trigger("beforeGetResults", array(&$sql));
 
-	// Execute the query and put the details of the conversations into an array.
-	$result = $sql->exec();
-	$results = array();
-	$model = ET::conversationModel();
+    // Execute the query and put the details of the conversations into an array.
+    $result = $sql->exec();
+    $results = array();
+    $model = ET::conversationModel();
 
-	while ($row = $result->nextRow()) {
+    while ($row = $result->nextRow()) {
 
-		// Expand the comma-separated label flags into a workable array of active labels.
-		$row["labels"] = $model->expandLabels($row["labels"]);
+        // Expand the comma-separated label flags into a workable array of active labels.
+        $row["labels"] = $model->expandLabels($row["labels"]);
 
-		$row["replies"] = max(0, $row["countPosts"] - 1);
-		$results[] = $row;
+        $row["replies"] = max(0, $row["countPosts"] - 1);
+        $results[] = $row;
 
-	}
+    }
 
-	$this->trigger("afterGetResults", array(&$results));
+    $this->trigger("afterGetResults", array(&$results));
 
-	return $results;
+    return $results;
 }
 
 
@@ -516,7 +559,7 @@ public function getResults($conversationIDs, $checkForPermission = false)
  */
 public function areMoreResults()
 {
-	return $this->areMoreResults;
+    return $this->areMoreResults;
 }
 
 
@@ -533,30 +576,32 @@ public function areMoreResults()
  */
 public function removeGambit($searchString, $condition)
 {
-	// Process the search string into individial terms. Replace all "-" signs with "+!", and then
-	// split the string by "+". Negated terms will then be prefixed with "!".
-	$terms = !empty($searchString) ? explode("+", strtolower(str_replace("-", "+!", trim($searchString, " +-")))) : array();
+    // Process the search string into individial terms. Replace all "-" signs with "+!", and then
+    // split the string by "+". Negated terms will then be prefixed with "!".
+    $terms = !empty($searchString) ? explode("+", strtolower(str_replace("-", "+!", trim($searchString, " +-")))) : array();
 
-	// Take each term, match it with a gambit, and execute the gambit's function.
-	foreach ($terms as $k => $term) {
+    // Take each term, match it with a gambit, and execute the gambit's function.
+    foreach ($terms as $k => $term) {
 
-		$term = $terms[$k] = trim($term);
+        $term = $terms[$k] = trim($term);
 
-		if ($term[0] == "#") {
-			$term = ltrim($term, "#");
+        if ($term[0] == "#") {
+            $term = ltrim($term, "#");
 
-			// If the term is an alias, translate it into the appropriate gambit.
-			if (array_key_exists($term, self::$aliases)) $term = self::$aliases[$term];
+            // If the term is an alias, translate it into the appropriate gambit.
+            if (array_key_exists($term, self::$aliases)) {
+                $term = self::$aliases[$term];
+            }
 
-			// Find a matching gambit by evaluating each gambit's condition, and run its callback function.
-			if (eval($condition)) {
-				unset($terms[$k]);
-				continue;
-			}
-		}
-	}
+            // Find a matching gambit by evaluating each gambit's condition, and run its callback function.
+            if (eval($condition)) {
+                unset($terms[$k]);
+                continue;
+            }
+        }
+    }
 
-	return implode(" + ", $terms);
+    return implode(" + ", $terms);
 }
 
 
@@ -566,7 +611,7 @@ public function removeGambit($searchString, $condition)
  * @param ETSearchModel $search The search model.
  * @param string $term The gambit term (in this case, will simply be "unread").
  * @param bool $negate Whether or not the gambit is negated.
- * @return void
+ * @return false|null
  *
  * @todo Make negation work on this gambit. Probably requires some kind of "OR" functionality, so that
  * 		we can get conversations which:
@@ -575,20 +620,22 @@ public function removeGambit($searchString, $condition)
  */
 public static function gambitUnread(&$search, $term, $negate)
 {
-	if (!ET::$session->user) return false;
+    if (!ET::$session->user) {
+        return false;
+    }
 
-	$q = ET::SQL()
-		->select("c2.conversationId")
-		->from("conversation c2")
-		->from("member_conversation s2", "c2.conversationId=s2.conversationId AND s2.type='member' AND s2.id=:gambitUnread_memberId", "left")
-		->where("s2.lastRead>=c2.countPosts")
-		->get();
+    $q = ET::SQL()
+        ->select("c2.conversationId")
+        ->from("conversation c2")
+        ->from("member_conversation s2", "c2.conversationId=s2.conversationId AND s2.type='member' AND s2.id=:gambitUnread_memberId", "left")
+        ->where("s2.lastRead>=c2.countPosts")
+        ->get();
 
-	$search->sql
-		->where("c.conversationId NOT IN ($q)")
-		->where("c.lastPostTime>=:gambitUnread_markedAsRead")
-		->bind(":gambitUnread_memberId", ET::$session->userId)
-		->bind(":gambitUnread_markedAsRead", ET::$session->preference("markedAllConversationsAsRead"));
+    $search->sql
+        ->where("c.conversationId NOT IN ($q)")
+        ->where("c.lastPostTime>=:gambitUnread_markedAsRead")
+        ->bind(":gambitUnread_memberId", ET::$session->userId)
+        ->bind(":gambitUnread_markedAsRead", ET::$session->preference("markedAllConversationsAsRead"));
 }
 
 
@@ -599,17 +646,19 @@ public static function gambitUnread(&$search, $term, $negate)
  */
 public static function gambitStarred(&$search, $term, $negate)
 {
-	if (!ET::$session->user) return;
+    if (!ET::$session->user) {
+        return;
+    }
 
-	$sql = ET::SQL()
-		->select("DISTINCT conversationId")
-		->from("member_conversation")
-		->where("type='member'")
-		->where("id=:memberId")
-		->where("starred=1")
-		->bind(":memberId", ET::$session->userId);
+    $sql = ET::SQL()
+        ->select("DISTINCT conversationId")
+        ->from("member_conversation")
+        ->where("type='member'")
+        ->where("id=:memberId")
+        ->where("starred=1")
+        ->bind(":memberId", ET::$session->userId);
 
-	$search->addIDFilter($sql, $negate);
+    $search->addIDFilter($sql, $negate);
 }
 
 
@@ -620,7 +669,7 @@ public static function gambitStarred(&$search, $term, $negate)
  */
 public static function gambitPrivate(&$search, $term, $negate)
 {
-	$search->sql->where("c.private=".($negate ? "0" : "1"));
+    $search->sql->where("c.private=" . ($negate ? "0" : "1"));
 }
 
 
@@ -631,18 +680,20 @@ public static function gambitPrivate(&$search, $term, $negate)
  */
 public static function gambitIgnored(&$search, $term, $negate)
 {
-	if (!ET::$session->user or $negate) return;
-	$search->includeIgnored = true;
+    if (!ET::$session->user or $negate) {
+        return;
+    }
+    $search->includeIgnored = true;
 
-	$sql = ET::SQL()
-		->select("DISTINCT conversationId")
-		->from("member_conversation")
-		->where("type='member'")
-		->where("id=:memberId")
-		->where("ignored=1")
-		->bind(":memberId", ET::$session->userId);
+    $sql = ET::SQL()
+        ->select("DISTINCT conversationId")
+        ->from("member_conversation")
+        ->where("type='member'")
+        ->where("id=:memberId")
+        ->where("ignored=1")
+        ->bind(":memberId", ET::$session->userId);
 
-	$search->addIDFilter($sql);
+    $search->addIDFilter($sql);
 }
 
 
@@ -654,16 +705,18 @@ public static function gambitIgnored(&$search, $term, $negate)
  */
 public static function gambitDraft(&$search, $term, $negate)
 {
-	if (!ET::$session->user) return;
-	$sql = ET::SQL()
-		->select("DISTINCT conversationId")
-		->from("member_conversation")
-		->where("type='member'")
-		->where("id=:memberId")
-		->where("draft IS NOT NULL")
-		->bind(":memberId", ET::$session->userId);
+    if (!ET::$session->user) {
+        return;
+    }
+    $sql = ET::SQL()
+        ->select("DISTINCT conversationId")
+        ->from("member_conversation")
+        ->where("type='member'")
+        ->where("id=:memberId")
+        ->where("draft IS NOT NULL")
+        ->bind(":memberId", ET::$session->userId);
 
-	$search->addIDFilter($sql, $negate);
+    $search->addIDFilter($sql, $negate);
 }
 
 
@@ -675,33 +728,33 @@ public static function gambitDraft(&$search, $term, $negate)
  */
 public function gambitActive(&$search, $term, $negate)
 {
-	// Multiply the "amount" part (b) of the regular expression matches by the value of the "unit" part (c).
-	$search->matches["b"] = (int)$search->matches["b"];
-	switch ($search->matches["c"]) {
-		case T("gambit.minute"): $search->matches["b"] *= 60; break;
-		case T("gambit.hour"): $search->matches["b"] *= 3600; break;
-		case T("gambit.day"): $search->matches["b"] *= 86400; break;
-		case T("gambit.week"): $search->matches["b"] *= 604800; break;
-		case T("gambit.month"): $search->matches["b"] *= 2626560; break;
-		case T("gambit.year"): $search->matches["b"] *= 31536000;
-	}
+    // Multiply the "amount" part (b) of the regular expression matches by the value of the "unit" part (c).
+    $search->matches["b"] = (int) $search->matches["b"];
+    switch ($search->matches["c"]) {
+        case T("gambit.minute"): $search->matches["b"] *= 60; break;
+        case T("gambit.hour"): $search->matches["b"] *= 3600; break;
+        case T("gambit.day"): $search->matches["b"] *= 86400; break;
+        case T("gambit.week"): $search->matches["b"] *= 604800; break;
+        case T("gambit.month"): $search->matches["b"] *= 2626560; break;
+        case T("gambit.year"): $search->matches["b"] *= 31536000;
+    }
 
-	// Set the "quantifier" part (a); default to <= (i.e. "last").
-	$search->matches["a"] = (!$search->matches["a"] or $search->matches["a"] == T("gambit.last")) ? "<=" : $search->matches["a"];
+    // Set the "quantifier" part (a); default to <= (i.e. "last").
+    $search->matches["a"] = (!$search->matches["a"] or $search->matches["a"] == T("gambit.last")) ? "<=" : $search->matches["a"];
 
-	// If the gambit is negated, use the inverse of the selected quantifier.
-	if ($negate) {
-		switch ($search->matches["a"]) {
-			case "<": $search->matches["a"] = ">="; break;
-			case "<=": $search->matches["a"] = ">"; break;
-			case ">": $search->matches["a"] = "<="; break;
-			case ">=": $search->matches["a"] = "<";
-		}
-	}
+    // If the gambit is negated, use the inverse of the selected quantifier.
+    if ($negate) {
+        switch ($search->matches["a"]) {
+            case "<": $search->matches["a"] = ">="; break;
+            case "<=": $search->matches["a"] = ">"; break;
+            case ">": $search->matches["a"] = "<="; break;
+            case ">=": $search->matches["a"] = "<";
+        }
+    }
 
-	// Apply the condition and force use of an index.
-	$search->sql->where("UNIX_TIMESTAMP() - {$search->matches["b"]} {$search->matches["a"]} c.lastPostTime");
-	$search->sql->useIndex("conversation_lastPostTime");
+    // Apply the condition and force use of an index.
+    $search->sql->where("UNIX_TIMESTAMP() - {$search->matches["b"]} {$search->matches["a"]} c.lastPostTime");
+    $search->sql->useIndex("conversation_lastPostTime");
 }
 
 
@@ -715,16 +768,18 @@ public function gambitActive(&$search, $term, $negate)
  */
 public static function gambitAuthor(&$search, $term, $negate)
 {
-	// Get the ID of the member.
-	$term = trim(str_replace("\xc2\xa0", " ", substr($term, strlen(T("gambit.author:")))));
+    // Get the ID of the member.
+    $term = trim(str_replace("\xc2\xa0", " ", substr($term, strlen(T("gambit.author:")))));
 
-	// Allow the user to refer to themselves using the "myself" keyword.
-	if ($term == T("gambit.myself")) $term = (int) ET::$session->userId;
+    // Allow the user to refer to themselves using the "myself" keyword.
+    if ($term == T("gambit.myself")) {
+        $term = (int) ET::$session->userId;
+    }
 
-	// Apply the condition.
-	$search->sql
-		->where("c.startMemberId ".($negate ? "!=" : "=")." :authorId")
-		->bind(":authorId", (int) $term);
+    // Apply the condition.
+    $search->sql
+        ->where("c.startMemberId " . ($negate ? "!=" : "=") . " :authorId")
+        ->bind(":authorId", (int) $term);
 }
 
 
@@ -736,19 +791,21 @@ public static function gambitAuthor(&$search, $term, $negate)
  */
 public static function gambitContributor(&$search, $term, $negate)
 {
-	// Get the ID of the member.
-	$term = trim(str_replace("\xc2\xa0", " ", substr($term, strlen(T("gambit.contributor:")))));
+    // Get the ID of the member.
+    $term = trim(str_replace("\xc2\xa0", " ", substr($term, strlen(T("gambit.contributor:")))));
 
-	// Allow the user to refer to themselves using the "myself" keyword.
-	if ($term == T("gambit.myself")) $term = (int) ET::$session->userId;
+    // Allow the user to refer to themselves using the "myself" keyword.
+    if ($term == T("gambit.myself")) {
+        $term = (int) ET::$session->userId;
+    }
 
-	// Apply the condition.
-	$sql = ET::SQL()
-		->select("DISTINCT conversationId")
-		->from("post")
-		->where("memberId = :contributorId")
-		->bind(":contributorId", (int) $term);
-	$search->addIDFilter($sql, $negate);
+    // Apply the condition.
+    $sql = ET::SQL()
+        ->select("DISTINCT conversationId")
+        ->from("post")
+        ->where("memberId = :contributorId")
+        ->bind(":contributorId", (int) $term);
+    $search->addIDFilter($sql, $negate);
 }
 
 
@@ -759,14 +816,18 @@ public static function gambitContributor(&$search, $term, $negate)
  */
 public static function gambitLimit(&$search, $term, $negate)
 {
-	if ($negate) return;
+    if ($negate) {
+        return;
+    }
 
-	// Get the number of results they want.
-	$limit = (int)trim(substr($term, strlen(T("gambit.limit:"))));
-	$limit = max(1, $limit);
-	if (($max = C("esoTalk.search.limitMax")) > 0) $limit = min($max, $limit);
+    // Get the number of results they want.
+    $limit = (int) trim(substr($term, strlen(T("gambit.limit:"))));
+    $limit = max(1, $limit);
+    if (($max = C("esoTalk.search.limitMax")) > 0) {
+        $limit = min($max, $limit);
+    }
 
-	$search->limit($limit);
+    $search->limit($limit);
 }
 
 
@@ -778,26 +839,26 @@ public static function gambitLimit(&$search, $term, $negate)
  */
 public static function gambitHasNReplies(&$search, $term, $negate)
 {
-	// Work out which quantifier to use; default to "=".
-	$search->matches["a"] = (!$search->matches["a"]) ? "=" : $search->matches["a"];
+    // Work out which quantifier to use; default to "=".
+    $search->matches["a"] = (!$search->matches["a"]) ? "=" : $search->matches["a"];
 
-	// If the gambit is negated, use the inverse of the quantifier.
-	if ($negate) {
-		switch ($search->matches["a"]) {
-			case "<": $search->matches["a"] = ">="; break;
-			case "<=": $search->matches["a"] = ">"; break;
-			case ">": $search->matches["a"] = "<="; break;
-			case ">=": $search->matches["a"] = "<"; break;
-			case "=": $search->matches["a"] = "!=";
-		}
-	}
+    // If the gambit is negated, use the inverse of the quantifier.
+    if ($negate) {
+        switch ($search->matches["a"]) {
+            case "<": $search->matches["a"] = ">="; break;
+            case "<=": $search->matches["a"] = ">"; break;
+            case ">": $search->matches["a"] = "<="; break;
+            case ">=": $search->matches["a"] = "<"; break;
+            case "=": $search->matches["a"] = "!=";
+        }
+    }
 
-	// Increase the amount by one as we are checking replies, but the column in the conversations
-	// table is a post count (it includes the original post.)
-	$search->matches["b"]++;
+    // Increase the amount by one as we are checking replies, but the column in the conversations
+    // table is a post count (it includes the original post.)
+    $search->matches["b"]++;
 
-	// Apply the condition.
-	$search->sql->where("countPosts {$search->matches["a"]} {$search->matches["b"]}");
+    // Apply the condition.
+    $search->sql->where("countPosts {$search->matches["a"]} {$search->matches["b"]}");
 }
 
 
@@ -808,8 +869,8 @@ public static function gambitHasNReplies(&$search, $term, $negate)
  */
 public static function gambitOrderByReplies(&$search, $term, $negate)
 {
-	$search->orderBy("c.countPosts ".($negate ? "ASC" : "DESC"));
-	$search->sql->useIndex("conversation_countPosts");
+    $search->orderBy("c.countPosts " . ($negate ? "ASC" : "DESC"));
+    $search->sql->useIndex("conversation_countPosts");
 }
 
 
@@ -822,8 +883,8 @@ public static function gambitOrderByReplies(&$search, $term, $negate)
  */
 public static function gambitOrderByNewest(&$search, $term, $negate)
 {
-	$search->orderBy("c.startTime ".($negate ? "ASC" : "DESC"));
-	$search->sql->useIndex("conversation_startTime");
+    $search->orderBy("c.startTime " . ($negate ? "ASC" : "DESC"));
+    $search->sql->useIndex("conversation_startTime");
 }
 
 
@@ -834,7 +895,7 @@ public static function gambitOrderByNewest(&$search, $term, $negate)
  */
 public static function gambitSticky(&$search, $term, $negate)
 {
-	$search->sql->where("sticky=".($negate ? "0" : "1"));
+    $search->sql->where("sticky=" . ($negate ? "0" : "1"));
 }
 
 
@@ -847,8 +908,10 @@ public static function gambitSticky(&$search, $term, $negate)
  */
 public static function gambitRandom(&$search, $term, $negate)
 {
-	if (!$negate) $search->orderBy("RAND()");
-}
+    if (!$negate) {
+        $search->orderBy("RAND()");
+    }
+    }
 
 
 /**
@@ -858,8 +921,10 @@ public static function gambitRandom(&$search, $term, $negate)
  */
 public static function gambitReverse(&$search, $term, $negate)
 {
-	if (!$negate) $search->orderReverse = true;
-}
+    if (!$negate) {
+        $search->orderReverse = true;
+    }
+    }
 
 
 /**
@@ -869,7 +934,7 @@ public static function gambitReverse(&$search, $term, $negate)
  */
 public static function gambitLocked(&$search, $term, $negate)
 {
-	$search->sql->where("locked=".($negate ? "0" : "1"));
+    $search->sql->where("locked=" . ($negate ? "0" : "1"));
 }
 
 
@@ -881,10 +946,10 @@ public static function gambitLocked(&$search, $term, $negate)
  */
 public static function gambitTitle(&$search, $term, $negate)
 {
-	$term = trim(substr($term, strlen(T("gambit.title:"))));
+    $term = trim(substr($term, strlen(T("gambit.title:"))));
 
-	$search->sql->where("title ".($negate ? "NOT" : "")." LIKE :titleTerm")
-		->bind(":titleTerm", "%".$term."%");
+    $search->sql->where("title " . ($negate ? "NOT" : "") . " LIKE :titleTerm")
+        ->bind(":titleTerm", "%" . $term . "%");
 }
 
 
@@ -908,8 +973,9 @@ ETSearchModel::addGambit('return $term == strtolower(T("gambit.reverse"));', arr
 ETSearchModel::addGambit('return strpos($term, strtolower(T("gambit.limit:"))) === 0;', array("ETSearchModel", "gambitLimit"));
 ETSearchModel::addGambit('return strpos($term, strtolower(T("gambit.title:"))) === 0;', array("ETSearchModel", "gambitTitle"));
 
-if (!C("esoTalk.search.disableRandomGambit"))
-	ETSearchModel::addGambit('return $term == strtolower(T("gambit.random"));', array("ETSearchModel", "gambitRandom"));
+if (!C("esoTalk.search.disableRandomGambit")) {
+    ETSearchModel::addGambit('return $term == strtolower(T("gambit.random"));', array("ETSearchModel", "gambitRandom"));
+}
 
 
 // Add default aliases.

@@ -27,10 +27,12 @@ class ETConversationController extends ETController {
  */
 public function action_index($conversationId = false, $year = false, $month = false)
 {
-    if (!$this->allowed()) return;
+    if (!$this->allowed()) {
+        return;
+    }
 
     // Get the conversation.
-    $conversation = ET::conversationModel()->getById((int)$conversationId);
+    $conversation = ET::conversationModel()->getById((int) $conversationId);
 
     // Stop here with a 404 header if the conversation wasn't found.
     if (!$conversation) {
@@ -74,14 +76,16 @@ public function action_index($conversationId = false, $year = false, $month = fa
                 ->from("post")
                 ->where("conversationId=:conversationId")->bind(":conversationId", $conversation["conversationId"])
                 ->orderBy("time ASC")
-                ->offset((int)$conversation["lastRead"])
+                ->offset((int) $conversation["lastRead"])
                 ->limit(1)
                 ->exec()
                 ->result();
 
             // If a post ID was found, redirect to its position within the conversation.
             $startFrom = max(0, min($conversation["lastRead"], $conversation["countPosts"] - C("esoTalk.conversation.postsPerPage")));
-            if ($id) $this->redirect(URL(conversationURL($conversation["conversationId"], $conversation["title"])."/$startFrom#p$id"));
+            if ($id) {
+                $this->redirect(URL(conversationURL($conversation["conversationId"], $conversation["title"]) . "/$startFrom#p$id"));
+            }
 
         }
 
@@ -100,20 +104,24 @@ public function action_index($conversationId = false, $year = false, $month = fa
 
             // Redirect there.
             $startFrom = max(0, $conversation["countPosts"] - C("esoTalk.conversation.postsPerPage"));
-            $this->redirect(URL(conversationURL($conversation["conversationId"], $conversation["title"])."/$startFrom#p$id"));
+            $this->redirect(URL(conversationURL($conversation["conversationId"], $conversation["title"]) . "/$startFrom#p$id"));
 
         }
 
         // If a month was specified, interpret the arguments as year/month.
         elseif ($month and !$searchString) {
-            $year = (int)$year;
-            $month = (int)$month;
+            $year = (int) $year;
+            $month = (int) $month;
 
             // Bit of a hacky way of loading posts from the last page.
-            if ($year == 9999 and $month == 99) $timestamp = PHP_INT_MAX;
+            if ($year == 9999 and $month == 99) {
+                $timestamp = PHP_INT_MAX;
+            }
 
             // Make a timestamp out of this date.
-            else $timestamp = mktime(0, 0, 0, min($month, 12), 1, min($year, 2038));
+            else {
+                $timestamp = mktime(0, 0, 0, min($month, 12), 1, min($year, 2038));
+            }
 
             // Find the closest post that's after this timestamp, and find its position within the conversation.
             $position = ET::SQL()
@@ -132,14 +140,19 @@ public function action_index($conversationId = false, $year = false, $month = fa
 
         // Otherwise, interpret it is a plain page number, or position.
         else {
-            if ($year[0] == "p") $startFrom = ((int)ltrim($year, "p") - 1) * C("esoTalk.conversation.postsPerPage");
-            else $startFrom = (int)$year;
+            if ($year[0] == "p") {
+                $startFrom = ((int) ltrim($year, "p") - 1) * C("esoTalk.conversation.postsPerPage");
+            } else {
+                $startFrom = (int) $year;
+            }
         }
     }
 
     // Make sure the startFrom number is within range.
     $startFrom = max(0, $startFrom);
-    if ($this->responseType === RESPONSE_TYPE_DEFAULT) $startFrom = min($startFrom, max(0, $conversation["countPosts"] - 1));
+    if ($this->responseType === RESPONSE_TYPE_DEFAULT) {
+        $startFrom = min($startFrom, max(0, $conversation["countPosts"] - 1));
+    }
 
     if (ET::$session->userId) {
 
@@ -164,9 +177,14 @@ public function action_index($conversationId = false, $year = false, $month = fa
         "startFrom" => $startFrom,
         "limit" => C("esoTalk.conversation.postsPerPage")
     );
-    if ($searchString) $options["search"] = $searchString;
-    if ($startFrom < $conversation["countPosts"]) $posts = ET::postModel()->getByConversation($conversation["conversationId"], $options);
-    else $posts = array();
+    if ($searchString) {
+        $options["search"] = $searchString;
+    }
+    if ($startFrom < $conversation["countPosts"]) {
+        $posts = ET::postModel()->getByConversation($conversation["conversationId"], $options);
+    } else {
+        $posts = array();
+    }
 
     $this->trigger("conversationIndex", array(&$conversation, &$posts, &$startFrom, &$searchString));
 
@@ -179,7 +197,7 @@ public function action_index($conversationId = false, $year = false, $month = fa
     if ($this->responseType === RESPONSE_TYPE_DEFAULT) {
 
         // Construct a canonical URL to this page.
-        $url = conversationURL($conversation["conversationId"], $conversation["title"])."/$startFrom".($searchString ? "?search=".urlencode($searchString) : "");
+        $url = conversationURL($conversation["conversationId"], $conversation["title"]) . "/$startFrom" . ($searchString ? "?search=" . urlencode($searchString) : "");
         $this->canonicalURL = URL($url, true);
 
         // If the slug in the URL is not the same as the actual slug, redirect.
@@ -189,7 +207,7 @@ public function action_index($conversationId = false, $year = false, $month = fa
         }
 
         // Push onto the top of the naviagation stack.
-        $this->pushNavigation("conversation/".$conversation["conversationId"], "conversation", URL($url));
+        $this->pushNavigation("conversation/" . $conversation["conversationId"], "conversation", URL($url));
 
         // Set the title of the page.
         $this->title = $conversation["title"];
@@ -228,36 +246,36 @@ public function action_index($conversationId = false, $year = false, $month = fa
 
         // Ignore conversation control
         if (ET::$session->user) {
-            $controls->add("ignore", "<a href='".URL("conversation/ignore/".$conversation["conversationId"]."/?token=".ET::$session->token."&return=".urlencode($this->selfURL))."' id='control-ignore'><i class='icon-eye-close'></i> <span>".T($conversation["ignored"] ? "Unignore conversation" : "Ignore conversation")."</span></a>");
+            $controls->add("ignore", "<a href='" . URL("conversation/ignore/" . $conversation["conversationId"] . "/?token=" . ET::$session->token . "&return=" . urlencode($this->selfURL)) . "' id='control-ignore'><i class='icon-eye-close'></i> <span>" . T($conversation["ignored"] ? "Unignore conversation" : "Ignore conversation") . "</span></a>");
         }
 
         // Mark as unread/read control
         if (ET::$session->user) {
-            $controls->add("read", "<a href='".URL("conversation/read/".$conversation["conversationId"]."/?token=".ET::$session->token)."' id='control-read'><i class='icon-circle'></i> <span>".T($conversation["lastRead"] >= $conversation["countPosts"] ? "Mark as unread" : "Mark as read")."</span></a>");
+            $controls->add("read", "<a href='" . URL("conversation/read/" . $conversation["conversationId"] . "/?token=" . ET::$session->token) . "' id='control-read'><i class='icon-circle'></i> <span>" . T($conversation["lastRead"] >= $conversation["countPosts"] ? "Mark as unread" : "Mark as read") . "</span></a>");
         }
 
         if ($conversation["canModerate"] or $conversation["startMemberId"] == ET::$session->userId) {
             $controls->separator();
 
             // Add the change channel control.
-            $controls->add("changeChannel", "<a href='".URL("conversation/changeChannel/".$conversation["conversationId"]."/?return=".urlencode($this->selfURL))."' id='control-changeChannel'><i class='icon-tag'></i> <span>".T("Change channel")."</span></a>");
+            $controls->add("changeChannel", "<a href='" . URL("conversation/changeChannel/" . $conversation["conversationId"] . "/?return=" . urlencode($this->selfURL)) . "' id='control-changeChannel'><i class='icon-tag'></i> <span>" . T("Change channel") . "</span></a>");
         }
 
         // If the user has permission to moderate this conversation...
         if ($conversation["canModerate"]) {
 
             // Add the sticky/unsticky control.
-            $controls->add("sticky", "<a href='".URL("conversation/sticky/".$conversation["conversationId"]."/?token=".ET::$session->token."&return=".urlencode($this->selfURL))."' id='control-sticky'><i class='icon-pushpin'></i> <span>".T($conversation["sticky"] ? "Unsticky" : "Sticky")."</span></a>");
+            $controls->add("sticky", "<a href='" . URL("conversation/sticky/" . $conversation["conversationId"] . "/?token=" . ET::$session->token . "&return=" . urlencode($this->selfURL)) . "' id='control-sticky'><i class='icon-pushpin'></i> <span>" . T($conversation["sticky"] ? "Unsticky" : "Sticky") . "</span></a>");
 
             // Add the lock/unlock control.
-            $controls->add("lock", "<a href='".URL("conversation/lock/".$conversation["conversationId"]."/?token=".ET::$session->token."&return=".urlencode($this->selfURL))."' id='control-lock'><i class='icon-lock'></i> <span>".T($conversation["locked"] ? "Unlock" : "Lock")."</span></a>");
+            $controls->add("lock", "<a href='" . URL("conversation/lock/" . $conversation["conversationId"] . "/?token=" . ET::$session->token . "&return=" . urlencode($this->selfURL)) . "' id='control-lock'><i class='icon-lock'></i> <span>" . T($conversation["locked"] ? "Unlock" : "Lock") . "</span></a>");
         }
 
         if ($conversation["canDeleteConversation"]) {
 
             // Add the delete conversation control.
             $controls->separator();
-            $controls->add("delete", "<a href='".URL("conversation/delete/".$conversation["conversationId"]."/?token=".ET::$session->token)."' id='control-delete'><i class='icon-remove'></i> <span>".T("Delete conversation")."</span></a>");
+            $controls->add("delete", "<a href='" . URL("conversation/delete/" . $conversation["conversationId"] . "/?token=" . ET::$session->token) . "' id='control-delete'><i class='icon-remove'></i> <span>" . T("Delete conversation") . "</span></a>");
 
         }
 
@@ -272,35 +290,39 @@ public function action_index($conversationId = false, $year = false, $month = fa
                 ->limit(1)
                 ->exec()
                 ->result();
-            if (strlen($description) > 155) $description = substr($description, 0, strrpos($description, " ")) . " ...";
+            if (strlen($description) > 155) {
+                $description = substr($description, 0, strrpos($description, " ")) . " ...";
+            }
             $description = str_replace(array("\n\n", "\n"), " ", $description);
-            $this->addToHead("<meta name='description' content='".sanitizeHTML($description)."'>");
+            $this->addToHead("<meta name='description' content='" . sanitizeHTML($description) . "'>");
         }
 
         // Add JavaScript variables which contain conversation information.
         $this->addJSVar("conversation", array(
-            "conversationId" => (int)$conversation["conversationId"],
+            "conversationId" => (int) $conversation["conversationId"],
             "slug" => conversationURL($conversation["conversationId"], $conversation["title"]),
-            "countPosts" => (int)$conversation["countPosts"],
-            "startFrom" => (int)$startFrom,
+            "countPosts" => (int) $conversation["countPosts"],
+            "startFrom" => (int) $startFrom,
             "searchString" => $searchString,
             "lastRead" => (ET::$session->user and $conversation["conversationId"])
-                ? (int)max(0, min($conversation["countPosts"], $conversation["lastRead"]))
-                : (int)$conversation["countPosts"],
+                ? (int) max(0, min($conversation["countPosts"], $conversation["lastRead"]))
+                : (int) $conversation["countPosts"],
             // Start the auto-reload interval at the square root of the number of seconds since the last action.
             "updateInterval" => max(C("esoTalk.conversation.updateIntervalStart"), min(round(sqrt(time() - $conversation["lastPostTime"])), C("esoTalk.conversation.updateIntervalLimit"))),
-            "channelId" => (int)$conversation["channelId"],
+            "channelId" => (int) $conversation["channelId"],
         ));
 
         // Quote a post: get the post details (id, name, content) and then set the value of the reply textarea appropriately.
-        if ($postId = (int)R("quote")) {
+        if ($postId = (int) R("quote")) {
             $post = $this->getPostForQuoting($postId, $conversation["conversationId"]);
-            if ($post) $conversation["draft"] = "[quote=$postId:".$post["username"]."]".ET::formatter()->init($post["content"])->removeQuotes()->get()."[/quote]";
+            if ($post) {
+                $conversation["draft"] = "[quote=$postId:" . $post["username"] . "]" . ET::formatter()->init($post["content"])->removeQuotes()->get() . "[/quote]";
+            }
         }
 
         // Set up the reply form.
         $replyForm = ETFactory::make("form");
-        $replyForm->action = URL("conversation/reply/".$conversation["conversationId"]);
+        $replyForm->action = URL("conversation/reply/" . $conversation["conversationId"]);
         $replyForm->setValue("content", $conversation["draft"]);
 
         $this->trigger("conversationIndexDefault", array(&$conversation, &$controls, &$replyForm, &$replyControls));
@@ -312,18 +334,14 @@ public function action_index($conversationId = false, $year = false, $month = fa
 
         $this->render("conversation/index");
 
-    }
-
-    elseif ($this->responseType === RESPONSE_TYPE_AJAX) {
+    } elseif ($this->responseType === RESPONSE_TYPE_AJAX) {
 
         $this->json("countPosts", $conversation["countPosts"]);
         $this->json("startFrom", $startFrom);
 
         $this->render("conversation/posts");
 
-    }
-
-    elseif ($this->responseType === RESPONSE_TYPE_VIEW) {
+    } elseif ($this->responseType === RESPONSE_TYPE_VIEW) {
 
         $this->render("conversation/posts");
 
@@ -340,7 +358,9 @@ public function action_index($conversationId = false, $year = false, $month = fa
 public function action_start($member = false)
 {
     // If the user isn't logged in, redirect them to the login page.
-    if (!ET::$session->user) $this->redirect(URL("user/login?return=conversation/start"));
+    if (!ET::$session->user) {
+        $this->redirect(URL("user/login?return=conversation/start"));
+    }
 
     // If the user is suspended, show an error.
     if (ET::$session->isSuspended()) {
@@ -356,7 +376,7 @@ public function action_start($member = false)
     $channels = ET::channelModel()->get("start");
 
     // The user not permission to star conversation.
-    if (!$channels){
+    if (!$channels) {
         $this->renderMessage(T("Error"), T("message.noPermission"));
         return;
     }
@@ -393,8 +413,7 @@ public function action_start($member = false)
             ET::$session->remove("membersAllowed");
             if (!($member = ET::conversationModel()->getMemberFromName($member))) {
                 $this->message(T("message.memberDoesntExist"), "warning");
-            }
-            else {
+            } else {
                 ET::conversationModel()->addMember($conversation, $member);
             }
             $this->redirect(URL("conversation/start"));
@@ -426,8 +445,9 @@ public function action_start($member = false)
             if ($this->responseType === RESPONSE_TYPE_JSON) {
                 $this->json("url", URL(conversationURL($conversationId, $form->getValue("title"))));
                 $this->json("conversationId", $conversationId);
+            } else {
+                $this->redirect(URL(conversationURL($conversationId, $form->getValue("title"))));
             }
-            else $this->redirect(URL(conversationURL($conversationId, $form->getValue("title"))));
         }
 
     }
@@ -468,7 +488,7 @@ public function action_post($postId = false)
         ->from("post p")
         ->from("conversation c", "c.conversationId=p.conversationId", "left")
         ->where("p.postId=:postId")
-        ->bind(":postId", (int)$postId)
+        ->bind(":postId", (int) $postId)
         ->exec();
 
     // If the post wasn't found, show a 404.
@@ -481,7 +501,7 @@ public function action_post($postId = false)
 
     // Work out which page of the conversation this post is on, and redirect there.
     $page = floor($pos / C("esoTalk.conversation.postsPerPage")) + 1;
-    $this->redirect(URL(conversationURL($conversationId, $title)."/p".$page."#p".$postId));
+    $this->redirect(URL(conversationURL($conversationId, $title) . "/p" . $page . "#p" . $postId));
 }
 
 
@@ -509,7 +529,7 @@ public function action_quotePost($postId = false)
     $post = $this->getPostForQuoting($postId, $conversation["conversationId"]);
     if ($post) {
         $this->json("postId", $postId);
-        $this->json("member", (C("esoTalk.format.mentions") ? "@" : "").$post["username"]);
+        $this->json("member", (C("esoTalk.format.mentions") ? "@" : "") . $post["username"]);
         $this->json("content", ET::formatter()->init($post["content"], false)->removeQuotes()->get());
         $this->render();
     }
@@ -524,9 +544,13 @@ public function action_quotePost($postId = false)
  */
 public function action_delete($conversationId = false)
 {
-    if (!$this->validateToken()) return;
+    if (!$this->validateToken()) {
+        return;
+    }
 
-    if (!($conversation = $this->getConversation($conversationId))) return;
+    if (!($conversation = $this->getConversation($conversationId))) {
+        return;
+    }
 
     // Do we have permission to do this?
     if (!$conversation["canDeleteConversation"]) {
@@ -549,7 +573,9 @@ public function action_delete($conversationId = false)
  */
 public function action_discard($conversationId = false)
 {
-    if (!$this->validateToken()) return;
+    if (!$this->validateToken()) {
+        return;
+    }
 
     $conversation = ET::conversationModel()->getById($conversationId) ?: ET::conversationModel()->getEmptyConversation();
 
@@ -557,8 +583,11 @@ public function action_discard($conversationId = false)
 
     // If there are no other posts in the conversation, delete the conversation.
     if (!$conversation["countPosts"]) {
-        if ($conversation["conversationId"]) $this->action_delete($conversation["conversationId"]);
-        else $this->redirect(URL(""));
+        if ($conversation["conversationId"]) {
+            $this->action_delete($conversation["conversationId"]);
+        } else {
+            $this->redirect(URL(""));
+        }
         return;
     }
 
@@ -604,9 +633,13 @@ public function action_lock($conversationId = false)
  */
 public function toggle($conversationId, $type)
 {
-    if (!$this->validateToken()) return;
+    if (!$this->validateToken()) {
+        return;
+    }
 
-    if (!($conversation = $this->getConversation($conversationId))) return;
+    if (!($conversation = $this->getConversation($conversationId))) {
+        return;
+    }
 
     // Do we have permission to do this?
     if (!$conversation["canModerate"]) {
@@ -614,7 +647,7 @@ public function toggle($conversationId, $type)
         return;
     }
 
-    $function = "set".ucfirst($type);
+    $function = "set" . ucfirst($type);
     ET::conversationModel()->$function($conversation, !$conversation[$type]);
 
     // For the default response type, redirect back to the conversation.
@@ -624,8 +657,9 @@ public function toggle($conversationId, $type)
     // Otherwise, output JSON of the flag's new value.
     else {
         $this->json($type, !$conversation[$type]);
-        if ($this->responseType === RESPONSE_TYPE_AJAX)
-            $this->json("labels", $this->getViewContents("conversation/labels", array("labels" => $conversation["labels"])));
+        if ($this->responseType === RESPONSE_TYPE_AJAX) {
+                    $this->json("labels", $this->getViewContents("conversation/labels", array("labels" => $conversation["labels"])));
+        }
         $this->render();
     }
 }
@@ -639,7 +673,9 @@ public function toggle($conversationId, $type)
  */
 public function action_edit($conversationId = false)
 {
-    if (!($conversation = $this->getConversation($conversationId))) return;
+    if (!($conversation = $this->getConversation($conversationId))) {
+        return;
+    }
 
     // Do we have permission to do this?
     if (!$conversation["canModerate"] and $conversation["startMemberId"] != ET::$session->userId) {
@@ -649,7 +685,7 @@ public function action_edit($conversationId = false)
 
     // Make a form to submit to the save page.
     $form = ETFactory::make("form");
-    $form->action = URL("conversation/save/".$conversation["conversationId"]);
+    $form->action = URL("conversation/save/" . $conversation["conversationId"]);
     $form->setValue("title", $conversation["title"]);
 
     // Get a list of the members allowed in this conversation.
@@ -659,7 +695,7 @@ public function action_edit($conversationId = false)
 
     // Make a form to add members allowed.
     $membersAllowedForm = ETFactory::make("form");
-    $membersAllowedForm->action = URL("conversation/addMember/".$conversation["conversationId"]);
+    $membersAllowedForm->action = URL("conversation/addMember/" . $conversation["conversationId"]);
 
     // Pass along the data to the view.
     $this->data("conversation", $conversation);
@@ -679,8 +715,11 @@ public function action_edit($conversationId = false)
 public function action_changeChannel($conversationId = "")
 {
     // Get the conversation.
-    if (!$conversationId) $conversation = ET::conversationModel()->getEmptyConversation();
-    elseif (!($conversation = $this->getConversation($conversationId))) return;
+    if (!$conversationId) {
+        $conversation = ET::conversationModel()->getEmptyConversation();
+    } elseif (!($conversation = $this->getConversation($conversationId))) {
+        return;
+    }
 
     // Do we have permission to do this?
     if (!$conversation["canModerate"] and $conversation["startMemberId"] != ET::$session->userId) {
@@ -702,7 +741,7 @@ public function action_changeChannel($conversationId = "")
 
     // Make a form to submit to the save page.
     $form = ETFactory::make("form");
-    $form->action = URL("conversation/save/".$conversation["conversationId"]);
+    $form->action = URL("conversation/save/" . $conversation["conversationId"]);
     $form->setValue("channel", $conversation["channelId"]);
 
     // Pass along data to the view.
@@ -722,12 +761,17 @@ public function action_changeChannel($conversationId = "")
  */
 public function action_save($conversationId = false)
 {
-    if (!$this->validateToken()) return;
+    if (!$this->validateToken()) {
+        return;
+    }
 
     // Get the conversation.
     $model = ET::conversationModel();
-    if (!$conversationId) $conversation = $model->getEmptyConversation();
-    elseif (!($conversation = $this->getConversation($conversationId))) return;
+    if (!$conversationId) {
+        $conversation = $model->getEmptyConversation();
+    } elseif (!($conversation = $this->getConversation($conversationId))) {
+        return;
+    }
 
     // Do we have permission to do this?
     if (!$conversation["canModerate"] and $conversation["startMemberId"] != ET::$session->userId) {
@@ -742,20 +786,24 @@ public function action_save($conversationId = false)
     if ($conversation["conversationId"]) {
 
         // Save the title.
-        if ($title = $form->getValue("title"))
-            $model->setTitle($conversation, $title);
+        if ($title = $form->getValue("title")) {
+                    $model->setTitle($conversation, $title);
+        }
 
         // Save the channel.
-        if ($channelId = $form->getValue("channel"))
-            $model->setChannel($conversation, $channelId);
+        if ($channelId = $form->getValue("channel")) {
+                    $model->setChannel($conversation, $channelId);
+        }
 
         // If there are errors, show them.
-        if ($model->errorCount())
-            $this->messages($model->errors(), "warning");
+        if ($model->errorCount()) {
+                    $this->messages($model->errors(), "warning");
+        }
 
         // Otherwise, redirect to the conversation.
-        elseif ($this->responseType === RESPONSE_TYPE_DEFAULT)
-            redirect(URL(R("return", conversationURL($conversation["conversationId"], $conversation["title"]))));
+        elseif ($this->responseType === RESPONSE_TYPE_DEFAULT) {
+                    redirect(URL(R("return", conversationURL($conversation["conversationId"], $conversation["title"]))));
+        }
 
         // Fetch the new conversation details.
         $conversation = $model->getById($conversation["conversationId"]);
@@ -765,16 +813,19 @@ public function action_save($conversationId = false)
     // interact with the session channelId variable.
     else {
 
-        if ($channelId = $form->getValue("channel"))
-            ET::$session->store("channelId", (int)$channelId);
+        if ($channelId = $form->getValue("channel")) {
+                    ET::$session->store("channelId", (int) $channelId);
+        }
 
         // If there are errors, show them.
-        if ($model->errorCount())
-            $this->messages($model->errors(), "warning");
+        if ($model->errorCount()) {
+                    $this->messages($model->errors(), "warning");
+        }
 
         // Otherwise, redirect to the start conversation page.
-        elseif ($this->responseType === RESPONSE_TYPE_DEFAULT)
-            redirect(URL(R("return", "conversation/start")));
+        elseif ($this->responseType === RESPONSE_TYPE_DEFAULT) {
+                    redirect(URL(R("return", "conversation/start")));
+        }
 
         // Fetch the new conversation details.
         $conversation = $model->getEmptyConversation();
@@ -792,7 +843,7 @@ public function action_save($conversationId = false)
     // Also return the details of the new channel.
     $this->json("channel", array(
         "channelId" => $conversation["channelId"],
-        "link" => URL("conversations/".$conversation["channelSlug"]),
+        "link" => URL("conversations/" . $conversation["channelSlug"]),
         "title" => $conversation["channelTitle"],
         "description" => $conversation["channelDescription"]
     ));
@@ -810,8 +861,11 @@ public function action_save($conversationId = false)
 public function action_membersAllowed($conversationId = false)
 {
     // Get the conversation.
-    if (!$conversationId) $conversation = ET::conversationModel()->getEmptyConversation();
-    elseif (!($conversation = $this->getConversation($conversationId))) return;
+    if (!$conversationId) {
+        $conversation = ET::conversationModel()->getEmptyConversation();
+    } elseif (!($conversation = $this->getConversation($conversationId))) {
+        return;
+    }
 
     // Do we have permission to do this?
     if (!$conversation["canEditMembersAllowed"]) {
@@ -824,7 +878,7 @@ public function action_membersAllowed($conversationId = false)
 
     // Make a form to add members allowed.
     $form = ETFactory::make("form");
-    $form->action = URL("conversation/addMember/".$conversation["conversationId"]);
+    $form->action = URL("conversation/addMember/" . $conversation["conversationId"]);
 
     $this->data("conversation", $conversation);
     $this->data("form", $form);
@@ -843,8 +897,11 @@ public function action_membersAllowed($conversationId = false)
 public function action_membersAllowedList($conversationId = false)
 {
     // Get the conversation.
-    if (!$conversationId) $conversation = ET::conversationModel()->getEmptyConversation();
-    elseif (!($conversation = $this->getConversation($conversationId))) return;
+    if (!$conversationId) {
+        $conversation = ET::conversationModel()->getEmptyConversation();
+    } elseif (!($conversation = $this->getConversation($conversationId))) {
+        return;
+    }
 
     $conversation["membersAllowed"] = ET::conversationModel()->getMembersAllowed($conversation);
     $conversation["membersAllowed"] = ET::conversationModel()->getMembersAllowedSummary($conversation, $conversation["membersAllowed"]);
@@ -863,12 +920,17 @@ public function action_membersAllowedList($conversationId = false)
  */
 public function action_addMember($conversationId = false)
 {
-    if (!$this->validateToken()) return;
+    if (!$this->validateToken()) {
+        return;
+    }
 
     // Get the conversation.
     $model = ET::conversationModel();
-    if (!$conversationId) $conversation = $model->getEmptyConversation();
-    elseif (!($conversation = $this->getConversation($conversationId))) return;
+    if (!$conversationId) {
+        $conversation = $model->getEmptyConversation();
+    } elseif (!($conversation = $this->getConversation($conversationId))) {
+        return;
+    }
 
     // Do we have permission to do this?
     if (!$conversation["canEditMembersAllowed"]) {
@@ -911,7 +973,7 @@ public function action_addMember($conversationId = false)
 
     // Otherwise, redirect back to the conversation edit page.
     else {
-        $this->redirect(URL(R("return", $conversation["conversationId"] ? "conversation/edit/".$conversation["conversationId"] : "conversation/start")));
+        $this->redirect(URL(R("return", $conversation["conversationId"] ? "conversation/edit/" . $conversation["conversationId"] : "conversation/start")));
     }
 }
 
@@ -924,12 +986,17 @@ public function action_addMember($conversationId = false)
  */
 public function action_removeMember($conversationId = false)
 {
-    if (!$this->validateToken()) return;
+    if (!$this->validateToken()) {
+        return;
+    }
 
     // Get the conversation.
     $model = ET::conversationModel();
-    if (!$conversationId) $conversation = $model->getEmptyConversation();
-    elseif (!($conversation = $this->getConversation($conversationId))) return;
+    if (!$conversationId) {
+        $conversation = $model->getEmptyConversation();
+    } elseif (!($conversation = $this->getConversation($conversationId))) {
+        return;
+    }
 
     // Do we have permission to do this?
     if (!$conversation["canEditMembersAllowed"]) {
@@ -971,7 +1038,7 @@ public function action_removeMember($conversationId = false)
 
     // Otherwise, redirect back to the conversation edit page.
     else {
-        $this->redirect(URL(R("return", $conversation["conversationId"] ? "conversation/edit/".$conversation["conversationId"] : "conversation/start")));
+        $this->redirect(URL(R("return", $conversation["conversationId"] ? "conversation/edit/" . $conversation["conversationId"] : "conversation/start")));
     }
 }
 
@@ -984,10 +1051,14 @@ public function action_removeMember($conversationId = false)
  */
 public function action_star($conversationId = false)
 {
-    if (!ET::$session->user or !$this->validateToken()) return;
+    if (!ET::$session->user or !$this->validateToken()) {
+        return;
+    }
 
     // Get the conversation.
-    if (!($conversation = $this->getConversation($conversationId))) return;
+    if (!($conversation = $this->getConversation($conversationId))) {
+        return;
+    }
 
     // Star/unstar the conversation.
     $starred = !$conversation["starred"];
@@ -1012,10 +1083,14 @@ public function action_star($conversationId = false)
  */
 public function action_ignore($conversationId = false)
 {
-    if (!ET::$session->user or !$this->validateToken()) return;
+    if (!ET::$session->user or !$this->validateToken()) {
+        return;
+    }
 
     // Get the conversation.
-    if (!($conversation = $this->getConversation($conversationId))) return;
+    if (!($conversation = $this->getConversation($conversationId))) {
+        return;
+    }
 
     // Ignore/unignore the conversation.
     $ignored = !$conversation["ignored"];
@@ -1029,8 +1104,9 @@ public function action_ignore($conversationId = false)
     }
 
     // If it's an AJAX request, return the contents of the labels view.
-    elseif ($this->responseType === RESPONSE_TYPE_AJAX)
-        $this->json("labels", $this->getViewContents("conversation/labels", array("labels" => $conversation["labels"])));
+    elseif ($this->responseType === RESPONSE_TYPE_AJAX) {
+            $this->json("labels", $this->getViewContents("conversation/labels", array("labels" => $conversation["labels"])));
+    }
 
     $this->render();
 }
@@ -1044,19 +1120,26 @@ public function action_ignore($conversationId = false)
  */
 public function action_read($conversationId = false)
 {
-    if (!ET::$session->user or !$this->validateToken()) return;
+    if (!ET::$session->user or !$this->validateToken()) {
+        return;
+    }
 
     // Get the conversation.
-    if (!($conversation = $this->getConversation($conversationId))) return;
+    if (!($conversation = $this->getConversation($conversationId))) {
+        return;
+    }
 
-    if ($conversation["lastRead"] >= $conversation["countPosts"]) $lastRead = 0;
-    else $lastRead = $conversation["countPosts"];
+    if ($conversation["lastRead"] >= $conversation["countPosts"]) {
+        $lastRead = 0;
+    } else {
+        $lastRead = $conversation["countPosts"];
+    }
 
     ET::conversationModel()->setLastRead($conversation, ET::$session->userId, $lastRead, true);
 
     // Redirect back to the last place we were at.
     if ($this->responseType === RESPONSE_TYPE_DEFAULT) {
-        $nav = ET::$session->getNavigation("conversation/".$conversation["conversationId"]);
+        $nav = ET::$session->getNavigation("conversation/" . $conversation["conversationId"]);
         $return = R("return");
         redirect($return ? URL($return) : $nav["url"]);
     }
@@ -1073,10 +1156,14 @@ public function action_read($conversationId = false)
  */
 public function action_reply($conversationId = false)
 {
-    if (!ET::$session->user or !$this->validateToken()) return;
+    if (!ET::$session->user or !$this->validateToken()) {
+        return;
+    }
 
     // Get the conversation.
-    if (!($conversation = $this->getConversation($conversationId))) return;
+    if (!($conversation = $this->getConversation($conversationId))) {
+        return;
+    }
 
     // Can the user reply?
     if (!$conversation["canReply"]) {
@@ -1112,17 +1199,16 @@ public function action_reply($conversationId = false)
         $postId = $model->addReply($conversation, $form->getValue("content"));
 
         // If there were errors, show them.
-        if ($model->errorCount())
-            $this->messages($model->errors(), "warning");
-
-        else {
+        if ($model->errorCount()) {
+                    $this->messages($model->errors(), "warning");
+        } else {
 
             // Update the user's last read.
             $model->setLastRead($conversation, ET::$session->userId, $conversation["countPosts"]);
 
             // Return a few bits of information.
             $this->json("postId", $postId);
-            $this->json("starOnReply", (bool)ET::$session->preference("starOnReply", false));
+            $this->json("starOnReply", (bool) ET::$session->preference("starOnReply", false));
 
             // For an AJAX request, render the new post view.
             if ($this->responseType === RESPONSE_TYPE_AJAX) {
@@ -1143,7 +1229,7 @@ public function action_reply($conversationId = false)
 
     // Redirect back to the conversation's reply box.
     if ($this->responseType === RESPONSE_TYPE_DEFAULT) {
-        $this->redirect(URL(R("return", conversationURL($conversation["conversationId"], $conversation["title"])."#reply")));
+        $this->redirect(URL(R("return", conversationURL($conversation["conversationId"], $conversation["title"]) . "#reply")));
     }
 
     $this->render();
@@ -1171,15 +1257,18 @@ public function action_preview()
  */
 public function action_editPost($postId = false)
 {
-    if (!($post = $this->getPostForEditing($postId))) return;
+    if (!($post = $this->getPostForEditing($postId))) {
+        return;
+    }
 
     // Set up a form.
     $form = ETFactory::make("form");
-    $form->action = URL("conversation/editPost/".$post["postId"]);
+    $form->action = URL("conversation/editPost/" . $post["postId"]);
     $form->setValue("content", $post["content"]);
 
-    if ($form->isPostBack("cancel"))
-        $this->redirect(URL(R("return", postURL($postId))));
+    if ($form->isPostBack("cancel")) {
+            $this->redirect(URL(R("return", postURL($postId))));
+    }
 
     // Are we saving the post?
     if ($form->validPostBack("save")) {
@@ -1203,9 +1292,7 @@ public function action_editPost($postId = false)
                 $this->data("post", $this->formatPostForTemplate($post, $post["conversation"]));
                 $this->render("conversation/post");
                 return;
-            }
-
-            else {
+            } else {
                 // JSON?
             }
 
@@ -1215,7 +1302,7 @@ public function action_editPost($postId = false)
 
     $this->data("form", $form);
     $this->data("post", $post);
-    $this->data("controls", $this->getEditControls("p".$post["postId"]));
+    $this->data("controls", $this->getEditControls("p" . $post["postId"]));
     $this->render("conversation/editPost");
 }
 
@@ -1228,7 +1315,9 @@ public function action_editPost($postId = false)
  */
 public function action_deletePost($postId = false)
 {
-    if (!($post = $this->getPostForEditing($postId)) or !$this->validateToken()) return;
+    if (!($post = $this->getPostForEditing($postId)) or !$this->validateToken()) {
+        return;
+    }
 
     ET::postModel()->deletePost($post);
 
@@ -1254,7 +1343,9 @@ public function action_deletePost($postId = false)
  */
 public function action_restorePost($postId = false)
 {
-    if (!($post = $this->getPostForEditing($postId)) or !$this->validateToken()) return;
+    if (!($post = $this->getPostForEditing($postId)) or !$this->validateToken()) {
+        return;
+    }
 
     ET::postModel()->restorePost($post);
 
@@ -1286,9 +1377,9 @@ public function formatPostForTemplate($post, $conversation)
 
     // Construct the post array for use in the post view (conversation/post).
     $formatted = array(
-        "id" => "p".$post["postId"],
+        "id" => "p" . $post["postId"],
         "title" => memberLink($post["memberId"], $post["username"]),
-        "avatar" => (!$post["deleteTime"] and $avatar) ? "<a href='".URL(memberURL($post["memberId"], $post["username"]))."'>$avatar</a>" : false,
+        "avatar" => (!$post["deleteTime"] and $avatar) ? "<a href='" . URL(memberURL($post["memberId"], $post["username"])) . "'>$avatar</a>" : false,
         "class" => $post["deleteTime"] ? array("deleted") : array(),
         "info" => array(),
         "controls" => array(),
@@ -1304,7 +1395,7 @@ public function formatPostForTemplate($post, $conversation)
     $date = smartTime($post["time"], true);
 
     // Add the date/time to the post info as a permalink.
-    $formatted["info"][] = "<a href='".URL(postURL($post["postId"]))."' class='time' title='".strftime(T("date.full"), $post["time"])."' data-timestamp='".$post["time"]."'>".(!empty($conversation["searching"]) ? T("Show in context") : $date)."</a>";
+    $formatted["info"][] = "<a href='" . URL(postURL($post["postId"])) . "' class='time' title='" . strftime(T("date.full"), $post["time"]) . "' data-timestamp='" . $post["time"] . "'>" . (!empty($conversation["searching"]) ? T("Show in context") : $date) . "</a>";
 
     // If the post isn't deleted, add a lot of stuff!
     if (!$post["deleteTime"]) {
@@ -1312,28 +1403,37 @@ public function formatPostForTemplate($post, $conversation)
         // Add the user's online status / last action next to their name.
         if (empty($post["preferences"]["hideOnline"])) {
             $lastAction = ET::memberModel()->getLastActionInfo($post["lastActionTime"], $post["lastActionDetail"]);
-            if ($lastAction[0]) $lastAction[0] = " (".sanitizeHTML($lastAction[0]).")";
-            if ($lastAction) array_unshift($formatted["info"], "<".(!empty($lastAction[1]) ? "a href='{$lastAction[1]}'" : "span")." class='online' title='".T("Online")."{$lastAction[0]}'><i class='icon-circle'></i></".(!empty($lastAction[1]) ? "a" : "span").">");
+            if ($lastAction[0]) {
+                $lastAction[0] = " (" . sanitizeHTML($lastAction[0]) . ")";
+            }
+            if ($lastAction) {
+                array_unshift($formatted["info"], "<" . (!empty($lastAction[1]) ? "a href='{$lastAction[1]}'" : "span") . " class='online' title='" . T("Online") . "{$lastAction[0]}'><i class='icon-circle'></i></" . (!empty($lastAction[1]) ? "a" : "span") . ">");
+            }
         }
 
         // Show the user's group type.
-        $formatted["info"][] = "<span class='group'>".memberGroup($post["account"], $post["groups"])."</span>";
-        $formatted["class"][] = "group-".$post["account"];
+        $formatted["info"][] = "<span class='group'>" . memberGroup($post["account"], $post["groups"]) . "</span>";
+        $formatted["class"][] = "group-" . $post["account"];
         foreach ($post["groups"] as $k => $v) {
-            if ($k) $formatted["class"][] = "group-".$k;
+            if ($k) {
+                $formatted["class"][] = "group-" . $k;
+            }
         }
 
         // If the post has been edited, show the time and by whom next to the controls.
-        if ($post["editMemberId"]) $formatted["controls"][] = "<span class='editedBy'>".sprintf(T("Edited %s by %s"), "<span title='".strftime(T("date.full"), $post["editTime"])."' data-timestamp='".$post["editTime"]."'>".relativeTime($post["editTime"], true)."</span>", memberLink($post["editMemberId"], $post["editMemberName"]))."</span>";
+        if ($post["editMemberId"]) {
+            $formatted["controls"][] = "<span class='editedBy'>" . sprintf(T("Edited %s by %s"), "<span title='" . strftime(T("date.full"), $post["editTime"]) . "' data-timestamp='" . $post["editTime"] . "'>" . relativeTime($post["editTime"], true) . "</span>", memberLink($post["editMemberId"], $post["editMemberName"])) . "</span>";
+        }
 
         // If the user can reply, add a quote control.
-        if ($conversation["canReply"])
-            $formatted["controls"][] = "<a href='".URL(conversationURL($conversation["conversationId"], $conversation["title"])."/?quote=".$post["postId"]."#reply")."' title='".T("Quote")."' class='control-quote'><i class='icon-quote-left'></i></a>";
+        if ($conversation["canReply"]) {
+                    $formatted["controls"][] = "<a href='" . URL(conversationURL($conversation["conversationId"], $conversation["title"]) . "/?quote=" . $post["postId"] . "#reply") . "' title='" . T("Quote") . "' class='control-quote'><i class='icon-quote-left'></i></a>";
+        }
 
         // If the user can edit the post, add edit/delete controls.
         if ($canEdit) {
-            $formatted["controls"][] = "<a href='".URL("conversation/editPost/".$post["postId"])."' title='".T("Edit")."' class='control-edit'><i class='icon-edit'></i></a>";
-            $formatted["controls"][] = "<a href='".URL("conversation/deletePost/".$post["postId"]."?token=".ET::$session->token)."' title='".T("Delete")."' class='control-delete'><i class='icon-remove'></i></a>";
+            $formatted["controls"][] = "<a href='" . URL("conversation/editPost/" . $post["postId"]) . "' title='" . T("Edit") . "' class='control-edit'><i class='icon-edit'></i></a>";
+            $formatted["controls"][] = "<a href='" . URL("conversation/deletePost/" . $post["postId"] . "?token=" . ET::$session->token) . "' title='" . T("Delete") . "' class='control-delete'><i class='icon-remove'></i></a>";
         }
         // If the reason the user cannot edit the post is because someone else has replied, then inform them with a tooltip.
         elseif (!$conversation["locked"]
@@ -1341,8 +1441,8 @@ public function formatPostForTemplate($post, $conversation)
             && $post["memberId"] == ET::$session->userId
             && (!$post["deleteMemberId"] || $post["deleteMemberId"] == ET::$session->userId)
             && C("esoTalk.conversation.editPostTimeLimit") == "reply") {
-            $formatted["controls"][] = "<span title='".sanitizeHTML(T("message.cannotEditSinceReply"))."' class='control-edit disabled'><i class='icon-edit'></i></span>";
-            $formatted["controls"][] = "<span title='".sanitizeHTML(T("message.cannotEditSinceReply"))."' class='control-delete disabled'><i class='icon-remove'></i></span>";
+            $formatted["controls"][] = "<span title='" . sanitizeHTML(T("message.cannotEditSinceReply")) . "' class='control-edit disabled'><i class='icon-edit'></i></span>";
+            $formatted["controls"][] = "<span title='" . sanitizeHTML(T("message.cannotEditSinceReply")) . "' class='control-delete disabled'><i class='icon-remove'></i></span>";
         }
 
     }
@@ -1351,11 +1451,14 @@ public function formatPostForTemplate($post, $conversation)
     else {
 
         // Add the "deleted by" information.
-        if ($post["deleteMemberId"]) $formatted["controls"][] = "<span>".sprintf(T("Deleted %s by %s"), "<span title='".strftime(T("date.full"), $post["deleteTime"])."' data-timestamp='".$post["deleteTime"]."'>".relativeTime($post["deleteTime"], true)."</span>", memberLink($post["deleteMemberId"], $post["deleteMemberName"]))."</span>";
+        if ($post["deleteMemberId"]) {
+            $formatted["controls"][] = "<span>" . sprintf(T("Deleted %s by %s"), "<span title='" . strftime(T("date.full"), $post["deleteTime"]) . "' data-timestamp='" . $post["deleteTime"] . "'>" . relativeTime($post["deleteTime"], true) . "</span>", memberLink($post["deleteMemberId"], $post["deleteMemberName"])) . "</span>";
+        }
 
         // If the user can edit the post, add a restore control.
-        if ($canEdit)
-            $formatted["controls"][] = "<a href='".URL("conversation/restorePost/".$post["postId"]."?token=".ET::$session->token)."' title='".T("Restore")."' class='control-restore'><i class='icon-reply'></i></a>";
+        if ($canEdit) {
+                    $formatted["controls"][] = "<a href='" . URL("conversation/restorePost/" . $post["postId"] . "?token=" . ET::$session->token) . "' title='" . T("Restore") . "' class='control-restore'><i class='icon-reply'></i></a>";
+        }
     }
 
     $this->trigger("formatPostForTemplate", array(&$formatted, $post, $conversation));
@@ -1386,7 +1489,7 @@ protected function displayPost($content)
 protected function getEditControls($id)
 {
     $controls = array(
-        "quote" => "<a href='javascript:ETConversation.quote(\"$id\");void(0)' class='control-quote' title='".T("Quote")."' accesskey='q'><i class='icon-quote-left'></i></a>",
+        "quote" => "<a href='javascript:ETConversation.quote(\"$id\");void(0)' class='control-quote' title='" . T("Quote") . "' accesskey='q'><i class='icon-quote-left'></i></a>",
     );
 
     $this->trigger("getEditControls", array(&$controls, $id));
@@ -1394,7 +1497,7 @@ protected function getEditControls($id)
     if (!empty($controls)) {
         array_unshift($controls, "<span class='formattingButtons'>");
         $controls[] = "</span>";
-        $controls[] = "<label class='previewCheckbox'><input type='checkbox' id='$id-previewCheckbox' onclick='ETConversation.togglePreview(\"$id\",this.checked)' accesskey='p'/> ".T("Preview")."</label>";
+        $controls[] = "<label class='previewCheckbox'><input type='checkbox' id='$id-previewCheckbox' onclick='ETConversation.togglePreview(\"$id\",this.checked)' accesskey='p'/> " . T("Preview") . "</label>";
     }
 
     return $controls;
@@ -1419,7 +1522,9 @@ protected function getPostForQuoting($postId, $conversationId)
         ->bind(":postId", $postId)
         ->bind(":conversationId", $conversationId)
         ->exec();
-    if (!$result->numRows()) return false;
+    if (!$result->numRows()) {
+        return false;
+    }
     $result = $result->firstRow();
 
     // Convert spaces in the member name to non-breaking spaces.
@@ -1462,7 +1567,9 @@ public function getConversation($id, $post = false)
 protected function getPostForEditing($postId)
 {
     // Get the conversation.
-    if (!($conversation = $this->getConversation($postId, true))) return false;
+    if (!($conversation = $this->getConversation($postId, true))) {
+        return false;
+    }
 
     // Get the post.
     $post = ET::postModel()->getById($postId);
@@ -1471,10 +1578,14 @@ protected function getPostForEditing($postId)
     if (!ET::postModel()->canEditPost($post, $conversation)) {
 
         // If users only have permission to edit their posts until someone replies, and someone has replied since...
-        if (C("esoTalk.conversation.editPostTimeLimit") === "reply" and ($conversation["lastPostTime"] > $post["time"] or $conversation["lastPostMemberId"] != $post["memberId"])) $msg = T("message.cannotEditSinceReply");
+        if (C("esoTalk.conversation.editPostTimeLimit") === "reply" and ($conversation["lastPostTime"] > $post["time"] or $conversation["lastPostMemberId"] != $post["memberId"])) {
+            $msg = T("message.cannotEditSinceReply");
+        }
 
         // Otherwise, show a generic "no permission" message.
-        else $msg = T("message.noPermission");
+        else {
+            $msg = T("message.noPermission");
+        }
 
         $this->renderMessage(T("Error"), $msg);
         return false;

@@ -2,7 +2,9 @@
 // Copyright 2011 Toby Zerner, Simon Zerner
 // This file is part of esoTalk. Please see the included license file for usage information.
 
-if (!defined("IN_ESOTALK")) exit;
+if (!defined("IN_ESOTALK")) {
+    exit;
+}
 
 /**
  * Displays the online members sheet.
@@ -13,7 +15,10 @@ if (!defined("IN_ESOTALK")) exit;
 <div class='sheet' id='onlineSheet'>
 <div class='sheetContent'>
 
-<h3><?php echo T("Members Online"); ?><?php if (count($data["members"])) echo " (".count($data["members"]).")"; ?></h3>
+<h3><?php echo T("Members Online"); ?><?php if (count($data["members"])) {
+    echo " (" . count($data["members"]) . ")";
+}
+?></h3>
 
 <div class='sheetBody'>
 
@@ -34,11 +39,14 @@ if (count($data["members"]) or $data["hidden"]): ?>
 
 <?php
 // Otherwise, display a 'no members online' message.
-else: ?>
+else {
+    : ?>
 
 <div class='section'>
 <div class='noResults help'>
-<?php echo T("message.noMembersOnline"); ?>
+<?php echo T("message.noMembersOnline");
+}
+?>
 </div>
 </div>
 

@@ -2,7 +2,9 @@
 // Copyright 2011 Toby Zerner, Simon Zerner
 // This file is part of esoTalk. Please see the included license file for usage information.
 
-if (!defined("IN_ESOTALK")) exit;
+if (!defined("IN_ESOTALK")) {
+    exit;
+}
 
 /**
  * Message master view. Displays a simple HTML template. Used for things like fatal errors and the installer.
@@ -15,7 +17,10 @@ if (!defined("IN_ESOTALK")) exit;
 	<head>
 		<title><?php echo sanitizeHTML($data["pageTitle"]); ?></title>
 		<meta charset='<?php echo T("charset", "utf-8"); ?>'>
-		<?php if (!empty($data["head"])) echo $data["head"]; ?>
+		<?php if (!empty($data["head"])) {
+    echo $data["head"];
+}
+?>
 		<link type="text/css" rel="stylesheet" href="//fonts.googleapis.com/css?family=Open+Sans:400,600">
 		<style>
 			body {

@@ -2,7 +2,9 @@
 // Copyright 2011 Toby Zerner, Simon Zerner
 // This file is part of esoTalk. Please see the included license file for usage information.
 
-if (!defined("IN_ESOTALK")) exit;
+if (!defined("IN_ESOTALK")) {
+    exit;
+}
 
 /**
  * The ETMenu class provides a way to collect menu items and then render them as list items in a menu.
@@ -37,7 +39,7 @@ public $highlight = array();
  */
 public function add($id, $html, $position = false)
 {
-	addToArrayString($this->items, $id, $html, $position);
+    addToArrayString($this->items, $id, $html, $position);
 }
 
 
@@ -49,7 +51,7 @@ public function add($id, $html, $position = false)
  */
 public function remove($id)
 {
-	unset($this->items[$id]);
+    unset($this->items[$id]);
 }
 
 
@@ -62,7 +64,7 @@ public function remove($id)
  */
 public function separator($position = false)
 {
-	addToArrayString($this->items, count($this->items) + 1, "separator", $position);
+    addToArrayString($this->items, count($this->items) + 1, "separator", $position);
 }
 
 
@@ -74,7 +76,7 @@ public function separator($position = false)
  */
 public function highlight($id)
 {
-	$this->highlight[] = $id;
+    $this->highlight[] = $id;
 }
 
 
@@ -85,17 +87,20 @@ public function highlight($id)
  */
 public function getContents()
 {
-	$return = "";
-	$i = 0;
-	$count = count($this->items);
-	foreach ($this->items as $k => $v) {
-		if ($v == "separator") {
-			if ($i != 0 and $i != $count - 1) $return .= "<li class='sep'></li>\n";
-		}
-		else $return .= "<li class='item-$k".(in_array($k, $this->highlight) ? " selected" : "")."'>$v</li>\n";
-		$i++;
-	}
-	return $return;
+    $return = "";
+    $i = 0;
+    $count = count($this->items);
+    foreach ($this->items as $k => $v) {
+        if ($v == "separator") {
+            if ($i != 0 and $i != $count - 1) {
+                $return .= "<li class='sep'></li>\n";
+            }
+        } else {
+            $return .= "<li class='item-$k" . (in_array($k, $this->highlight) ? " selected" : "") . "'>$v</li>\n";
+        }
+        $i++;
+    }
+    return $return;
 }
 
 
@@ -106,7 +111,7 @@ public function getContents()
  */
 public function count()
 {
-	return count($this->items);
+    return count($this->items);
 }
 
 }

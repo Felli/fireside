@@ -2,7 +2,9 @@
 // Copyright 2011 Toby Zerner, Simon Zerner
 // This file is part of esoTalk. Please see the included license file for usage information.
 
-if (!defined("IN_ESOTALK")) exit;
+if (!defined("IN_ESOTALK")) {
+    exit;
+}
 
 /**
  * The ETModel class provides basic functions to get, insert, update, and delete data from the database for
@@ -46,8 +48,8 @@ protected $primaryKey;
  */
 public function __construct($table = "", $primaryKey = "")
 {
-	$this->table = $table;
-	$this->primaryKey = $primaryKey ? $primaryKey : $table."Id";
+    $this->table = $table;
+    $this->primaryKey = $primaryKey ? $primaryKey : $table . "Id";
 }
 
 
@@ -55,15 +57,15 @@ public function __construct($table = "", $primaryKey = "")
  * Create a new record in the model's table.
  *
  * @param array $values An array of data to insert into the table.
- * @return int The new record's ID.
+ * @return string The new record's ID.
  */
 public function create($values)
 {
-	ET::SQL()->insert($this->table)
-		->set($values)
-		->exec();
+    ET::SQL()->insert($this->table)
+        ->set($values)
+        ->exec();
 
-	return ET::$database->lastInsertId();
+    return ET::$database->lastInsertId();
 }
 
 
@@ -76,10 +78,10 @@ public function create($values)
  */
 public function update($values, $wheres = array())
 {
-	return ET::SQL()->update($this->table)
-		->set($values)
-		->where($wheres)
-		->exec();
+    return ET::SQL()->update($this->table)
+        ->set($values)
+        ->where($wheres)
+        ->exec();
 }
 
 
@@ -92,7 +94,7 @@ public function update($values, $wheres = array())
  */
 public function updateById($id, $values)
 {
-	return $this->update($values, array($this->primaryKey => $id));
+    return $this->update($values, array($this->primaryKey => $id));
 }
 
 
@@ -104,23 +106,23 @@ public function updateById($id, $values)
  */
 public function delete($wheres = array())
 {
-	return ET::SQL()
-		->delete()
-		->from($this->table)
-		->where($wheres)
-		->exec();
+    return ET::SQL()
+        ->delete()
+        ->from($this->table)
+        ->where($wheres)
+        ->exec();
 }
 
 
 /**
  * Delete an existing record in the model's table with a particular ID.
  *
- * @param mixed $id The ID of the record to delete.
+ * @param integer $id The ID of the record to delete.
  * @return ETSQLResult
  */
 public function deleteById($id)
 {
-	return $this->delete(array($this->primaryKey => $id));
+    return $this->delete(array($this->primaryKey => $id));
 }
 
 
@@ -132,12 +134,12 @@ public function deleteById($id)
  */
 public function count($wheres = array())
 {
-	return ET::SQL()
-		->select("COUNT(*)", "count")
-		->from($this->table)
-		->where($wheres)
-		->exec()
-		->result();
+    return ET::SQL()
+        ->select("COUNT(*)", "count")
+        ->from($this->table)
+        ->where($wheres)
+        ->exec()
+        ->result();
 }
 
 
@@ -149,11 +151,11 @@ public function count($wheres = array())
  */
 public function getWithSQL($sql)
 {
-	return $sql
-		->select("*")
-		->from($this->table)
-		->exec()
-		->allRows();
+    return $sql
+        ->select("*")
+        ->from($this->table)
+        ->exec()
+        ->allRows();
 }
 
 
@@ -165,10 +167,10 @@ public function getWithSQL($sql)
  */
 public function get($wheres = array())
 {
-	$sql = ET::SQL();
-	$sql->where($wheres);
+    $sql = ET::SQL();
+    $sql->where($wheres);
 
-	return $this->getWithSQL($sql);
+    return $this->getWithSQL($sql);
 }
 
 
@@ -180,7 +182,7 @@ public function get($wheres = array())
  */
 public function getById($id)
 {
-	return reset($this->get(array($this->primaryKey => $id)));
+    return reset($this->get(array($this->primaryKey => $id)));
 }
 
 
@@ -191,9 +193,9 @@ public function getById($id)
  */
 public function errors()
 {
-	$errors = $this->errors;
-	$this->errors = array();
-	return $errors;
+    $errors = $this->errors;
+    $this->errors = array();
+    return $errors;
 }
 
 
@@ -204,7 +206,7 @@ public function errors()
  */
 public function errorCount()
 {
-	return count($this->errors);
+    return count($this->errors);
 }
 
 
@@ -217,7 +219,7 @@ public function errorCount()
  */
 public function error($field, $code = null)
 {
-	$this->errors = array_merge($this->errors, array($field => $code ?: $field));
+    $this->errors = array_merge($this->errors, array($field => $code ?: $field));
 }
 
 
@@ -232,8 +234,9 @@ public function error($field, $code = null)
  */
 public function validate($field, $value, $callback)
 {
-	if ($message = call_user_func($callback, $value))
-		$this->error($field, $message);
-}
+    if ($message = call_user_func($callback, $value)) {
+            $this->error($field, $message);
+    }
+    }
 
 }

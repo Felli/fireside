@@ -2,7 +2,9 @@
 // Copyright 2011 Toby Zerner, Simon Zerner
 // This file is part of esoTalk. Please see the included license file for usage information.
 
-if (!defined("IN_ESOTALK")) exit;
+if (!defined("IN_ESOTALK")) {
+    exit;
+}
 
 /**
  * Render functions. Contains functions that generally return common elements to be rendered to the page, such
@@ -27,15 +29,19 @@ if (!function_exists("highlight")) {
  */
 function highlight($text, $words)
 {
-	if (!is_array($words)) return $text;
-	foreach ($words as $word) {
-		if (!($word = trim($word))) continue;
+    if (!is_array($words)) {
+        return $text;
+    }
+    foreach ($words as $word) {
+        if (!($word = trim($word))) {
+            continue;
+        }
 
-		// Make sure we only highlight whole words that would've been matched by a fulltext search.
-		$text = preg_replace("/(?<=[\s>]|^)(".preg_quote($word, "/").")(?=[\s<,\.?!:\/-]|$)/iu", "<span class='highlight'>$1</span>", $text);
+        // Make sure we only highlight whole words that would've been matched by a fulltext search.
+        $text = preg_replace("/(?<=[\s>]|^)(" . preg_quote($word, "/") . ")(?=[\s<,\.?!:\/-]|$)/iu", "<span class='highlight'>$1</span>", $text);
 
-	}
-	return $text;
+    }
+    return $text;
 }
 
 }
@@ -54,7 +60,7 @@ if (!function_exists("conversationURL")) {
  */
 function conversationURL($conversationId, $title = "")
 {
-	return $conversationId.(($title = slug($title)) ? "-$title" : "");
+    return $conversationId . (($title = slug($title)) ? "-$title" : "");
 }
 
 }
@@ -74,7 +80,7 @@ if (!function_exists("memberURL")) {
  */
 function memberURL($memberId, $username = "", $pane = "")
 {
-	return "member/".($pane ? "$pane/" : "").$memberId.(($username = slug($username)) ? "-$username" : "");
+    return "member/" . ($pane ? "$pane/" : "") . $memberId . (($username = slug($username)) ? "-$username" : "");
 }
 
 }
@@ -92,7 +98,7 @@ if (!function_exists("postURL")) {
  */
 function postURL($postId)
 {
-	return "conversation/post/".$postId;
+    return "conversation/post/" . $postId;
 }
 
 }
@@ -111,7 +117,7 @@ if (!function_exists("searchURL")) {
  */
 function searchURL($search, $channel = "all")
 {
-	return "conversations/$channel/".($search ? "?search=".urlencode($search) : "");
+    return "conversations/$channel/" . ($search ? "?search=" . urlencode($search) : "");
 }
 
 }
@@ -130,10 +136,13 @@ if (!function_exists("memberLink")) {
  */
 function memberLink($memberId, $username = "")
 {
-	$displayName = name($username);
-	if ($username) return "<a href='".URL(memberURL($memberId, $username))."' title='".sprintf(sanitizeHTML(T("View %s's profile")), $displayName)."'>$displayName</a>";
-	else return $displayName;
-}
+    $displayName = name($username);
+    if ($username) {
+        return "<a href='" . URL(memberURL($memberId, $username)) . "' title='" . sprintf(sanitizeHTML(T("View %s's profile")), $displayName) . "'>$displayName</a>";
+    } else {
+        return $displayName;
+    }
+    }
 
 }
 
@@ -152,8 +161,10 @@ if (!function_exists("name")) {
  */
 function name($username, $sanitize = true)
 {
-	if (!$username) $username = "[".T("deleted")."]";
-	return $sanitize ? sanitizeHTML($username) : $username;
+    if (!$username) {
+        $username = "[" . T("deleted") . "]";
+    }
+    return $sanitize ? sanitizeHTML($username) : $username;
 }
 
 }
@@ -171,15 +182,15 @@ if (!function_exists("avatar")) {
  */
 function avatar($member = array(), $className = "")
 {
-	// Construct the avatar path from the provided information.
-	if (!empty($member["memberId"]) and !empty($member["avatarFormat"])) {
-		$file = "uploads/avatars/{$member["memberId"]}.{$member["avatarFormat"]}";
-		$url = getWebPath($file);
-		return "<img src='$url' alt='' class='avatar $className'/>";
-	}
+    // Construct the avatar path from the provided information.
+    if (!empty($member["memberId"]) and !empty($member["avatarFormat"])) {
+        $file = "uploads/avatars/{$member["memberId"]}.{$member["avatarFormat"]}";
+        $url = getWebPath($file);
+        return "<img src='$url' alt='' class='avatar $className'/>";
+    }
 
-	// Default to an avatar with the first letter of the member's name.
-	return "<span class='avatar $className'>".(!empty($member["username"]) ? mb_strtoupper(mb_substr($member["username"], 0, 1, "UTF-8"), "UTF-8") : "&nbsp;")."</span>";
+    // Default to an avatar with the first letter of the member's name.
+    return "<span class='avatar $className'>" . (!empty($member["username"]) ? mb_strtoupper(mb_substr($member["username"], 0, 1, "UTF-8"), "UTF-8") : "&nbsp;") . "</span>";
 }
 
 }
@@ -200,21 +211,26 @@ if (!function_exists("memberGroup")) {
  */
 function memberGroup($account, $groups = array(), $showMember = false)
 {
-	// If the member isn't a Member, groups don't matter - just display their account type.
-	if ($account and $account != ACCOUNT_MEMBER) return "<span class='group-$account'>".groupName($account)."</span>";
-	else {
+    // If the member isn't a Member, groups don't matter - just display their account type.
+    if ($account and $account != ACCOUNT_MEMBER) {
+        return "<span class='group-$account'>" . groupName($account) . "</span>";
+    } else {
 
-		// Otherwise, show a comma-separated list of the groups that they're in.
-		$groups = array_filter((array)$groups);
-		if (count($groups)) {
-			foreach ($groups as $k => $v) $groups[$k] = "<span class='group-$k'>".groupName($v)."</span>";
-			return implode(", ", $groups);
-		}
+        // Otherwise, show a comma-separated list of the groups that they're in.
+        $groups = array_filter((array) $groups);
+        if (count($groups)) {
+            foreach ($groups as $k => $v) {
+                $groups[$k] = "<span class='group-$k'>" . groupName($v) . "</span>";
+            }
+            return implode(", ", $groups);
+        }
 
-		// If they're not in any groups, either show them as a "Member" or just show nothing at all.
-		else return $showMember ? groupName(ACCOUNT_MEMBER) : "";
+        // If they're not in any groups, either show them as a "Member" or just show nothing at all.
+        else {
+            return $showMember ? groupName(ACCOUNT_MEMBER) : "";
+        }
 
-	}
+    }
 }
 
 }
@@ -234,7 +250,7 @@ if (!function_exists("groupName")) {
  */
 function groupName($group, $plural = false)
 {
-	return T("group.$group".($plural ? ".plural" : ""), sanitizeHTML(ucfirst($group)));
+    return T("group.$group" . ($plural ? ".plural" : ""), sanitizeHTML(ucfirst($group)));
 }
 
 }
@@ -253,7 +269,7 @@ if (!function_exists("groupLink")) {
  */
 function groupLink($group)
 {
-	return "<a href='".URL("members/?search=".urlencode(groupName($group)))."'>".groupName($group, true)."</a>";
+    return "<a href='" . URL("members/?search=" . urlencode(groupName($group))) . "'>" . groupName($group, true) . "</a>";
 }
 
 }
@@ -272,15 +288,17 @@ if (!function_exists("star")) {
  */
 function star($conversationId, $starred)
 {
-	// If the user is not logged in, don't return anything.
-	if (!ET::$session->user) return "";
+    // If the user is not logged in, don't return anything.
+    if (!ET::$session->user) {
+        return "";
+    }
 
-	// Otherwise, return a clickable star!
-	else {
-		$conversationId = (int)$conversationId;
-		$url = URL("conversation/star/".$conversationId."?token=".ET::$session->token."&return=".urlencode(ET::$controller->selfURL));
-		return "<a href='$url' class='starButton' title='".($starred ? T("Following") : T("Follow"))."' data-id='$conversationId'><i class='star icon-star".($starred ? "" : "-empty")."'></i></a>";
-	}
+    // Otherwise, return a clickable star!
+    else {
+        $conversationId = (int) $conversationId;
+        $url = URL("conversation/star/" . $conversationId . "?token=" . ET::$session->token . "&return=" . urlencode(ET::$controller->selfURL));
+        return "<a href='$url' class='starButton' title='" . ($starred ? T("Following") : T("Follow")) . "' data-id='$conversationId'><i class='star icon-star" . ($starred ? "" : "-empty") . "'></i></a>";
+    }
 }
 
 }
@@ -299,15 +317,17 @@ if (!function_exists("starButton")) {
  */
 function starButton($conversationId, $starred)
 {
-	// If the user is not logged in, don't return anything.
-	if (!ET::$session->user) return "";
+    // If the user is not logged in, don't return anything.
+    if (!ET::$session->user) {
+        return "";
+    }
 
-	// Otherwise, return a clickable star!
-	else {
-		$conversationId = (int)$conversationId;
-		$url = URL("conversation/star/".$conversationId."?token=".ET::$session->token."&return=".urlencode(ET::$controller->selfURL));
-		return "<a href='$url' class='button big starButton' title='".T("Follow to receive notifications")."' data-id='$conversationId'><i class='star icon-star".($starred ? "" : "-empty")."'></i> <span>".($starred ? T("Following") : T("Follow"))."</span></a>";
-	}
+    // Otherwise, return a clickable star!
+    else {
+        $conversationId = (int) $conversationId;
+        $url = URL("conversation/star/" . $conversationId . "?token=" . ET::$session->token . "&return=" . urlencode(ET::$controller->selfURL));
+        return "<a href='$url' class='button big starButton' title='" . T("Follow to receive notifications") . "' data-id='$conversationId'><i class='star icon-star" . ($starred ? "" : "-empty") . "'></i> <span>" . ($starred ? T("Following") : T("Follow")) . "</span></a>";
+    }
 }
 
 }
@@ -321,15 +341,16 @@ if (!function_exists("label")) {
  * 
  *
  * @package esoTalk
+ * @param string $label
  */
 function label($label, $url = "", $className = "")
 {
-	// Make sure the ETConversationModel class has been loaded so we can access its static properties.
-	ET::conversationModel();
+    // Make sure the ETConversationModel class has been loaded so we can access its static properties.
+    ET::conversationModel();
 
-	return ($url ? "<a href='$url'" : "<span")." class='label label-$label $className' title='".T("label.$label")."'>
-		<i class='".ETConversationModel::$labels[$label][1]."'></i>
-	</".($url ? "a" : "span").">";
+    return ($url ? "<a href='$url'" : "<span") . " class='label label-$label $className' title='" . T("label.$label") . "'>
+		<i class='".ETConversationModel::$labels[$label][1] . "'></i>
+	</".($url ? "a" : "span") . ">";
 }
 
 }

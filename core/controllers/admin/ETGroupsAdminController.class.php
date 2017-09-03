@@ -2,7 +2,9 @@
 // Copyright 2011 Toby Zerner, Simon Zerner
 // This file is part of esoTalk. Please see the included license file for usage information.
 
-if (!defined("IN_ESOTALK")) exit;
+if (!defined("IN_ESOTALK")) {
+    exit;
+}
 
 /**
  * The groups admin controller handles the management of member groups.
@@ -19,12 +21,12 @@ class ETGroupsAdminController extends ETAdminController {
  */
 public function action_index()
 {
-	$groups = ET::groupModel()->getAll();
+    $groups = ET::groupModel()->getAll();
 
-	$this->addJSLanguage("message.confirmDelete");
+    $this->addJSLanguage("message.confirmDelete");
 
-	$this->data("groups", $groups);
-	$this->render("admin/groups");
+    $this->data("groups", $groups);
+    $this->render("admin/groups");
 }
 
 
@@ -36,42 +38,48 @@ public function action_index()
  */
 public function action_edit($groupId = "")
 {
-	// Get this group's details. If it doesn't exist, show an error.
-	if (!($group = ET::groupModel()->getById((int)$groupId))) {
-		$this->render404();
-		return;
-	}
+    // Get this group's details. If it doesn't exist, show an error.
+    if (!($group = ET::groupModel()->getById((int) $groupId))) {
+        $this->render404();
+        return;
+    }
 
-	// Set up the form.
-	$form = ETFactory::make("form");
-	$form->action = URL("admin/groups/edit/".$group["groupId"]);
-	$form->setValues($group);
+    // Set up the form.
+    $form = ETFactory::make("form");
+    $form->action = URL("admin/groups/edit/" . $group["groupId"]);
+    $form->setValues($group);
 
-	// Was the cancel button pressed?
-	if ($form->isPostBack("cancel")) $this->redirect(URL("admin/groups"));
+    // Was the cancel button pressed?
+    if ($form->isPostBack("cancel")) {
+        $this->redirect(URL("admin/groups"));
+    }
 
-	// Was the save button pressed?
-	if ($form->validPostBack("save")) {
+    // Was the save button pressed?
+    if ($form->validPostBack("save")) {
 
-		$data = array(
-			"name" => $form->getValue("name"),
-			"canSuspend" => (bool)$form->getValue("canSuspend"),
-			"private" => (bool)$form->getValue("private")
-		);
+        $data = array(
+            "name" => $form->getValue("name"),
+            "canSuspend" => (bool) $form->getValue("canSuspend"),
+            "private" => (bool) $form->getValue("private")
+        );
 
-		$model = ET::groupModel();
-		$model->updateById($group["groupId"], $data);
+        $model = ET::groupModel();
+        $model->updateById($group["groupId"], $data);
 
-		// If there were errors, pass them on to the form.
-		if ($model->errorCount()) $form->errors($model->errors());
+        // If there were errors, pass them on to the form.
+        if ($model->errorCount()) {
+            $form->errors($model->errors());
+        }
 
-		// Otherwise, redirect back to the groups page.
-		else $this->redirect(URL("admin/groups"));
-	}
+        // Otherwise, redirect back to the groups page.
+        else {
+            $this->redirect(URL("admin/groups"));
+        }
+    }
 
-	$this->data("form", $form);
-	$this->data("group", $group);
-	$this->render("admin/editGroup");
+    $this->data("form", $form);
+    $this->data("group", $group);
+    $this->render("admin/editGroup");
 }
 
 
@@ -82,59 +90,63 @@ public function action_edit($groupId = "")
  */
 public function action_create()
 {
-	// Set up the form.
-	$form = ETFactory::make("form");
-	$form->action = URL("admin/groups/create");
+    // Set up the form.
+    $form = ETFactory::make("form");
+    $form->action = URL("admin/groups/create");
 
-	// Was the cancel button pressed?
-	if ($form->isPostBack("cancel")) $this->redirect(URL("admin/groups"));
+    // Was the cancel button pressed?
+    if ($form->isPostBack("cancel")) {
+        $this->redirect(URL("admin/groups"));
+    }
 
-	// Was the save button pressed?
-	if ($form->validPostBack("save")) {
+    // Was the save button pressed?
+    if ($form->validPostBack("save")) {
 
-		$data = array(
-			"name" => $form->getValue("name"),
-			"canSuspend" => (bool)$form->getValue("canSuspend"),
-			"private" => (bool)$form->getValue("private")
-		);
+        $data = array(
+            "name" => $form->getValue("name"),
+            "canSuspend" => (bool) $form->getValue("canSuspend"),
+            "private" => (bool) $form->getValue("private")
+        );
 
-		$model = ET::groupModel();
-		$groupId = $model->create($data);
+        $model = ET::groupModel();
+        $groupId = $model->create($data);
 
-		// If there were errors, pass them on to the form.
-		if ($model->errorCount()) $form->errors($model->errors());
+        // If there were errors, pass them on to the form.
+        if ($model->errorCount()) {
+            $form->errors($model->errors());
+        }
 
-		// Otherwise...
-		else {
+        // Otherwise...
+        else {
 
-			// Do we want to give this group the moderate permission on all existing channels?
-			if ($form->getValue("giveModeratePermission")) {
+            // Do we want to give this group the moderate permission on all existing channels?
+            if ($form->getValue("giveModeratePermission")) {
 
-				// Go through all the channels and construct an array of rows to insert into the channel_group table.
-				$channels = ET::channelModel()->getAll();
-				$inserts = array();
-				foreach ($channels as $id => $channel) {
-					$inserts[] = array($id, $groupId, 1, 1, 1, 1);
-				}
+                // Go through all the channels and construct an array of rows to insert into the channel_group table.
+                $channels = ET::channelModel()->getAll();
+                $inserts = array();
+                foreach ($channels as $id => $channel) {
+                    $inserts[] = array($id, $groupId, 1, 1, 1, 1);
+                }
 
-				// Insert them!
-				ET::SQL()
-					->insert("channel_group")
-					->setMultiple(array("channelId", "groupId", "view", "reply", "start", "moderate"), $inserts)
-					->setOnDuplicateKey("moderate", 1)
-					->exec();
+                // Insert them!
+                ET::SQL()
+                    ->insert("channel_group")
+                    ->setMultiple(array("channelId", "groupId", "view", "reply", "start", "moderate"), $inserts)
+                    ->setOnDuplicateKey("moderate", 1)
+                    ->exec();
 
-			}
+            }
 
-			// Redirect back to the groups page.
-			$this->redirect(URL("admin/groups"));
+            // Redirect back to the groups page.
+            $this->redirect(URL("admin/groups"));
 
-		}
-	}
+        }
+    }
 
-	$this->data("form", $form);
-	$this->data("group", null);
-	$this->render("admin/editGroup");
+    $this->data("form", $form);
+    $this->data("group", null);
+    $this->render("admin/editGroup");
 }
 
 
@@ -146,17 +158,19 @@ public function action_create()
  */
 public function action_delete($groupId = "")
 {
-	if (!$this->validateToken()) return;
+    if (!$this->validateToken()) {
+        return;
+    }
 
-	// Get this group's details. If it doesn't exist, show an error.
-	if (!($group = ET::groupModel()->getById((int)$groupId))) {
-		$this->render404();
-		return;
-	}
+    // Get this group's details. If it doesn't exist, show an error.
+    if (!($group = ET::groupModel()->getById((int) $groupId))) {
+        $this->render404();
+        return;
+    }
 
-	ET::groupModel()->deleteById($group["groupId"]);
+    ET::groupModel()->deleteById($group["groupId"]);
 
-	$this->redirect(URL("admin/groups"));
+    $this->redirect(URL("admin/groups"));
 }
 
 }

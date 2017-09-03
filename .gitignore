@@ -12,24 +12,29 @@ uploads/*
 robots.txt
 
 addons/plugins/*
-addons/languages/*
-addons/languages/English/*
-addons/skins/*
-addons/libraries/*
 !addons/plugins/BBCode
 !addons/plugins/Debug
 !addons/plugins/Emoticons
 !addons/plugins/SMTP
+!addons/plugins/Compatibility
 !addons/plugins/index.html
+
+addons/languages/*
+!addons/languages/index.html
 !addons/languages/English/
+
+addons/languages/English/*
 !addons/languages/English/definitions.php
 !addons/languages/English/definitions.BBCode.php
 !addons/languages/English/definitions.Debug.php
 !addons/languages/English/definitions.Emoticons.php
 !addons/languages/English/definitions.SMTP.php
-!addons/languages/index.html
+
+addons/skins/*
 !addons/skins/Default
 !addons/skins/index.html
+
+addons/libraries/*
 
 # Compiled source
 *.com

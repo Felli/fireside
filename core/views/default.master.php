@@ -2,7 +2,9 @@
 // Copyright 2011 Toby Zerner, Simon Zerner
 // This file is part of esoTalk. Please see the included license file for usage information.
 
-if (!defined("IN_ESOTALK")) exit;
+if (!defined("IN_ESOTALK")) {
+    exit;
+}
 
 /**
  * Default master view. Displays a HTML template with a header and footer.
@@ -44,7 +46,10 @@ if (!defined("IN_ESOTALK")) exit;
 <h1 id='forumTitle'><a href='<?php echo URL(""); ?>'><?php echo $data["forumTitle"]; ?></a></h1>
 
 <ul id='mainMenu' class='menu'>
-<?php if (!empty($data["mainMenuItems"])) echo $data["mainMenuItems"]; ?>
+<?php if (!empty($data["mainMenuItems"])) {
+    echo $data["mainMenuItems"];
+}
+?>
 </ul>
 
 <ul id='userMenu' class='menu'>
@@ -69,7 +74,10 @@ if (!defined("IN_ESOTALK")) exit;
 <ul class='menu'>
 <li id='goToTop'><a href='#'><?php echo T("Go to top"); ?></a></li>
 <?php echo $data["metaMenuItems"]; ?>
-<?php if (!empty($data["statisticsMenuItems"])) echo $data["statisticsMenuItems"]; ?>
+<?php if (!empty($data["statisticsMenuItems"])) {
+    echo $data["statisticsMenuItems"];
+}
+?>
 </ul>
 </div>
 </div>

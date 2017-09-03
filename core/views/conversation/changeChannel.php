@@ -2,7 +2,9 @@
 // Copyright 2011 Toby Zerner, Simon Zerner
 // This file is part of esoTalk. Please see the included license file for usage information.
 
-if (!defined("IN_ESOTALK")) exit;
+if (!defined("IN_ESOTALK")) {
+    exit;
+}
 
 /**
  * Displays a sheet with a list of channels to choose from.
@@ -16,7 +18,7 @@ $conversation = $data["conversation"];
 <div class='sheet' id='changeChannelSheet'>
 <div class='sheetContent'>
 
-<h3><?php echo $conversation["conversationId"] ? T("Change Channel").": <em>".sanitizeHTML($conversation["title"])."</em>" : T("Choose a Channel"); ?></h3>
+<h3><?php echo $conversation["conversationId"] ? T("Change Channel") . ": <em>" . sanitizeHTML($conversation["title"]) . "</em>" : T("Choose a Channel"); ?></h3>
 
 <?php echo $form->open(); ?>
 

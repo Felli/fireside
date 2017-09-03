@@ -178,7 +178,7 @@ class SMTP
                 break;
             case 'echo':
             default:
-                echo gmdate('Y-m-d H:i:s')."\t".trim($str)."\n";
+                echo gmdate('Y-m-d H:i:s') . "\t" . trim($str) . "\n";
         }
     }
 
@@ -574,7 +574,7 @@ class SMTP
     public function hello($host = '')
     {
         // Try extended hello first (RFC 2821)
-        return (bool)($this->sendHello('EHLO', $host) or $this->sendHello('HELO', $host));
+        return (bool) ($this->sendHello('EHLO', $host) or $this->sendHello('HELO', $host));
     }
 
     /**
@@ -688,7 +688,7 @@ class SMTP
             $this->edebug('SERVER -> CLIENT: ' . $reply);
         }
 
-        if (!in_array($code, (array)$expect)) {
+        if (!in_array($code, (array) $expect)) {
             $this->last_reply = null;
             $this->error = array(
                 'error' => "$command command failed",
@@ -785,7 +785,7 @@ class SMTP
     /**
      * Get the latest error.
      * @access public
-     * @return array
+     * @return string
      */
     public function getError()
     {
@@ -851,7 +851,7 @@ class SMTP
             if ($endtime and time() > $endtime) {
                 if ($this->do_debug >= 4) {
                     $this->edebug(
-                        'SMTP -> get_lines(): timelimit reached ('.
+                        'SMTP -> get_lines(): timelimit reached (' .
                         $this->Timelimit . ' sec)'
                     );
                 }

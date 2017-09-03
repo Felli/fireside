@@ -1363,7 +1363,7 @@ class GeSHi {
      * @param string The new line-ending
      */
     function set_line_ending($line_ending) {
-        $this->line_ending = (string)$line_ending;
+        $this->line_ending = (string) $line_ending;
     }
 
     /**
@@ -1607,30 +1607,26 @@ class GeSHi {
                                 $HARDQUOTE_OPEN = false;
                             }
                             $ESCAPE_CHAR_OPEN = false;
-                        }
-                        else if (in_array($char, $this->language_data['QUOTEMARKS']) &&
+                        } else if (in_array($char, $this->language_data['QUOTEMARKS']) &&
                             ($STRING_OPEN == '') && $this->lexic_permissions['STRINGS']) {
                             // The start of a new string
                             $STRING_OPEN = $char;
                             if (!$this->use_classes) {
                                 $attributes = ' style="' . $this->language_data['STYLES']['STRINGS'][0] . '"';
-                            }
-                            else {
+                            } else {
                                 $attributes = ' class="st0"';
                             }
                             $char = "<span$attributes>" . GeSHi::hsc($char);
 
                             $result .= $this->parse_non_string_part($stuff_to_parse);
                             $stuff_to_parse = '';
-                        }
-                        else if ($hq && substr($part, $i, strlen($hq)) == $hq &&
+                        } else if ($hq && substr($part, $i, strlen($hq)) == $hq &&
                             ($STRING_OPEN == '') && $this->lexic_permissions['STRINGS']) {
                             // The start of a hard quoted string
                             $STRING_OPEN = $this->language_data['HARDQUOTE'][1];
                             if (!$this->use_classes) {
                                 $attributes = ' style="' . $this->language_data['STYLES']['STRINGS'][0] . '"';
-                            }
-                            else {
+                            } else {
                                 $attributes = ' class="st0"';
                             }
                             $char = "<span$attributes>" . $hq;
@@ -1859,6 +1855,7 @@ class GeSHi {
      * the code is in a pre block...
      *
      * @param  string The source to indent
+     * @param string $result
      * @return string The source with HTML indenting applied
      * @since  1.0.0
      * @access private
@@ -2002,7 +1999,9 @@ class GeSHi {
                     }
                     $word = (substr($word, 0, 4) == '&lt;') ? substr($word, 4) : $word;
                     $word = (substr($word, -4) == '&gt;') ? substr($word, 0, strlen($word) - 4) : $word;
-                    if (!$word) return '';
+                    if (!$word) {
+                        return '';
+                    }
 
                     return '<|UR1|"' .
                         str_replace(
@@ -2048,8 +2047,7 @@ class GeSHi {
                         "{$regexp[GESHI_BEFORE]}<|!REG3XP$key!>{$regexp[GESHI_REPLACE]}|>{$regexp[GESHI_AFTER]}",
                         $stuff_to_parse
                     );
-                }
-                else {
+                } else {
                     $stuff_to_parse = preg_replace("/(" . str_replace('/', '\/', $regexp) . ")/", "<|!REG3XP$key!>\\1|>", $stuff_to_parse);
                 }
             }
@@ -2183,14 +2181,12 @@ class GeSHi {
             if ($this->lexic_permissions['REGEXPS'][$key]) {
                 if (!$this->use_classes) {
                     $attributes = ' style="' . $this->language_data['STYLES']['REGEXPS'][$key] . '"';
-                }
-                else {
-                    if(is_array($this->language_data['REGEXPS'][$key]) &&
+                } else {
+                    if (is_array($this->language_data['REGEXPS'][$key]) &&
                             array_key_exists(GESHI_CLASS, $this->language_data['REGEXPS'][$key])) {
                         $attributes = ' class="'
                             . $this->language_data['REGEXPS'][$key][GESHI_CLASS] . '"';
-                    }
-                    else {
+                    } else {
                         $attributes = ' class="re' . $key . '"';
                     }
                 }
@@ -2454,17 +2450,14 @@ class GeSHi {
         if ($this->line_numbers != GESHI_NO_LINE_NUMBERS) {
             if ($this->header_type == GESHI_HEADER_PRE) {
                 return "<pre$attributes>$header<ol$ol_attributes>";
-            }
-            else if ($this->header_type == GESHI_HEADER_DIV) {
+            } else if ($this->header_type == GESHI_HEADER_DIV) {
                 return "<div$attributes>$header<ol$ol_attributes>";
             }
-        }
-        else {
+        } else {
             if ($this->header_type == GESHI_HEADER_PRE) {
                 return "<pre$attributes>$header" .
                     ($this->force_code_block ? '<div>' : '');
-            }
-            else if ($this->header_type == GESHI_HEADER_DIV) {
+            } else if ($this->header_type == GESHI_HEADER_DIV) {
                 return "<div$attributes>$header" .
                     ($this->force_code_block ? '<div>' : '');
             }

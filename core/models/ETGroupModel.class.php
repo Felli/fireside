@@ -2,7 +2,9 @@
 // Copyright 2011 Toby Zerner, Simon Zerner
 // This file is part of esoTalk. Please see the included license file for usage information.
 
-if (!defined("IN_ESOTALK")) exit;
+if (!defined("IN_ESOTALK")) {
+    exit;
+}
 
 /**
  * The group model provides functions for retrieving and managing member group data, and also provides some
@@ -29,7 +31,7 @@ protected $groups;
  */
 public function __construct()
 {
-	parent::__construct("group");
+    parent::__construct("group");
 }
 
 
@@ -43,29 +45,29 @@ public function __construct()
  */
 public function getAll()
 {
-	if (!$this->groups) {
+    if (!$this->groups) {
 
-		// If we don't have a local cache of groups, attempt to retrieve the data from the global cache.
-		$groups = ET::$cache->get(self::CACHE_KEY);
+        // If we don't have a local cache of groups, attempt to retrieve the data from the global cache.
+        $groups = ET::$cache->get(self::CACHE_KEY);
 
-		if (!$groups) {
+        if (!$groups) {
 
-			// Still no luck? Let's get all of the groups and their details from the db.
-			$sql = ET::SQL()
-				->select("g.*")
-				->from("group g");
+            // Still no luck? Let's get all of the groups and their details from the db.
+            $sql = ET::SQL()
+                ->select("g.*")
+                ->from("group g");
 
-			$groups = $sql->exec()->allRows("groupId");
+            $groups = $sql->exec()->allRows("groupId");
 
-			// Store the result in the global cache.
-			ET::$cache->store(self::CACHE_KEY, $groups);
-		}
+            // Store the result in the global cache.
+            ET::$cache->store(self::CACHE_KEY, $groups);
+        }
 
-		// Store the result in the local cache.
-		$this->groups = $groups;
-	}
+        // Store the result in the local cache.
+        $this->groups = $groups;
+    }
 
-	return $this->groups;
+    return $this->groups;
 }
 
 
@@ -77,17 +79,17 @@ public function getAll()
  */
 public function delete($wheres = array())
 {
-	ET::SQL()
-		->delete("g")
-		->delete("m")
-		->delete("c")
-		->from("group g")
-		->from("member_group m", "m.groupId=g.groupId", "left")
-		->from("channel_group c", "c.groupId=g.groupId", "left")
-		->where($wheres)
-		->exec();
+    ET::SQL()
+        ->delete("g")
+        ->delete("m")
+        ->delete("c")
+        ->from("group g")
+        ->from("member_group m", "m.groupId=g.groupId", "left")
+        ->from("channel_group c", "c.groupId=g.groupId", "left")
+        ->where($wheres)
+        ->exec();
 
-	return true;
+    return true;
 }
 
 
@@ -95,11 +97,11 @@ public function delete($wheres = array())
  * Delete an existing record in the model's table with a particular ID.
  *
  * @param mixed $id The ID of the record to delete.
- * @return ETSQLResult
+ * @return boolean
  */
 public function deleteById($id)
 {
-	return $this->delete(array("g.groupId" => $id));
+    return $this->delete(array("g.groupId" => $id));
 }
 
 
@@ -118,14 +120,18 @@ public function deleteById($id)
  */
 public function groupIdsAllowedInGroupIds($groupIds, $allowedGroupIds, $adminAlwaysAllowed = false)
 {
-	// If the group IDs contains the administrator group, then we may not need to go any further.
-	if (in_array(GROUP_ID_ADMINISTRATOR, (array)$groupIds) and $adminAlwaysAllowed) return true;
+    // If the group IDs contains the administrator group, then we may not need to go any further.
+    if (in_array(GROUP_ID_ADMINISTRATOR, (array) $groupIds) and $adminAlwaysAllowed) {
+        return true;
+    }
 
-	// If guests are allowed, then everyone is allowed!
-	if (in_array(GROUP_ID_GUEST, (array)$allowedGroupIds)) return true;
+    // If guests are allowed, then everyone is allowed!
+    if (in_array(GROUP_ID_GUEST, (array) $allowedGroupIds)) {
+        return true;
+    }
 
-	// Return whether or not any of the group IDs in each array match.
-	return (bool)count(array_intersect((array)$groupIds, (array)$allowedGroupIds));
+    // Return whether or not any of the group IDs in each array match.
+    return (bool) count(array_intersect((array) $groupIds, (array) $allowedGroupIds));
 }
 
 
@@ -135,23 +141,27 @@ public function groupIdsAllowedInGroupIds($groupIds, $allowedGroupIds, $adminAlw
  *
  * @param string $account The member's account type.
  * @param array $groupIds An array of groups that the member is in.
- * @return array An array of applied group IDs for use with permission checking.
+ * @return integer[] An array of applied group IDs for use with permission checking.
  */
 public function getGroupIds($account, $groupIds)
 {
-	// If the user is a guest, or is suspended, they're just in the guest group.
-	if (!$account or $account == ACCOUNT_SUSPENDED) return array(GROUP_ID_GUEST);
+    // If the user is a guest, or is suspended, they're just in the guest group.
+    if (!$account or $account == ACCOUNT_SUSPENDED) {
+        return array(GROUP_ID_GUEST);
+    }
 
-	$groupIds = array_filter($groupIds);
+    $groupIds = array_filter($groupIds);
 
-	// If the user is an admin, add that group to their groups.
-	if ($account == ACCOUNT_ADMINISTRATOR) $groupIds[] = GROUP_ID_ADMINISTRATOR;
+    // If the user is an admin, add that group to their groups.
+    if ($account == ACCOUNT_ADMINISTRATOR) {
+        $groupIds[] = GROUP_ID_ADMINISTRATOR;
+    }
 
-	// Add the member and guest groups, and return all of them.
-	$groupIds[] = GROUP_ID_MEMBER;
-	$groupIds[] = GROUP_ID_GUEST;
+    // Add the member and guest groups, and return all of them.
+    $groupIds[] = GROUP_ID_MEMBER;
+    $groupIds[] = GROUP_ID_GUEST;
 
-	return $groupIds;
+    return $groupIds;
 }
 
 }

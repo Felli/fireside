@@ -2,7 +2,9 @@
 // Copyright 2011 Toby Zerner, Simon Zerner
 // This file is part of esoTalk. Please see the included license file for usage information.
 
-if (!defined("IN_ESOTALK")) exit;
+if (!defined("IN_ESOTALK")) {
+    exit;
+}
 
 /**
  * Default configuration: This file will get overwritten with every esoTalk update, so do not edit it.
@@ -12,10 +14,12 @@ if (!defined("IN_ESOTALK")) exit;
  */
 
 // The version of the code.
-define("ESOTALK_VERSION", "1.0.0g5");
+define("ESOTALK_VERSION", "1.0.1");
 
 // Define response type constants.
-if (!defined("RESPONSE_TYPE_DEFAULT")) define("RESPONSE_TYPE_DEFAULT", "default");
+if (!defined("RESPONSE_TYPE_DEFAULT")) {
+    define("RESPONSE_TYPE_DEFAULT", "default");
+}
 define("RESPONSE_TYPE_VIEW", "view"); // Renders only the controller's view (without the master view)
 define("RESPONSE_TYPE_AJAX", "ajax"); // Renders the controller's json contents and includes the view contents
 define("RESPONSE_TYPE_JSON", "json"); // Renders only the contorller's json contents
@@ -46,9 +50,9 @@ $config["esoTalk.database.dbName"] = "";
 $config["esoTalk.database.prefix"] = "";
 $config["esoTalk.database.characterEncoding"] = "utf8";
 $config["esoTalk.database.connectionOptions"] = array(
-	PDO::ATTR_PERSISTENT => false,
-	1000 => true, // PDO::MYSQL_ATTR_USE_BUFFERED_QUERY is missing in some PHP installations
-	1002 => "SET NAMES 'utf8'" // PDO::MYSQL_ATTR_INIT_COMMAND is missing in some PHP installations
+    PDO::ATTR_PERSISTENT => false,
+    1000 => true, // PDO::MYSQL_ATTR_USE_BUFFERED_QUERY is missing in some PHP installations
+    1002 => "SET NAMES 'utf8'" // PDO::MYSQL_ATTR_INIT_COMMAND is missing in some PHP installations
 );
 
 // Basic forum details.

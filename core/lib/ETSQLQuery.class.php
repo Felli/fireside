@@ -2,7 +2,9 @@
 // Copyright 2011 Toby Zerner, Simon Zerner
 // This file is part of esoTalk. Please see the included license file for usage information.
 
-if (!defined("IN_ESOTALK")) exit;
+if (!defined("IN_ESOTALK")) {
+    exit;
+}
 
 /**
  * Enables dynamic construction of SQL queries.
@@ -135,34 +137,38 @@ public $parameters = array();
  */
 public function bind($parameter, $value, $dataType = null)
 {
-	$this->parameters[$parameter] = array($value, $dataType);
-	return $this;
+    $this->parameters[$parameter] = array($value, $dataType);
+    return $this;
 }
 
 
 /**
  * Add an expression to the SELECT clause.
  *
- * @param string|array $expression The expression to select. If an array is passed, all values will be added.
+ * @param string $expression The expression to select. If an array is passed, all values will be added.
  * @param string $as An optional identifier to select the expression AS.
  * @return ETSQLQuery
  */
 public function select($expression, $as = false)
 {
-	$this->mode = "select";
+    $this->mode = "select";
 
-	// If an AS name was specified, set a keyed value in the array.
-	if ($as !== false) $this->select[$as] = $expression;
+    // If an AS name was specified, set a keyed value in the array.
+    if ($as !== false) {
+        $this->select[$as] = $expression;
+    }
 
-	// Otherwise, cast the expression to an array and add all its values to the SELECTs array.
-	else {
-		$expressions = (array)$expression;
-		foreach ($expressions as $expression) {
-			if (!empty($expression)) $this->select[] = $expression;
-		}
-	}
+    // Otherwise, cast the expression to an array and add all its values to the SELECTs array.
+    else {
+        $expressions = (array) $expression;
+        foreach ($expressions as $expression) {
+            if (!empty($expression)) {
+                $this->select[] = $expression;
+            }
+        }
+    }
 
-	return $this;
+    return $this;
 }
 
 
@@ -177,22 +183,25 @@ public function select($expression, $as = false)
  */
 public function from($table, $on = false, $type = false)
 {
-	// If the first character is an opening bracket, then assume the table is a SELECT query. Otherwise,
-	// add the table prefix.
-	if ($table[0] != "(") {
-		$parts = explode(" ", ET::$database->tablePrefix.$table);
-		$parts[0] = "`".$parts[0]."`";
-		$table = implode(" ", $parts);
-	}
+    // If the first character is an opening bracket, then assume the table is a SELECT query. Otherwise,
+    // add the table prefix.
+    if ($table[0] != "(") {
+        $parts = explode(" ", ET::$database->tablePrefix . $table);
+        $parts[0] = "`" . $parts[0] . "`";
+        $table = implode(" ", $parts);
+    }
 
-	// If a JOIN type or condition was specified, add the table with JOIN syntax.
-	if (!empty($type) or !empty($on))
-		$this->tables[] = strtoupper($type ? $type : "inner")." JOIN $table".(!empty($on) ? " ON ($on)" : "");
+    // If a JOIN type or condition was specified, add the table with JOIN syntax.
+    if (!empty($type) or !empty($on)) {
+            $this->tables[] = strtoupper($type ? $type : "inner") . " JOIN $table" . (!empty($on) ? " ON ($on)" : "");
+    }
 
-	// Otherwise, just add the table name normally.
-	else array_unshift($this->tables, $table);
+    // Otherwise, just add the table name normally.
+    else {
+        array_unshift($this->tables, $table);
+    }
 
-	return $this;
+    return $this;
 }
 
 
@@ -209,60 +218,70 @@ public function from($table, $on = false, $type = false)
  */
 public function where($predicate, $value = false)
 {
-	if (empty($predicate)) return $this;
+    if (empty($predicate)) {
+        return $this;
+    }
 
-	// If a value was specified, use the predicate as the field name.
-	if ($value !== false) $predicate = array($predicate => $value);
+    // If a value was specified, use the predicate as the field name.
+    if ($value !== false) {
+        $predicate = array($predicate => $value);
+    }
 
-	// Go through the predicates and add them to the query one by one.
-	$predicates = (array)$predicate;
-	foreach ($predicates as $field => $predicate) {
+    // Go through the predicates and add them to the query one by one.
+    $predicates = (array) $predicate;
+    foreach ($predicates as $field => $predicate) {
 
-		// If the key is non-numeric, use it as the field name add an equality predicate.
-		// Bind the value with a parameter called :where#.
-		if (!is_numeric($field)) {
-			$i = count($this->where);
-			$this->where[] = "$field=:where$i";
-			$this->bind(":where$i", $predicate);
-		}
+        // If the key is non-numeric, use it as the field name add an equality predicate.
+        // Bind the value with a parameter called :where#.
+        if (!is_numeric($field)) {
+            $i = count($this->where);
+            $this->where[] = "$field=:where$i";
+            $this->bind(":where$i", $predicate);
+        }
 
-		// If the key is numeric, add the predicate as is.
-		else $this->where[] = $predicate;
-	}
+        // If the key is numeric, add the predicate as is.
+        else {
+            $this->where[] = $predicate;
+        }
+    }
 
-	return $this;
+    return $this;
 }
 
 
 /**
  * Add an expression to the GROUP BY clause.
  *
- * @param string|array $expression The expression, or an array of expressions, to add.
+ * @param string $expression The expression, or an array of expressions, to add.
  * @return ETSQLQuery
  */
 public function groupBy($expression)
 {
-	$expressions = (array)$expression;
-	foreach ($expressions as $expression) {
-		if (!empty($expression)) $this->groupBy[] = $expression;
-	}
-	return $this;
+    $expressions = (array) $expression;
+    foreach ($expressions as $expression) {
+        if (!empty($expression)) {
+            $this->groupBy[] = $expression;
+        }
+    }
+    return $this;
 }
 
 
 /**
  * Add an expression to the ORDER BY clause.
  *
- * @param string|array $expression The expression, or an array of expressions, to add.
+ * @param string $expression The expression, or an array of expressions, to add.
  * @return ETSQLQuery
  */
 public function orderBy($expression)
 {
-	$expressions = (array)$expression;
-	foreach ($expressions as $expression) {
-		if (!empty($expression)) $this->orderBy[] = $expression;
-	}
-	return $this;
+    $expressions = (array) $expression;
+    foreach ($expressions as $expression) {
+        if (!empty($expression)) {
+            $this->orderBy[] = $expression;
+        }
+    }
+    return $this;
 }
 
 
@@ -274,11 +293,13 @@ public function orderBy($expression)
  */
 public function having($expression)
 {
-	$expressions = (array)$expression;
-	foreach ($expressions as $expression) {
-		if (!empty($expression)) $this->having[] = $expression;
-	}
-	return $this;
+    $expressions = (array) $expression;
+    foreach ($expressions as $expression) {
+        if (!empty($expression)) {
+            $this->having[] = $expression;
+        }
+    }
+    return $this;
 }
 
 
@@ -290,8 +311,8 @@ public function having($expression)
  */
 public function useIndex($index)
 {
-	$this->index = $index;
-	return $this;
+    $this->index = $index;
+    return $this;
 }
 
 
@@ -303,8 +324,8 @@ public function useIndex($index)
  */
 public function limit($limit)
 {
-	$this->limit = $limit;
-	return $this;
+    $this->limit = $limit;
+    return $this;
 }
 
 
@@ -316,8 +337,8 @@ public function limit($limit)
  */
 public function offset($offset)
 {
-	$this->offset = $offset;
-	return $this;
+    $this->offset = $offset;
+    return $this;
 }
 
 
@@ -329,9 +350,9 @@ public function offset($offset)
  */
 public function update($table)
 {
-	$this->mode = "update";
-	$this->tables[] = ET::$database->tablePrefix.$table;
-	return $this;
+    $this->mode = "update";
+    $this->tables[] = ET::$database->tablePrefix . $table;
+    return $this;
 }
 
 
@@ -345,24 +366,27 @@ public function update($table)
  */
 public function set($field, $value = false, $sanitize = true)
 {
-	if (!is_array($field)) $field = array($field => $value);
-	foreach ($field as $field => $value) {
+    if (!is_array($field)) {
+        $field = array($field => $value);
+    }
+    foreach ($field as $field => $value) {
 
-		$value = $sanitize ? ET::$database->escapeValue($value) : $value;
+        $value = $sanitize ? ET::$database->escapeValue($value) : $value;
 
-		// For an UPDATE query, simply add the field and value to the SET array.
-		if ($this->mode == "update")
-			$this->set[$field] = $value;
+        // For an UPDATE query, simply add the field and value to the SET array.
+        if ($this->mode == "update") {
+                    $this->set[$field] = $value;
+        }
 
-		// But for an INSERT query, we need to add the field to $this->insertFields and the value to the
-		// first row in the SET array.
-		else {
-			$this->insertFields[] = $field;
-			$this->set[0][] = $value;
-		}
+        // But for an INSERT query, we need to add the field to $this->insertFields and the value to the
+        // first row in the SET array.
+        else {
+            $this->insertFields[] = $field;
+            $this->set[0][] = $value;
+        }
 
-	}
-	return $this;
+    }
+    return $this;
 }
 
 
@@ -374,9 +398,9 @@ public function set($field, $value = false, $sanitize = true)
  */
 public function insert($table)
 {
-	$this->mode = "insert";
-	$this->tables[] = ET::$database->tablePrefix.$table;
-	return $this;
+    $this->mode = "insert";
+    $this->tables[] = ET::$database->tablePrefix . $table;
+    return $this;
 }
 
 
@@ -389,14 +413,14 @@ public function insert($table)
  */
 public function setMultiple($fields, $valueSets)
 {
-	$this->insertFields = $fields;
-	foreach ($valueSets as &$row) {
-		foreach ($row as &$value) {
-			$value = ET::$database->escapeValue($value);
-		}
-	}
-	$this->set = $valueSets;
-	return $this;
+    $this->insertFields = $fields;
+    foreach ($valueSets as &$row) {
+        foreach ($row as &$value) {
+            $value = ET::$database->escapeValue($value);
+        }
+    }
+    $this->set = $valueSets;
+    return $this;
 }
 
 
@@ -410,11 +434,13 @@ public function setMultiple($fields, $valueSets)
  */
 public function setOnDuplicateKey($field, $value = false, $sanitize = true)
 {
-	if (!is_array($field)) $field = array($field => $value);
-	foreach ($field as $field => $value) {
-		$this->setDuplicateKey[$field] = $sanitize ? ET::$database->escapeValue($value) : $value;
-	}
-	return $this;
+    if (!is_array($field)) {
+        $field = array($field => $value);
+    }
+    foreach ($field as $field => $value) {
+        $this->setDuplicateKey[$field] = $sanitize ? ET::$database->escapeValue($value) : $value;
+    }
+    return $this;
 }
 
 
@@ -426,9 +452,9 @@ public function setOnDuplicateKey($field, $value = false, $sanitize = true)
  */
 public function replace($table)
 {
-	$this->mode = "replace";
-	$this->tables[] = ET::$database->tablePrefix.$table;
-	return $this;
+    $this->mode = "replace";
+    $this->tables[] = ET::$database->tablePrefix . $table;
+    return $this;
 }
 
 
@@ -440,9 +466,11 @@ public function replace($table)
  */
 public function delete($table = null)
 {
-	$this->mode = "delete";
-	if ($table) $this->select[] = $table;
-	return $this;
+    $this->mode = "delete";
+    if ($table) {
+        $this->select[] = $table;
+    }
+    return $this;
 }
 
 
@@ -454,9 +482,9 @@ public function delete($table = null)
  */
 public function union($query)
 {
-	$this->mode = "union";
-	$this->union[] = $query;
-	return $this;
+    $this->mode = "union";
+    $this->union[] = $query;
+    return $this;
 }
 
 
@@ -469,9 +497,12 @@ public function union($query)
  */
 protected function indent($value)
 {
-	if (is_array($value)) return array_map(array($this, "indent"), $value);
-	else return str_replace("\n", "\n\t\t", $value);
-}
+    if (is_array($value)) {
+        return array_map(array($this, "indent"), $value);
+    } else {
+        return str_replace("\n", "\n\t\t", $value);
+    }
+    }
 
 
 /**
@@ -481,7 +512,7 @@ protected function indent($value)
  */
 protected function getWhere()
 {
-	return count($this->where) ? "\nWHERE (".implode(")\n\tAND (", $this->indent($this->where)).")" : "";
+    return count($this->where) ? "\nWHERE (" . implode(")\n\tAND (", $this->indent($this->where)) . ")" : "";
 }
 
 
@@ -492,7 +523,7 @@ protected function getWhere()
  */
 protected function getOrderBy()
 {
-	return count($this->orderBy) ? "\nORDER BY ".implode(", ", $this->orderBy) : "";
+    return count($this->orderBy) ? "\nORDER BY " . implode(", ", $this->orderBy) : "";
 }
 
 
@@ -503,24 +534,27 @@ protected function getOrderBy()
  */
 protected function getSelect()
 {
-	// Construct the SELECT clause.
-	$select = array();
-	foreach ($this->select as $k => $v) {
-		if (!is_numeric($k)) $select[] = "$v AS $k";
-		else $select[] = $v;
-	}
-	$select = "SELECT ".implode(", \n\t", $this->indent($select));
+    // Construct the SELECT clause.
+    $select = array();
+    foreach ($this->select as $k => $v) {
+        if (!is_numeric($k)) {
+            $select[] = "$v AS $k";
+        } else {
+            $select[] = $v;
+        }
+    }
+    $select = "SELECT " . implode(", \n\t", $this->indent($select));
 
-	// Construct some other clauses.
-	$from = count($this->tables) ? "\nFROM ".implode("\n\t", $this->indent($this->tables)) : "";
-	$index = $this->index ? "\nUSE INDEX ($this->index)" : "";
-	$having = count($this->having) ? "\nHAVING (".implode(") AND (", $this->indent($this->having)).")" : "";
-	$groupBy = count($this->groupBy) ? "\nGROUP BY ".implode(", ", $this->groupBy) : "";
-	$limit = $this->limit ? "\nLIMIT $this->limit" : "";
-	$offset = $this->offset ? "\nOFFSET $this->offset" : "";
+    // Construct some other clauses.
+    $from = count($this->tables) ? "\nFROM " . implode("\n\t", $this->indent($this->tables)) : "";
+    $index = $this->index ? "\nUSE INDEX ($this->index)" : "";
+    $having = count($this->having) ? "\nHAVING (" . implode(") AND (", $this->indent($this->having)) . ")" : "";
+    $groupBy = count($this->groupBy) ? "\nGROUP BY " . implode(", ", $this->groupBy) : "";
+    $limit = $this->limit ? "\nLIMIT $this->limit" : "";
+    $offset = $this->offset ? "\nOFFSET $this->offset" : "";
 
-	// Put the whole query together and return it.
-	return $select.$from.$index.$this->getWhere().$groupBy.$this->getOrderBy().$limit.$offset;
+    // Put the whole query together and return it.
+    return $select . $from . $index . $this->getWhere() . $groupBy . $this->getOrderBy() . $limit . $offset;
 }
 
 
@@ -531,15 +565,17 @@ protected function getSelect()
  */
 protected function getUpdate()
 {
-	// Put together the tables to update.
-	$tables = implode(", ", $this->tables);
+    // Put together the tables to update.
+    $tables = implode(", ", $this->tables);
 
-	// Construct the SET clause.
-	$set = array();
-	foreach ($this->set as $k => $v) $set[] = "$k=$v";
-	$set = implode(", ", $set);
+    // Construct the SET clause.
+    $set = array();
+    foreach ($this->set as $k => $v) {
+        $set[] = "$k=$v";
+    }
+    $set = implode(", ", $set);
 
-	return "UPDATE $tables SET $set ".$this->getWhere();
+    return "UPDATE $tables SET $set " . $this->getWhere();
 }
 
 
@@ -550,23 +586,27 @@ protected function getUpdate()
  */
 protected function getInsert()
 {
-	// Put together the tables to insert into.
-	$tables = implode(", ", $this->tables);
+    // Put together the tables to insert into.
+    $tables = implode(", ", $this->tables);
 
-	// Make a list of fields to insert data into.
-	$fields = implode(", ", $this->insertFields);
+    // Make a list of fields to insert data into.
+    $fields = implode(", ", $this->insertFields);
 
-	// Make a list of rows and their values to insert.
-	$rows = array();
-	foreach ($this->set as $row) $rows[] = "(".implode(", ", $row).")";
-	$values = implode(", ", $rows);
+    // Make a list of rows and their values to insert.
+    $rows = array();
+    foreach ($this->set as $row) {
+        $rows[] = "(" . implode(", ", $row) . ")";
+    }
+    $values = implode(", ", $rows);
 
-	// Construct the ON DUPLICATE KEY UPDATE clause.
-	$onDuplicateKey = array();
-	foreach ($this->setDuplicateKey as $k => $v) $onDuplicateKey[] = "$k=$v";
-	$onDuplicateKey = implode(", ", $onDuplicateKey);
+    // Construct the ON DUPLICATE KEY UPDATE clause.
+    $onDuplicateKey = array();
+    foreach ($this->setDuplicateKey as $k => $v) {
+        $onDuplicateKey[] = "$k=$v";
+    }
+    $onDuplicateKey = implode(", ", $onDuplicateKey);
 
-	return "INSERT INTO $tables ($fields) VALUES $values".($onDuplicateKey ? " ON DUPLICATE KEY UPDATE $onDuplicateKey" : "");
+    return "INSERT INTO $tables ($fields) VALUES $values" . ($onDuplicateKey ? " ON DUPLICATE KEY UPDATE $onDuplicateKey" : "");
 }
 
 
@@ -577,10 +617,10 @@ protected function getInsert()
  */
 protected function getReplace()
 {
-	// Simply construct an INSERT query, replacing the word INSERT with REPLACE.
-	$query = $this->getInsert();
-	$query = "REPLACE".substr($query, 6);
-	return $query;
+    // Simply construct an INSERT query, replacing the word INSERT with REPLACE.
+    $query = $this->getInsert();
+    $query = "REPLACE" . substr($query, 6);
+    return $query;
 }
 
 
@@ -591,10 +631,10 @@ protected function getReplace()
  */
 protected function getDelete()
 {
-	$tables = implode(", ", $this->select);
-	$from = implode("\n\t", $this->indent($this->tables));
+    $tables = implode(", ", $this->select);
+    $from = implode("\n\t", $this->indent($this->tables));
 
-	return "DELETE $tables FROM $from ".$this->getWhere();
+    return "DELETE $tables FROM $from " . $this->getWhere();
 }
 
 
@@ -605,19 +645,21 @@ protected function getDelete()
  */
 protected function getUnion()
 {
-	// Convert the queries that we want to UNION to strings.
-	$selects = $this->union;
-	foreach ($selects as &$sql) $sql = "\t(".$sql->get().")";
+    // Convert the queries that we want to UNION to strings.
+    $selects = $this->union;
+    foreach ($selects as &$sql) {
+        $sql = "\t(" . $sql->get() . ")";
+    }
 
-	// Implode them with the UNION keyword.
-	$selects = implode("\nUNION\n", $this->indent($selects));
+    // Implode them with the UNION keyword.
+    $selects = implode("\nUNION\n", $this->indent($selects));
 
-	// Add order by, limit, and offset clauses.
-	$limit = $this->limit ? "\nLIMIT $this->limit" : "";
-	$offset = $this->offset ? "\nOFFSET $this->offset" : "";
+    // Add order by, limit, and offset clauses.
+    $limit = $this->limit ? "\nLIMIT $this->limit" : "";
+    $offset = $this->offset ? "\nOFFSET $this->offset" : "";
 
-	// Put the query together.
-	return $selects.$this->getOrderBy().$limit.$offset;
+    // Put the query together.
+    return $selects . $this->getOrderBy() . $limit . $offset;
 }
 
 
@@ -629,46 +671,46 @@ protected function getUnion()
  */
 public function get()
 {
-	// Run the appropriate get function depending on this query's mode.
-	switch ($this->mode) {
+    // Run the appropriate get function depending on this query's mode.
+    switch ($this->mode) {
 
-		case "select":
-			$query = $this->getSelect();
-			break;
+        case "select":
+            $query = $this->getSelect();
+            break;
 
-		case "update":
-			$query = $this->getUpdate();
-			break;
+        case "update":
+            $query = $this->getUpdate();
+            break;
 
-		case "insert":
-			$query = $this->getInsert();
-			break;
+        case "insert":
+            $query = $this->getInsert();
+            break;
 
-		case "replace":
-			$query = $this->getReplace();
-			break;
+        case "replace":
+            $query = $this->getReplace();
+            break;
 
-		case "delete":
-			$query = $this->getDelete();
-			break;
+        case "delete":
+            $query = $this->getDelete();
+            break;
 
-		case "union":
-			$query = $this->getUnion();
-			break;
+        case "union":
+            $query = $this->getUnion();
+            break;
 
-		default:
-			$query = "";
-	}
+        default:
+            $query = "";
+    }
 
-	// Substitute in bound parameter values.
-	$self = $this;
-	$query = preg_replace_callback('/(:[A-Za-z0-9_]+)/', function ($matches) use ($self) {
-		return array_key_exists($matches[1], $self->parameters)
-			? ET::$database->escapeValue($self->parameters[$matches[1]][0], $self->parameters[$matches[1]][1])
-			: $matches[1];
-	}, $query);
+    // Substitute in bound parameter values.
+    $self = $this;
+    $query = preg_replace_callback('/(:[A-Za-z0-9_]+)/', function($matches) use ($self) {
+        return array_key_exists($matches[1], $self->parameters)
+            ? ET::$database->escapeValue($self->parameters[$matches[1]][0], $self->parameters[$matches[1]][1])
+            : $matches[1];
+    }, $query);
 
-	return $query;
+    return $query;
 }
 
 
@@ -679,13 +721,13 @@ public function get()
  */
 public function exec()
 {
-	$query = $this->get();
-	return ET::$database->query($query);
+    $query = $this->get();
+    return ET::$database->query($query);
 }
 
 public function __toString()
 {
-	return $this->get();
+    return $this->get();
 }
 
 }

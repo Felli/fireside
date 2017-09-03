@@ -2,7 +2,9 @@
 // Copyright 2011 Toby Zerner, Simon Zerner
 // This file is part of esoTalk. Please see the included license file for usage information.
 
-if (!defined("IN_ESOTALK")) exit;
+if (!defined("IN_ESOTALK")) {
+    exit;
+}
 
 /**
  * The conversation model provides functions for retrieving and managing conversation data. It also provides
@@ -29,7 +31,7 @@ public static $labels = array();
  */
 public function __construct()
 {
-	parent::__construct("conversation");
+    parent::__construct("conversation");
 }
 
 
@@ -43,7 +45,7 @@ public function __construct()
  */
 public static function addLabel($label, $expression, $icon = "")
 {
-	self::$labels[$label] = array($expression, $icon);
+    self::$labels[$label] = array($expression, $icon);
 }
 
 
@@ -58,11 +60,16 @@ public static function addLabel($label, $expression, $icon = "")
  */
 public static function addLabels(&$sql)
 {
-	$expressions = array();
-	foreach (self::$labels as $label) $expressions[] = $label[0];
-	if (count($expressions)) $sql->select("CONCAT_WS(',',".implode(",", $expressions).")", "labels");
-	else $sql->select("NULL", "labels");
-}
+    $expressions = array();
+    foreach (self::$labels as $label) {
+        $expressions[] = $label[0];
+    }
+    if (count($expressions)) {
+        $sql->select("CONCAT_WS(','," . implode(",", $expressions) . ")", "labels");
+    } else {
+        $sql->select("NULL", "labels");
+    }
+    }
 
 
 /**
@@ -73,16 +80,18 @@ public static function addLabels(&$sql)
  */
 public static function expandLabels($labels)
 {
-	$active = array();
-	if (count(self::$labels)) {
-		$labels = explode(",", $labels);
-		$i = 0;
-		foreach (self::$labels as $k => $v) {
-			if (!empty($labels[$i])) $active[] = $k;
-			$i++;
-		}
-	}
-	return $active;
+    $active = array();
+    if (count(self::$labels)) {
+        $labels = explode(",", $labels);
+        $i = 0;
+        foreach (self::$labels as $k => $v) {
+            if (!empty($labels[$i])) {
+                $active[] = $k;
+            }
+            $i++;
+        }
+    }
+    return $active;
 }
 
 
@@ -99,33 +108,37 @@ public static function expandLabels($labels)
 // Get a WHERE clause that makes sure the currently logged in user is allowed to view a conversation.
 public function addAllowedPredicate(&$sql, $member = false, $table = "c")
 {
-	// If no member was specified, use the current user.
-	if (!$member) $member = ET::$session->user;
+    // If no member was specified, use the current user.
+    if (!$member) {
+        $member = ET::$session->user;
+    }
 
-	// If the user is a guest, they can only see conversations that are not drafts and that are not private.
-	if (!$member) $sql->where("$table.countPosts>0")->where("$table.private=0");
+    // If the user is a guest, they can only see conversations that are not drafts and that are not private.
+    if (!$member) {
+        $sql->where("$table.countPosts>0")->where("$table.private=0");
+    }
 
-	// If the user is logged in...
-	else {
+    // If the user is logged in...
+    else {
 
-		// Construct a query to get a list of conversationIds that the user is explicitly allowed in.
-		$allowedQuery = ET::SQL()
-			->select("conversationId")
-			->from("member_conversation")
-			->where("(type='member' AND id=:allowedMemberId) OR (type='group' AND id IN (:allowedGroupIds))")
-			->where("allowed=1")
-			->get();
+        // Construct a query to get a list of conversationIds that the user is explicitly allowed in.
+        $allowedQuery = ET::SQL()
+            ->select("conversationId")
+            ->from("member_conversation")
+            ->where("(type='member' AND id=:allowedMemberId) OR (type='group' AND id IN (:allowedGroupIds))")
+            ->where("allowed=1")
+            ->get();
 
-		// They must be the start member, or the conversation mustn't be a draft or private. If it is private, they must be allowed, using the query above.
-		$sql->where("($table.startMemberId=:startMemberId OR ($table.countPosts>0 AND ($table.private=0 OR $table.conversationId IN ($allowedQuery))))")
-			->bind(":allowedMemberId", $member["memberId"])
-			->bind(":allowedGroupIds", ET::groupModel()->getGroupIds($member["account"], array_keys($member["groups"])))
-			->bind(":startMemberId", $member["memberId"]);
+        // They must be the start member, or the conversation mustn't be a draft or private. If it is private, they must be allowed, using the query above.
+        $sql->where("($table.startMemberId=:startMemberId OR ($table.countPosts>0 AND ($table.private=0 OR $table.conversationId IN ($allowedQuery))))")
+            ->bind(":allowedMemberId", $member["memberId"])
+            ->bind(":allowedGroupIds", ET::groupModel()->getGroupIds($member["account"], array_keys($member["groups"])))
+            ->bind(":startMemberId", $member["memberId"]);
 
-	}
+    }
 
-	// Additionally, the user must be allowed to view the channel that the conversation is in.
-	ET::channelModel()->addPermissionPredicate($sql, "view", $member, $table);
+    // Additionally, the user must be allowed to view the channel that the conversation is in.
+    ET::channelModel()->addPermissionPredicate($sql, "view", $member, $table);
 }
 
 
@@ -141,87 +154,91 @@ public function addAllowedPredicate(&$sql, $member = false, $table = "c")
  */
 public function get($wheres = array())
 {
-	$sql = ET::SQL()
-		->select("s.*")
-		->select("c.*")
-		->select("sm.username", "startMember")
-		->select("sm.avatarFormat", "startMemberAvatarFormat")
-		->select("ch.title", "channelTitle")
-		->select("ch.description", "channelDescription")
-		->select("ch.slug", "channelSlug")
-		->select("ch.lft", "channelLft")
-		->select("ch.rgt", "channelRgt")
+    $sql = ET::SQL()
+        ->select("s.*")
+        ->select("c.*")
+        ->select("sm.username", "startMember")
+        ->select("sm.avatarFormat", "startMemberAvatarFormat")
+        ->select("ch.title", "channelTitle")
+        ->select("ch.description", "channelDescription")
+        ->select("ch.slug", "channelSlug")
+        ->select("ch.lft", "channelLft")
+        ->select("ch.rgt", "channelRgt")
 
-		// Get the groups that are allowed to view this channel, and the names of those groups.
-		->select("GROUP_CONCAT(pv.groupId)", "channelPermissionView")
-		->select("GROUP_CONCAT(IF(pvg.name IS NOT NULL, pvg.name, ''))", "channelPermissionViewNames")
+        // Get the groups that are allowed to view this channel, and the names of those groups.
+        ->select("GROUP_CONCAT(pv.groupId)", "channelPermissionView")
+        ->select("GROUP_CONCAT(IF(pvg.name IS NOT NULL, pvg.name, ''))", "channelPermissionViewNames")
 
-		// Join the appropriate tables.
-		->from("conversation c")
-		->from("channel ch", "c.channelId=ch.channelId", "left")
-		->from("channel_group pv", "c.channelId=pv.channelId AND pv.view=1", "left")
-		->from("group pvg", "pv.groupId=pvg.groupId", "left")
-		->from("member_conversation s", "s.conversationId=c.conversationId AND type='member' AND s.id=:userId", "left")->bind(":userId", ET::$session->userId)
-		->from("member sm", "sm.memberId=c.startMemberId", "left")
+        // Join the appropriate tables.
+        ->from("conversation c")
+        ->from("channel ch", "c.channelId=ch.channelId", "left")
+        ->from("channel_group pv", "c.channelId=pv.channelId AND pv.view=1", "left")
+        ->from("group pvg", "pv.groupId=pvg.groupId", "left")
+        ->from("member_conversation s", "s.conversationId=c.conversationId AND type='member' AND s.id=:userId", "left")->bind(":userId", ET::$session->userId)
+        ->from("member sm", "sm.memberId=c.startMemberId", "left")
 
-		->where($wheres)
-		->groupBy("c.channelId")
-		->limit(1);
+        ->where($wheres)
+        ->groupBy("c.channelId")
+        ->limit(1);
 
-	// Fetch the labels field as well.
-	$this->addLabels($sql);
+    // Fetch the labels field as well.
+    $this->addLabels($sql);
 
-	// Make sure the user is allowed to view this conversation.
-	$this->addAllowedPredicate($sql);
+    // Make sure the user is allowed to view this conversation.
+    $this->addAllowedPredicate($sql);
 
-	// Fetch the user's reply and moderate permissions for this conversation.
-	if (!ET::$session->isAdmin()) {
-		$sql->select("BIT_OR(p.reply)", "canReply")
-			->select("BIT_OR(p.moderate)", "canModerate")
-			->select("BIT_OR(p.moderate)", "canDeleteConversation")
-			->from("channel_group p", "c.channelId=p.channelId AND p.groupId IN (:groupIds)", "left")
-			->bind(":groupIds", ET::$session->getGroupIds());
-	}
-	// If the user is an administrator, they can always reply and moderate.
-	else {
-		$sql->select("1", "canReply")
-			->select("1", "canModerate")
-			->select("1", "canDeleteConversation");
-	}
+    // Fetch the user's reply and moderate permissions for this conversation.
+    if (!ET::$session->isAdmin()) {
+        $sql->select("BIT_OR(p.reply)", "canReply")
+            ->select("BIT_OR(p.moderate)", "canModerate")
+            ->select("BIT_OR(p.moderate)", "canDeleteConversation")
+            ->from("channel_group p", "c.channelId=p.channelId AND p.groupId IN (:groupIds)", "left")
+            ->bind(":groupIds", ET::$session->getGroupIds());
+    }
+    // If the user is an administrator, they can always reply and moderate.
+    else {
+        $sql->select("1", "canReply")
+            ->select("1", "canModerate")
+            ->select("1", "canDeleteConversation");
+    }
 
 
-	// Execute the query.
-	$result = $sql->exec();
-	if (!$result->numRows()) return false;
+    // Execute the query.
+    $result = $sql->exec();
+    if (!$result->numRows()) {
+        return false;
+    }
 
-	// Get all the details from the result into an array.
-	$conversation = $result->firstRow();
+    // Get all the details from the result into an array.
+    $conversation = $result->firstRow();
 
-	// Expand the labels field into a simple array of active labels.
-	$conversation["labels"] = $this->expandLabels($conversation["labels"]);
+    // Expand the labels field into a simple array of active labels.
+    $conversation["labels"] = $this->expandLabels($conversation["labels"]);
 
-	// Convert the separate groups who have permission to view this channel ID/name fields into one.
-	$conversation["channelPermissionView"] = $this->formatGroupsAllowed($conversation["channelPermissionView"], $conversation["channelPermissionViewNames"]);
+    // Convert the separate groups who have permission to view this channel ID/name fields into one.
+    $conversation["channelPermissionView"] = $this->formatGroupsAllowed($conversation["channelPermissionView"], $conversation["channelPermissionViewNames"]);
 
-	// If the conversation is locked and the user can't moderate, then they can't reply.
-	if ($conversation["locked"] and !$conversation["canModerate"]) $conversation["canReply"] = false;
+    // If the conversation is locked and the user can't moderate, then they can't reply.
+    if ($conversation["locked"] and !$conversation["canModerate"]) {
+        $conversation["canReply"] = false;
+    }
 
-	// The user can edit members allowed if they are the author AND no one else has posted in this conversation.
-	$conversation["canEditMembersAllowed"] = ET::$session->userId == $conversation["startMemberId"] && $conversation["countPosts"] <= 1;
+    // The user can edit members allowed if they are the author AND no one else has posted in this conversation.
+    $conversation["canEditMembersAllowed"] = ET::$session->userId == $conversation["startMemberId"] && $conversation["countPosts"] <= 1;
 
-	// If the current user owns this conversation, and it's a draft, or they're the only poster,
-	// then allow them to delete it. We can only know that they're the only poster if there is only
-	// one post in the conversation, or if there are two and the last one is theirs. In an ideal world,
-	// we would check all of the post authors, but it's probably not worth the performance hit here.
-	if ($conversation["startMemberId"] == ET::$session->userId 
-		and ($conversation["countPosts"] <= 1
-			or ($conversation["countPosts"] == 2 and $conversation["lastPostMemberId"] == ET::$session->userId)))
-	{
-		$conversation["canDeleteConversation"] = true;
-	}
+    // If the current user owns this conversation, and it's a draft, or they're the only poster,
+    // then allow them to delete it. We can only know that they're the only poster if there is only
+    // one post in the conversation, or if there are two and the last one is theirs. In an ideal world,
+    // we would check all of the post authors, but it's probably not worth the performance hit here.
+    if ($conversation["startMemberId"] == ET::$session->userId 
+        and ($conversation["countPosts"] <= 1
+            or ($conversation["countPosts"] == 2 and $conversation["lastPostMemberId"] == ET::$session->userId)))
+    {
+        $conversation["canDeleteConversation"] = true;
+    }
 		
 
-	return $conversation;
+    return $conversation;
 }
 
 
@@ -234,13 +251,13 @@ public function get($wheres = array())
  */
 public function getByPostId($postId)
 {
-	$subquery = ET::SQL()
-		->select("conversationId")
-		->from("post")
-		->where("postId=:postId")
-		->bind(":postId", (int)$postId)
-		->get();
-	return $this->get("c.conversationId=($subquery)");
+    $subquery = ET::SQL()
+        ->select("conversationId")
+        ->from("post")
+        ->where("postId=:postId")
+        ->bind(":postId", (int) $postId)
+        ->get();
+    return $this->get("c.conversationId=($subquery)");
 }
 
 
@@ -253,7 +270,7 @@ public function getByPostId($postId)
  */
 public function getById($id)
 {
-	return $this->get(array("c.conversationId" => (int)$id));
+    return $this->get(array("c.conversationId" => (int) $id));
 }
 
 
@@ -264,59 +281,59 @@ public function getById($id)
  */
 public function getEmptyConversation()
 {
-	$conversation = array(
-		"conversationId" => null,
-		"title" => "",
-		"startMemberId" => ET::$session->userId,
-		"startMemberName" => ET::$session->user["username"],
-		"startMemberAvatarFormat" => ET::$session->user["avatarFormat"],
-		"countPosts" => 0,
-		"lastRead" => 0,
-		"draft" => "",
-		"private" => false,
-		"starred" => false,
-		"ingored" => false,
-		"locked" => false,
-		"channelId" => ET::$session->get("channelId"),
-		"channelTitle" => "",
-		"channelDescription" => "",
-		"channelSlug" => "",
-		"channelPermissionView" => array(),
-		"labels" => array(),
-		"canModerate" => true,
-		"canReply" => true,
-		"canEditMembersAllowed" => true
-	);
-	// Add the private label if there are entities in the membersAllowed session store.
-	if (ET::$session->get("membersAllowed")) {
-		$conversation["private"] = true;
-		$conversation["labels"][] = "private";
-	}
+    $conversation = array(
+        "conversationId" => null,
+        "title" => "",
+        "startMemberId" => ET::$session->userId,
+        "startMemberName" => ET::$session->user["username"],
+        "startMemberAvatarFormat" => ET::$session->user["avatarFormat"],
+        "countPosts" => 0,
+        "lastRead" => 0,
+        "draft" => "",
+        "private" => false,
+        "starred" => false,
+        "ingored" => false,
+        "locked" => false,
+        "channelId" => ET::$session->get("channelId"),
+        "channelTitle" => "",
+        "channelDescription" => "",
+        "channelSlug" => "",
+        "channelPermissionView" => array(),
+        "labels" => array(),
+        "canModerate" => true,
+        "canReply" => true,
+        "canEditMembersAllowed" => true
+    );
+    // Add the private label if there are entities in the membersAllowed session store.
+    if (ET::$session->get("membersAllowed")) {
+        $conversation["private"] = true;
+        $conversation["labels"][] = "private";
+    }
 
-	// Get the channel info.
-	$result = ET::SQL()
-		->select("c.title")
-		->select("c.description")
-		->select("c.slug")
-		->select("c.lft")
-		->select("c.rgt")
-		->select("GROUP_CONCAT(pv.groupId)", "channelPermissionView")
-		->select("GROUP_CONCAT(IF(pvg.name IS NOT NULL, pvg.name, ''))", "channelPermissionViewNames")
-		->from("channel c")
-		->from("channel_group pv", "pv.channelId=c.channelId", "left")
-		->from("group pvg", "pv.groupId=pvg.groupId", "left")
-		->where("c.channelId=:channelId")
-		->bind(":channelId", $conversation["channelId"])
-		->where("pv.view=1")
-		->groupBy("pv.channelId")
-		->limit(1)
-		->exec();
-	list($conversation["channelTitle"], $conversation["channelDescription"], $conversation["channelSlug"], $conversation["channelLft"], $conversation["channelRgt"], $conversation["channelPermissionView"], $channelPermissionViewNames) = array_values($result->firstRow());
+    // Get the channel info.
+    $result = ET::SQL()
+        ->select("c.title")
+        ->select("c.description")
+        ->select("c.slug")
+        ->select("c.lft")
+        ->select("c.rgt")
+        ->select("GROUP_CONCAT(pv.groupId)", "channelPermissionView")
+        ->select("GROUP_CONCAT(IF(pvg.name IS NOT NULL, pvg.name, ''))", "channelPermissionViewNames")
+        ->from("channel c")
+        ->from("channel_group pv", "pv.channelId=c.channelId", "left")
+        ->from("group pvg", "pv.groupId=pvg.groupId", "left")
+        ->where("c.channelId=:channelId")
+        ->bind(":channelId", $conversation["channelId"])
+        ->where("pv.view=1")
+        ->groupBy("pv.channelId")
+        ->limit(1)
+        ->exec();
+    list($conversation["channelTitle"], $conversation["channelDescription"], $conversation["channelSlug"], $conversation["channelLft"], $conversation["channelRgt"], $conversation["channelPermissionView"], $channelPermissionViewNames) = array_values($result->firstRow());
 
-	// Convert the separate groups who have permission to view this channel ID/name fields into one.
-	$conversation["channelPermissionView"] = $this->formatGroupsAllowed($conversation["channelPermissionView"], $channelPermissionViewNames);
+    // Convert the separate groups who have permission to view this channel ID/name fields into one.
+    $conversation["channelPermissionView"] = $this->formatGroupsAllowed($conversation["channelPermissionView"], $channelPermissionViewNames);
 
-	return $conversation;
+    return $conversation;
 }
 
 
@@ -333,16 +350,20 @@ public function getEmptyConversation()
  */
 private function formatGroupsAllowed($permissionView, $permissionViewNames)
 {
-	// Get a list of group IDs that are allowed to view the channel.
-	$permissionView = array_combine(explode(",", $permissionView), explode(",", $permissionViewNames));
-	if (isset($permissionView[GROUP_ID_GUEST])) $permissionView[GROUP_ID_GUEST] = ACCOUNT_GUEST;
-	if (isset($permissionView[GROUP_ID_MEMBER])) $permissionView[GROUP_ID_MEMBER] = ACCOUNT_MEMBER;
+    // Get a list of group IDs that are allowed to view the channel.
+    $permissionView = array_combine(explode(",", $permissionView), explode(",", $permissionViewNames));
+    if (isset($permissionView[GROUP_ID_GUEST])) {
+        $permissionView[GROUP_ID_GUEST] = ACCOUNT_GUEST;
+    }
+    if (isset($permissionView[GROUP_ID_MEMBER])) {
+        $permissionView[GROUP_ID_MEMBER] = ACCOUNT_MEMBER;
+    }
 
-	// Add in administrators if they're not already in there, because they can always see every channel.
-	$permissionView[GROUP_ID_ADMINISTRATOR] = ACCOUNT_ADMINISTRATOR;
-	$permissionView = array_filter($permissionView);
+    // Add in administrators if they're not already in there, because they can always see every channel.
+    $permissionView[GROUP_ID_ADMINISTRATOR] = ACCOUNT_ADMINISTRATOR;
+    $permissionView = array_filter($permissionView);
 
-	return $permissionView;
+    return $permissionView;
 }
 
 
@@ -364,100 +385,113 @@ private function formatGroupsAllowed($permissionView, $permissionViewNames)
  */
 public function getMembersAllowed($conversation)
 {
-	$membersAllowed = array();
+    $membersAllowed = array();
 
-	// If the conversation is not private, then everyone can view it - return an empty array.
-	if (!$conversation["private"] and $conversation["conversationId"]) return $membersAllowed;
+    // If the conversation is not private, then everyone can view it - return an empty array.
+    if (!$conversation["private"] and $conversation["conversationId"]) {
+        return $membersAllowed;
+    }
 
-	// Construct separate queries for getting a list of the members and groups allowed in a conversation.
-	// We will marry these later on.
-	$qMembers = ET::SQL()
-		->select("'member'", "type")
-		->select("CAST(".($conversation["conversationId"] ? "s.id" : "m.memberId")." AS SIGNED)")
-		->select("m.username")
-		->select("m.email")
-		->select("m.avatarFormat")
-		->select("m.account")
-		->select("GROUP_CONCAT(g.groupId)")
-		->groupBy("m.memberId");
+    // Construct separate queries for getting a list of the members and groups allowed in a conversation.
+    // We will marry these later on.
+    $qMembers = ET::SQL()
+        ->select("'member'", "type")
+        ->select("CAST(" . ($conversation["conversationId"] ? "s.id" : "m.memberId") . " AS SIGNED)")
+        ->select("m.username")
+        ->select("m.email")
+        ->select("m.avatarFormat")
+        ->select("m.account")
+        ->select("GROUP_CONCAT(g.groupId)")
+        ->groupBy("m.memberId");
 
-	$qGroups = ET::SQL()
-		->select("'group'", "type")
-		->select("s.id", "id")
-		->select("g.name")
-		->select("NULL")
-		->select("NULL")
-		->select("NULL")
-		->select("NULL");
+    $qGroups = ET::SQL()
+        ->select("'group'", "type")
+        ->select("s.id", "id")
+        ->select("g.name")
+        ->select("NULL")
+        ->select("NULL")
+        ->select("NULL")
+        ->select("NULL");
 
-	// If the conversation doesn't exist, the members allowed are in stored in the session.
-	// We'll have to get details from the database using the IDs stored in the session.
-	if (!$conversation["conversationId"]) {
+    // If the conversation doesn't exist, the members allowed are in stored in the session.
+    // We'll have to get details from the database using the IDs stored in the session.
+    if (!$conversation["conversationId"]) {
 
-		$groups = $members = array();
-		$sessionMembers = (array)ET::$session->get("membersAllowed");
-		foreach ($sessionMembers as $member) {
-			if ($member["type"] == "group") {
+        $groups = $members = array();
+        $sessionMembers = (array) ET::$session->get("membersAllowed");
+        foreach ($sessionMembers as $member) {
+            if ($member["type"] == "group") {
 
-				// The adminisrtator/member groups aren't really groups, so we can't query the database
-				// for their information. Instead, add them to the members allowed array manually.
-				if ($member["id"] == GROUP_ID_ADMINISTRATOR or $member["id"] == GROUP_ID_MEMBER) {
-					if ($member["id"] == GROUP_ID_ADMINISTRATOR) $name = ACCOUNT_ADMINISTRATOR;
-					elseif ($member["id"] == GROUP_ID_MEMBER) $name = ACCOUNT_MEMBER;
-					$membersAllowed[] = array("type" => "group", "id" => $member["id"], "name" => $name, "email" => null, "avatarFormat" => null, "groups" => null);
-				}
+                // The adminisrtator/member groups aren't really groups, so we can't query the database
+                // for their information. Instead, add them to the members allowed array manually.
+                if ($member["id"] == GROUP_ID_ADMINISTRATOR or $member["id"] == GROUP_ID_MEMBER) {
+                    if ($member["id"] == GROUP_ID_ADMINISTRATOR) {
+                        $name = ACCOUNT_ADMINISTRATOR;
+                    } elseif ($member["id"] == GROUP_ID_MEMBER) {
+                        $name = ACCOUNT_MEMBER;
+                    }
+                    $membersAllowed[] = array("type" => "group", "id" => $member["id"], "name" => $name, "email" => null, "avatarFormat" => null, "groups" => null);
+                } else {
+                    $groups[] = $member["id"];
+                }
+            } else {
+                $members[] = $member["id"];
+            }
+        }
 
-				else $groups[] = $member["id"];
-			}
-			else $members[] = $member["id"];
-		}
+        if (!count($members)) {
+            $members[] = null;
+        }
+        if (!count($groups)) {
+            $groups[] = null;
+        }
 
-		if (!count($members)) $members[] = null;
-		if (!count($groups)) $groups[] = null;
+        // Get member details directly from the members table, and the group details directly from the groups table.
+        $qMembers->from("member m")->where("m.memberId IN (:memberIds)")->bind(":memberIds", $members);
+        $qGroups->select("g.groupId", "id")->from("group g")->where("g.groupId IN (:groupIds)")->bind(":groupIds", $groups);
 
-		// Get member details directly from the members table, and the group details directly from the groups table.
-		$qMembers->from("member m")->where("m.memberId IN (:memberIds)")->bind(":memberIds", $members);
-		$qGroups->select("g.groupId", "id")->from("group g")->where("g.groupId IN (:groupIds)")->bind(":groupIds", $groups);
+    }
 
-	}
+    // If the conversation does exist, we'll get the members allowed from the database.
+    else {
 
-	// If the conversation does exist, we'll get the members allowed from the database.
-	else {
+        $qMembers->from("member_conversation s")
+            ->from("member m", "s.id=m.memberId", "left")
+            ->where("s.conversationId=:conversationId")->bind(":conversationId", $conversation["conversationId"])
+            ->where("s.allowed=1")
+            ->where("s.type='member'");
+        $qGroups->from("member_conversation s")
+            ->from("group g", "s.id=g.groupId", "left")
+            ->where("s.conversationId=:conversationId")->bind(":conversationId", $conversation["conversationId"])
+            ->where("s.allowed=1")
+            ->where("s.type='group'");
 
-		$qMembers->from("member_conversation s")
-			->from("member m", "s.id=m.memberId", "left")
-			->where("s.conversationId=:conversationId")->bind(":conversationId", $conversation["conversationId"])
-			->where("s.allowed=1")
-			->where("s.type='member'");
-		$qGroups->from("member_conversation s")
-			->from("group g", "s.id=g.groupId", "left")
-			->where("s.conversationId=:conversationId")->bind(":conversationId", $conversation["conversationId"])
-			->where("s.allowed=1")
-			->where("s.type='group'");
+    }
 
-	}
+    // Any objections?
+    $qMembers->from("member_group g", "m.memberId=g.memberId", "left");
 
-	// Any objections?
-	$qMembers->from("member_group g", "m.memberId=g.memberId", "left");
+    // You may now kiss the bride.
+    $result = ET::SQL("(" . $qMembers->get() . ") UNION (" . $qGroups->get() . ")");
 
-	// You may now kiss the bride.
-	$result = ET::SQL("(".$qMembers->get().") UNION (".$qGroups->get().")");
+    // Go through the results and construct our final "members allowed" array.
+    while ($entity = $result->nextRow()) {
+        list($type, $id, $name, $email, $avatarFormat, $account, $groups) = array_values($entity);
+        $groups = ET::groupModel()->getGroupIds($account, explode(",", $groups));
+        if ($type == "group") {
+            if ($id == GROUP_ID_ADMINISTRATOR) {
+                $name = ACCOUNT_ADMINISTRATOR;
+            } elseif ($id == GROUP_ID_MEMBER) {
+                $name = ACCOUNT_MEMBER;
+            }
+        }
+        $membersAllowed[] = array("type" => $type, "id" => $id, "name" => $name, "email" => $email, "avatarFormat" => $avatarFormat, "groups" => $groups);
+    }
 
-	// Go through the results and construct our final "members allowed" array.
-	while ($entity = $result->nextRow()) {
-		list($type, $id, $name, $email, $avatarFormat, $account, $groups) = array_values($entity);
-		$groups = ET::groupModel()->getGroupIds($account, explode(",", $groups));
-		if ($type == "group") {
-			if ($id == GROUP_ID_ADMINISTRATOR) $name = ACCOUNT_ADMINISTRATOR;
-			elseif ($id == GROUP_ID_MEMBER) $name = ACCOUNT_MEMBER;
-		}
-		$membersAllowed[] = array("type" => $type, "id" => $id, "name" => $name, "email" => $email, "avatarFormat" => $avatarFormat, "groups" => $groups);
-	}
+    // Sort the entities by name.
+    $membersAllowed = sort2d($membersAllowed, "name", "asc", true, false);
 
-	// Sort the entities by name.
-	$membersAllowed = sort2d($membersAllowed, "name", "asc", true, false);
-
-	return $membersAllowed;
+    return $membersAllowed;
 }
 
 
@@ -473,83 +507,90 @@ public function getMembersAllowed($conversation)
  */
 public function getMembersAllowedSummary($conversation, $membersAllowed = array())
 {
-	$groups = array();
-	$members = array();
+    $groups = array();
+    $members = array();
 
-	$channelGroupIds = array_keys($conversation["channelPermissionView"]);
+    $channelGroupIds = array_keys($conversation["channelPermissionView"]);
 
-	// If the conversation ISN'T private...
-	if (!$conversation["private"]) {
+    // If the conversation ISN'T private...
+    if (!$conversation["private"]) {
 
-		// If guests aren't allowed to view this channel (i.e. not everyone), then we need to
-		// explicitly show who can view the channel.
-		if (!in_array(GROUP_ID_GUEST, $channelGroupIds)) {
+        // If guests aren't allowed to view this channel (i.e. not everyone), then we need to
+        // explicitly show who can view the channel.
+        if (!in_array(GROUP_ID_GUEST, $channelGroupIds)) {
 
-			// If members can view the channel, that covers everyone.
-			if (in_array(GROUP_ID_MEMBER, $channelGroupIds)) $groups[GROUP_ID_MEMBER] = ACCOUNT_MEMBER;
+            // If members can view the channel, that covers everyone.
+            if (in_array(GROUP_ID_MEMBER, $channelGroupIds)) {
+                $groups[GROUP_ID_MEMBER] = ACCOUNT_MEMBER;
+            }
 
-			// Otherwise, go through each of the groups who can view the channel and add them to the groups array for later.
-			else {
-				foreach ($channelGroupIds as $id) $groups[$id] = $conversation["channelPermissionView"][$id];
-			}
+            // Otherwise, go through each of the groups who can view the channel and add them to the groups array for later.
+            else {
+                foreach ($channelGroupIds as $id) {
+                    $groups[$id] = $conversation["channelPermissionView"][$id];
+                }
+            }
 
-		}
-	}
+        }
+    }
 
-	// If the conversation IS private...
-	else {
+    // If the conversation IS private...
+    else {
 
-		// Sort the members.
-		$count = count($membersAllowed);
+        // Sort the members.
+        $count = count($membersAllowed);
 
-		// Loop through the members allowed and filter out all the groups and members into separate arrays.
-		foreach ($membersAllowed as $k => $member) {
+        // Loop through the members allowed and filter out all the groups and members into separate arrays.
+        foreach ($membersAllowed as $k => $member) {
 
-			if ($member["type"] == "group") {
-				// Only add the group to the final list if it is allowed to view the channel.
-				if (!ET::groupModel()->groupIdsAllowedInGroupIds($member["id"], $channelGroupIds)) continue;
-				$groups[$member["id"]] = $member["name"];
-			}
-			else {
-				// Only add the member to the final list if they are allowed to view the channel.
-				if (!ET::groupModel()->groupIdsAllowedInGroupIds($member["groups"], $channelGroupIds)) continue;
-				$members[] = $member;
-			}
+            if ($member["type"] == "group") {
+                // Only add the group to the final list if it is allowed to view the channel.
+                if (!ET::groupModel()->groupIdsAllowedInGroupIds($member["id"], $channelGroupIds)) {
+                    continue;
+                }
+                $groups[$member["id"]] = $member["name"];
+            } else {
+                // Only add the member to the final list if they are allowed to view the channel.
+                if (!ET::groupModel()->groupIdsAllowedInGroupIds($member["groups"], $channelGroupIds)) {
+                    continue;
+                }
+                $members[] = $member;
+            }
 
-		}
+        }
 
-	}
+    }
 
-	// Now, create a final list of members/groups who can view this conversation.
-	$membersAllowedSummary = array();
+    // Now, create a final list of members/groups who can view this conversation.
+    $membersAllowedSummary = array();
 
-	// If members are allowed to view this conversation, just show that (as members covers all members.)
-	if (isset($groups[GROUP_ID_MEMBER])) {
-		$membersAllowedSummary[] = array("type" => "group", "id" => GROUP_ID_MEMBER, "name" => ACCOUNT_MEMBER, "email" => null);
-	}
+    // If members are allowed to view this conversation, just show that (as members covers all members.)
+    if (isset($groups[GROUP_ID_MEMBER])) {
+        $membersAllowedSummary[] = array("type" => "group", "id" => GROUP_ID_MEMBER, "name" => ACCOUNT_MEMBER, "email" => null);
+    } else {
 
-	else {
+        // Loop through the groups allowed and add them to the summary.
+        foreach ($groups as $id => $name) {
+            $membersAllowedSummary[] = array("type" => "group", "id" => $id, "name" => $name, "email" => null);
+        }
 
-		// Loop through the groups allowed and add them to the summary.
-		foreach ($groups as $id => $name) {
-			$membersAllowedSummary[] = array("type" => "group", "id" => $id, "name" => $name, "email" => null);
-		}
+        // Loop through the members allowed and add them to the summary.
+        $groupIds = array_keys($groups);
+        foreach ($members as $member) {
 
-		// Loop through the members allowed and add them to the summary.
-		$groupIds = array_keys($groups);
-		foreach ($members as $member) {
+            // If the member is already covered by one of the groups being displayed, don't show them.
+            if (ET::groupModel()->groupIdsAllowedInGroupIds($member["groups"], $groupIds) or !$member["name"]) {
+                continue;
+            }
 
-			// If the member is already covered by one of the groups being displayed, don't show them.
-			if (ET::groupModel()->groupIdsAllowedInGroupIds($member["groups"], $groupIds) or !$member["name"]) continue;
+            $membersAllowedSummary[] = $member;
 
-			$membersAllowedSummary[] = $member;
+        }
 
-		}
+    }
 
-	}
-
-	// Whew! All done. Hopefully that wasn't too confusing.
-	return $membersAllowedSummary;
+    // Whew! All done. Hopefully that wasn't too confusing.
+    return $membersAllowedSummary;
 }
 
 
@@ -561,15 +602,16 @@ public function getMembersAllowedSummary($conversation, $membersAllowed = array(
  */
 public function getChannelPath($conversation)
 {
-	$channels = ET::channelModel()->getAll();
-	$path = array();
+    $channels = ET::channelModel()->getAll();
+    $path = array();
 
-	foreach ($channels as $channel) {
-		if ($channel["lft"] <= $conversation["channelLft"] and $channel["rgt"] >= $conversation["channelRgt"])
-			$path[] = $channel;
-	}
+    foreach ($channels as $channel) {
+        if ($channel["lft"] <= $conversation["channelLft"] and $channel["rgt"] >= $conversation["channelRgt"]) {
+                    $path[] = $channel;
+        }
+    }
 
-	return $path;
+    return $path;
 }
 
 
@@ -585,100 +627,113 @@ public function getChannelPath($conversation)
  */
 public function create($data, $membersAllowed = array(), $isDraft = false)
 {
-	// We can't do this if we're not logged in.
-	if (!ET::$session->user) return false;
+    // We can't do this if we're not logged in.
+    if (!ET::$session->user) {
+        return false;
+    }
 
-	// If the title is blank but the user is only saving a draft, call it "Untitled conversation."
-	if ($isDraft and !$data["title"]) $data["title"] = T("Untitled conversation");
+    // If the title is blank but the user is only saving a draft, call it "Untitled conversation."
+    if ($isDraft and !$data["title"]) {
+        $data["title"] = T("Untitled conversation");
+    }
 
-	// Check for errors; validate the title and the post content.
-	$this->validate("title", $data["title"], array($this, "validateTitle"));
-	$this->validate("content", $data["content"], array(ET::postModel(), "validateContent"));
-	$content = $data["content"];
-	unset($data["content"]);
+    // Check for errors; validate the title and the post content.
+    $this->validate("title", $data["title"], array($this, "validateTitle"));
+    $this->validate("content", $data["content"], array(ET::postModel(), "validateContent"));
+    $content = $data["content"];
+    unset($data["content"]);
 
-	// Flood control!
-	if (ET::$session->isFlooding()) $this->error("flooding", sprintf(T("message.waitToReply"), C("esoTalk.conversation.timeBetweenPosts")));
+    // Flood control!
+    if (ET::$session->isFlooding()) {
+        $this->error("flooding", sprintf(T("message.waitToReply"), C("esoTalk.conversation.timeBetweenPosts")));
+    }
 
-	// Make sure that we have permission to post in this channel.
-	$data["channelId"] = (int)$data["channelId"];
-	if (!ET::channelModel()->hasPermission($data["channelId"], "start"))
-		$this->error("channelId", "invalidChannel");
+    // Make sure that we have permission to post in this channel.
+    $data["channelId"] = (int) $data["channelId"];
+    if (!ET::channelModel()->hasPermission($data["channelId"], "start")) {
+            $this->error("channelId", "invalidChannel");
+    }
 
-	// Did we encounter any errors? Don't continue.
-	if ($this->errorCount()) return false;
+    // Did we encounter any errors? Don't continue.
+    if ($this->errorCount()) {
+        return false;
+    }
 
-	// Start a notification group. This means that for all notifications sent out until endNotifcationGroup
-	// is called, each individual user will receive a maximum of one.
-	ET::activityModel()->startNotificationGroup();
+    // Start a notification group. This means that for all notifications sent out until endNotifcationGroup
+    // is called, each individual user will receive a maximum of one.
+    ET::activityModel()->startNotificationGroup();
 
-	// Add some more data fields to insert into the database.
-	$time = time();
-	$data["startMemberId"] = ET::$session->userId;
-	$data["startTime"] = $time;
-	$data["lastPostMemberId"] = ET::$session->userId;
-	$data["lastPostTime"] = $time;
-	$data["private"] = !empty($membersAllowed);
-	$data["countPosts"] = $isDraft ? 0 : 1;
+    // Add some more data fields to insert into the database.
+    $time = time();
+    $data["startMemberId"] = ET::$session->userId;
+    $data["startTime"] = $time;
+    $data["lastPostMemberId"] = ET::$session->userId;
+    $data["lastPostTime"] = $time;
+    $data["private"] = !empty($membersAllowed);
+    $data["countPosts"] = $isDraft ? 0 : 1;
 
-	// Insert the conversation into the database.
-	$conversationId = parent::create($data);
+    // Insert the conversation into the database.
+    $conversationId = parent::create($data);
 
-	// Update the member's conversation count.
-	ET::SQL()
-		->update("member")
-		->set("countConversations", "countConversations + 1", false)
-		->where("memberId", ET::$session->userId)
-		->exec();
+    // Update the member's conversation count.
+    ET::SQL()
+        ->update("member")
+        ->set("countConversations", "countConversations + 1", false)
+        ->where("memberId", ET::$session->userId)
+        ->exec();
 
-	// Update the channel's converastion count.
-	ET::SQL()
-		->update("channel")
-		->set("countConversations", "countConversations + 1", false)
-		->where("channelId", $data["channelId"])
-		->exec();
+    // Update the channel's converastion count.
+    ET::SQL()
+        ->update("channel")
+        ->set("countConversations", "countConversations + 1", false)
+        ->where("channelId", $data["channelId"])
+        ->exec();
 
-	// Get our newly created conversation.
-	$conversation = $this->getById($conversationId);
+    // Get our newly created conversation.
+    $conversation = $this->getById($conversationId);
 
-	// Add the first post or save the draft.
-	$postId = null;
-	if ($isDraft) {
-		$this->setDraft($conversation, ET::$session->userId, $content);
-	}
-	else {
-		$postId = ET::postModel()->create($conversationId, ET::$session->userId, $content, $conversation["title"]);
+    // Add the first post or save the draft.
+    $postId = null;
+    if ($isDraft) {
+        $this->setDraft($conversation, ET::$session->userId, $content);
+    } else {
+        $postId = ET::postModel()->create($conversationId, ET::$session->userId, $content, $conversation["title"]);
 
-		// If the conversation is private, send out notifications to the allowed members.
-		if (!empty($membersAllowed)) {
-			$memberIds = array();
-			foreach ($membersAllowed as $member) {
-				if ($member["type"] == "member") $memberIds[] = $member["id"];
-			}
-			ET::conversationModel()->privateAddNotification($conversation, $memberIds, true, $content);
-		}
-	}
+        // If the conversation is private, send out notifications to the allowed members.
+        if (!empty($membersAllowed)) {
+            $memberIds = array();
+            foreach ($membersAllowed as $member) {
+                if ($member["type"] == "member") {
+                    $memberIds[] = $member["id"];
+                }
+            }
+            ET::conversationModel()->privateAddNotification($conversation, $memberIds, true, $content);
+        }
+    }
 
-	// If the conversation is private, add the allowed members to the database.
-	if (!empty($membersAllowed)) {
-		$inserts = array();
-		foreach ($membersAllowed as $member) $inserts[] = array($conversationId, $member["type"], $member["id"], 1);
-		ET::SQL()
-			->insert("member_conversation")
-			->setMultiple(array("conversationId", "type", "id", "allowed"), $inserts)
-			->setOnDuplicateKey("allowed", 1)
-			->exec();
-	}
+    // If the conversation is private, add the allowed members to the database.
+    if (!empty($membersAllowed)) {
+        $inserts = array();
+        foreach ($membersAllowed as $member) {
+            $inserts[] = array($conversationId, $member["type"], $member["id"], 1);
+        }
+        ET::SQL()
+            ->insert("member_conversation")
+            ->setMultiple(array("conversationId", "type", "id", "allowed"), $inserts)
+            ->setOnDuplicateKey("allowed", 1)
+            ->exec();
+    }
 
-	// If the user has the "star on reply" or "star private" preferences checked, star the conversation.
-	if (ET::$session->preference("starOnReply") or ($conversation["private"] and ET::$session->preference("starPrivate")))
-		$this->setStatus($conversation["conversationId"], ET::$session->userId, array("starred" => true));
+    // If the user has the "star on reply" or "star private" preferences checked, star the conversation.
+    if (ET::$session->preference("starOnReply") or ($conversation["private"] and ET::$session->preference("starPrivate"))) {
+            $this->setStatus($conversation["conversationId"], ET::$session->userId, array("starred" => true));
+    }
 
-	$this->trigger("createAfter", array($conversation, $postId, $content));
+    $this->trigger("createAfter", array($conversation, $postId, $content));
 
-	ET::activityModel()->endNotificationGroup();
+    ET::activityModel()->endNotificationGroup();
 
-	return array($conversationId, $postId);
+    return array($conversationId, $postId);
 }
 
 
@@ -692,101 +747,115 @@ public function create($data, $membersAllowed = array(), $isDraft = false)
  */
 public function addReply(&$conversation, $content)
 {
-	// We can't do this if we're not logged in.
-	if (!ET::$session->user) return false;
+    // We can't do this if we're not logged in.
+    if (!ET::$session->user) {
+        return false;
+    }
 
-	// Flood control!
-	if (ET::$session->isFlooding()) {
-		$this->error("flooding", sprintf(T("message.waitToReply"), C("esoTalk.conversation.timeBetweenPosts")));
-		return false;
-	}
+    // Flood control!
+    if (ET::$session->isFlooding()) {
+        $this->error("flooding", sprintf(T("message.waitToReply"), C("esoTalk.conversation.timeBetweenPosts")));
+        return false;
+    }
 
-	// Start a notification group. This means that for all notifications sent out until endNotifcationGroup
-	// is called, each individual user will receive a maximum of one.
-	ET::activityModel()->startNotificationGroup();
+    // Start a notification group. This means that for all notifications sent out until endNotifcationGroup
+    // is called, each individual user will receive a maximum of one.
+    ET::activityModel()->startNotificationGroup();
 
-	if (($returns = $this->trigger("addReplyBefore", array($conversation, &$content))) && count($returns)) {
-		return reset($returns);
-	}
+    if (($returns = $this->trigger("addReplyBefore", array($conversation, &$content))) && count($returns)) {
+        return reset($returns);
+    }
 
-	// Create the post. If there were validation errors, get them from the post model and add them to this model.
-	$postModel = ET::postModel();
-	$postId = $postModel->create($conversation["conversationId"], ET::$session->userId, $content, $conversation["title"]);
-	if (!$postId) $this->error($postModel->errors());
+    // Create the post. If there were validation errors, get them from the post model and add them to this model.
+    $postModel = ET::postModel();
+    $postId = $postModel->create($conversation["conversationId"], ET::$session->userId, $content, $conversation["title"]);
+    if (!$postId) {
+        $this->error($postModel->errors());
+    }
 
-	// Did we encounter any errors? Don't continue.
-	if ($this->errorCount()) return false;
+    // Did we encounter any errors? Don't continue.
+    if ($this->errorCount()) {
+        return false;
+    }
 
-	// Update the conversations table with the new post count, last post/action times, and last post member.
-	$time = time();
-	$update = array(
-		"countPosts" => ET::raw("countPosts + 1"),
-		"lastPostMemberId" => ET::$session->userId,
-		"lastPostTime" => $time,
-	);
-	// Also update the conversation's start time if this is the first post.
-	if ($conversation["countPosts"] == 0) $update["startTime"] = $time;
+    // Update the conversations table with the new post count, last post/action times, and last post member.
+    $time = time();
+    $update = array(
+        "countPosts" => ET::raw("countPosts + 1"),
+        "lastPostMemberId" => ET::$session->userId,
+        "lastPostTime" => $time,
+    );
+    // Also update the conversation's start time if this is the first post.
+    if ($conversation["countPosts"] == 0) {
+        $update["startTime"] = $time;
+    }
 
-	// If the user had a draft saved in this conversation before adding this reply, erase it now.
-	// Also, if the user has the "star on reply" option checked, star the conversation.
-	$updateStatus = array();
-	if ($conversation["draft"]) $updateStatus["draft"] = null;
-	if (ET::$session->preference("starOnReply")) $updateStatus["starred"] = true;
+    // If the user had a draft saved in this conversation before adding this reply, erase it now.
+    // Also, if the user has the "star on reply" option checked, star the conversation.
+    $updateStatus = array();
+    if ($conversation["draft"]) {
+        $updateStatus["draft"] = null;
+    }
+    if (ET::$session->preference("starOnReply")) {
+        $updateStatus["starred"] = true;
+    }
 
-	if (($returns = $this->trigger("addReplyBeforeUpdateConversation", array($conversation, &$update, &$updateStatus))) && count($returns)) {
-		return reset($returns);
-	}
+    if (($returns = $this->trigger("addReplyBeforeUpdateConversation", array($conversation, &$update, &$updateStatus))) && count($returns)) {
+        return reset($returns);
+    }
 
-	// Commit our changes to the database!
-	$this->updateById($conversation["conversationId"], $update);
-	if (count($updateStatus)) {
-		$this->setStatus($conversation["conversationId"], ET::$session->userId, $updateStatus);
-	}
+    // Commit our changes to the database!
+    $this->updateById($conversation["conversationId"], $update);
+    if (count($updateStatus)) {
+        $this->setStatus($conversation["conversationId"], ET::$session->userId, $updateStatus);
+    }
 
-	// Update the conversation details.
-	$conversation["countPosts"]++;
-	$conversation["lastPostTime"] = $time;
-	$conversation["lastPostMemberId"] = ET::$session->userId;
+    // Update the conversation details.
+    $conversation["countPosts"]++;
+    $conversation["lastPostTime"] = $time;
+    $conversation["lastPostMemberId"] = ET::$session->userId;
 
-	// Send out notifications to people who have starred this conversation.
-	// We get all members who have starred the conversation and have no unread posts in it.
-	$sql = ET::SQL()
-		->from("member_conversation s", "s.conversationId=:conversationId AND s.type='member' AND s.id=m.memberId AND s.starred=1 AND s.lastRead>=:posts AND s.id!=:userId", "inner")
-		->bind(":conversationId", $conversation["conversationId"])
-		->bind(":posts", $conversation["countPosts"] - 1)
-		->bind(":userId", ET::$session->userId);
-	$members = ET::memberModel()->getWithSQL($sql);
+    // Send out notifications to people who have starred this conversation.
+    // We get all members who have starred the conversation and have no unread posts in it.
+    $sql = ET::SQL()
+        ->from("member_conversation s", "s.conversationId=:conversationId AND s.type='member' AND s.id=m.memberId AND s.starred=1 AND s.lastRead>=:posts AND s.id!=:userId", "inner")
+        ->bind(":conversationId", $conversation["conversationId"])
+        ->bind(":posts", $conversation["countPosts"] - 1)
+        ->bind(":userId", ET::$session->userId);
+    $members = ET::memberModel()->getWithSQL($sql);
 
-	$data = array(
-		"conversationId" => $conversation["conversationId"],
-		"postId" => $postId,
-		"title" => $conversation["title"]
-	);
-	$emailData = array("content" => $content);
+    $data = array(
+        "conversationId" => $conversation["conversationId"],
+        "postId" => $postId,
+        "title" => $conversation["title"]
+    );
+    $emailData = array("content" => $content);
 
-	if (($returns = $this->trigger("addReplyBeforeCreateActivity", array($conversation, $postId, &$data, &$emailData))) && count($returns)) {
-		return reset($returns);
-	}
+    if (($returns = $this->trigger("addReplyBeforeCreateActivity", array($conversation, $postId, &$data, &$emailData))) && count($returns)) {
+        return reset($returns);
+    }
 
-	foreach ($members as $member) {
-		ET::activityModel()->create("post", $member, ET::$session->user, $data, $emailData);
-	}
+    foreach ($members as $member) {
+        ET::activityModel()->create("post", $member, ET::$session->user, $data, $emailData);
+    }
 
-	// If this is the first reply (ie. the conversation was a draft and now it isn't), send notifications to
-	// members who are in the membersAllowed list.
-	if ($conversation["countPosts"] == 1 and !empty($conversation["membersAllowed"])) {
-		$memberIds = array();
-		foreach ($conversation["membersAllowed"] as $member) {
-			if ($member["type"] == "member") $memberIds[] = $member["id"];
-		}
-		$this->privateAddNotification($conversation, $memberIds, true);
-	}
+    // If this is the first reply (ie. the conversation was a draft and now it isn't), send notifications to
+    // members who are in the membersAllowed list.
+    if ($conversation["countPosts"] == 1 and !empty($conversation["membersAllowed"])) {
+        $memberIds = array();
+        foreach ($conversation["membersAllowed"] as $member) {
+            if ($member["type"] == "member") {
+                $memberIds[] = $member["id"];
+            }
+        }
+        $this->privateAddNotification($conversation, $memberIds, true);
+    }
 
-	$this->trigger("addReplyAfter", array($conversation, $postId, $content));
+    $this->trigger("addReplyAfter", array($conversation, $postId, $content));
 
-	ET::activityModel()->endNotificationGroup();
+    ET::activityModel()->endNotificationGroup();
 
-	return $postId;
+    return $postId;
 }
 
 
@@ -798,63 +867,67 @@ public function addReply(&$conversation, $content)
  */
 public function delete($wheres = array())
 {
-	// Get conversation IDs that match these WHERE conditions.
-	$ids = array();
-	$result = ET::SQL()->select("conversationId")->from("conversation c")->where($wheres)->exec();
-	while ($row = $result->nextRow()) $ids[] = $row["conversationId"];
+    // Get conversation IDs that match these WHERE conditions.
+    $ids = array();
+    $result = ET::SQL()->select("conversationId")->from("conversation c")->where($wheres)->exec();
+    while ($row = $result->nextRow()) {
+        $ids[] = $row["conversationId"];
+    }
 
-	if (empty($ids)) return true;
+    if (empty($ids)) {
+        return true;
+    }
 
-	// Decrease channel and member conversation/post counts for these conversations.
-	// There might be a more efficient way to do this than one query per conversation... but good enough for now!
-	foreach ($ids as $id) {
-		ET::SQL()
-			->update("member")
-			->set("countConversations", "GREATEST(0, CAST(countConversations AS SIGNED) - 1)", false)
-			->where("memberId = (".ET::SQL()->select("startMemberId")->from("conversation")->where("conversationId", $id)->get().")")
-			->exec();
+    // Decrease channel and member conversation/post counts for these conversations.
+    // There might be a more efficient way to do this than one query per conversation... but good enough for now!
+    foreach ($ids as $id) {
+        ET::SQL()
+            ->update("member")
+            ->set("countConversations", "GREATEST(0, CAST(countConversations AS SIGNED) - 1)", false)
+            ->where("memberId = (" . ET::SQL()->select("startMemberId")->from("conversation")->where("conversationId", $id)->get() . ")")
+            ->exec();
 
-		ET::SQL()
-			->update("channel")
-			->set("countConversations", "GREATEST(0, CAST(countConversations AS SIGNED) - 1)", false)
-			->set("countPosts", "GREATEST(0, CAST(countPosts AS SIGNED) - (".ET::SQL()->select("countPosts")->from("conversation")->where("conversationId", $id)->get()."))", false)
-			->where("channelId = (".ET::SQL()->select("channelId")->from("conversation")->where("conversationId", $id)->get().")")
-			->exec();
+        ET::SQL()
+            ->update("channel")
+            ->set("countConversations", "GREATEST(0, CAST(countConversations AS SIGNED) - 1)", false)
+            ->set("countPosts", "GREATEST(0, CAST(countPosts AS SIGNED) - (" . ET::SQL()->select("countPosts")->from("conversation")->where("conversationId", $id)->get() . "))", false)
+            ->where("channelId = (" . ET::SQL()->select("channelId")->from("conversation")->where("conversationId", $id)->get() . ")")
+            ->exec();
 
-		// Find all the members who posted in the conversation, and how many times they posted.
-		$result = ET::SQL()
-			->select("memberId")
-			->select("COUNT(memberId)", "count")
-			->from("post")
-			->where("conversationId", $id)
-			->groupBy("memberId")
-			->exec();
+        // Find all the members who posted in the conversation, and how many times they posted.
+        $result = ET::SQL()
+            ->select("memberId")
+            ->select("COUNT(memberId)", "count")
+            ->from("post")
+            ->where("conversationId", $id)
+            ->groupBy("memberId")
+            ->exec();
 
-		// Loop through each member and decrease its post count.
-		while ($row = $result->nextRow()) {
-			ET::SQL()
-				->update("member")
-				->set("countPosts", "GREATEST(0, CAST(countPosts AS SIGNED) - ".$row["count"].")", false)
-				->where("memberId", $row["memberId"])
-				->exec();
-		}
-	}
+        // Loop through each member and decrease its post count.
+        while ($row = $result->nextRow()) {
+            ET::SQL()
+                ->update("member")
+                ->set("countPosts", "GREATEST(0, CAST(countPosts AS SIGNED) - " . $row["count"] . ")", false)
+                ->where("memberId", $row["memberId"])
+                ->exec();
+        }
+    }
 	
-	// Delete the conversation, posts, member_conversation, and activity rows.
-	$sql = ET::SQL()
-		->delete("c, m, p")
-		->from("conversation c")
-		->from("member_conversation m", "m.conversationId=c.conversationId", "left")
-		->from("post p", "p.conversationId=c.conversationId", "left")
-		->from("activity a", "a.conversationId=c.conversationId", "left")
-		->where("c.conversationId IN (:conversationIds)")
-		->bind(":conversationIds", $ids);
+    // Delete the conversation, posts, member_conversation, and activity rows.
+    $sql = ET::SQL()
+        ->delete("c, m, p")
+        ->from("conversation c")
+        ->from("member_conversation m", "m.conversationId=c.conversationId", "left")
+        ->from("post p", "p.conversationId=c.conversationId", "left")
+        ->from("activity a", "a.conversationId=c.conversationId", "left")
+        ->where("c.conversationId IN (:conversationIds)")
+        ->bind(":conversationIds", $ids);
 
-	$this->trigger("deleteBefore", array($sql, $ids));
+    $this->trigger("deleteBefore", array($sql, $ids));
 
-	$sql->exec();
+    $sql->exec();
 
-	return true;
+    return true;
 }
 
 
@@ -862,11 +935,11 @@ public function delete($wheres = array())
  * Delete an existing record in the model's table with a particular ID.
  *
  * @param mixed $id The ID of the record to delete.
- * @return ETSQLResult
+ * @return boolean
  */
 public function deleteById($id)
 {
-	return $this->delete(array("c.conversationId" => $id));
+    return $this->delete(array("c.conversationId" => $id));
 }
 
 
@@ -883,24 +956,26 @@ public function deleteById($id)
  */
 public function setStatus($conversationIds, $memberIds, $data, $type = "member")
 {
-	$memberIds = (array)$memberIds;
-	$conversationIds = (array)$conversationIds;
+    $memberIds = (array) $memberIds;
+    $conversationIds = (array) $conversationIds;
 
-	$keys = array_merge(array("type", "id", "conversationId"), array_keys($data));
-	$inserts = array();
-	foreach ($memberIds as $memberId) {
-		foreach ($conversationIds as $conversationId) {
-			$inserts[] = array_merge(array($type, $memberId, $conversationId), array_values($data));
-		}
-	}
+    $keys = array_merge(array("type", "id", "conversationId"), array_keys($data));
+    $inserts = array();
+    foreach ($memberIds as $memberId) {
+        foreach ($conversationIds as $conversationId) {
+            $inserts[] = array_merge(array($type, $memberId, $conversationId), array_values($data));
+        }
+    }
 
-	if (empty($inserts)) return;
+    if (empty($inserts)) {
+        return;
+    }
 	
-	ET::SQL()
-		->insert("member_conversation")
-		->setMultiple($keys, $inserts)
-		->setOnDuplicateKey($data)
-		->exec();
+    ET::SQL()
+        ->insert("member_conversation")
+        ->setMultiple($keys, $inserts)
+        ->setOnDuplicateKey($data)
+        ->exec();
 }
 
 
@@ -915,21 +990,27 @@ public function setStatus($conversationIds, $memberIds, $data, $type = "member")
  */
 public function setDraft(&$conversation, $memberId, $draft = null)
 {
-	// Validate the post content if applicable.
-	if ($draft !== null) $this->validate("content", $draft, array(ET::postModel(), "validateContent"));
+    // Validate the post content if applicable.
+    if ($draft !== null) {
+        $this->validate("content", $draft, array(ET::postModel(), "validateContent"));
+    }
 
-	if ($this->errorCount()) return false;
+    if ($this->errorCount()) {
+        return false;
+    }
 
-	// Save the draft to the database if the conversation exists.
-	if ($conversation["conversationId"]) $this->setStatus($conversation["conversationId"], $memberId, array("draft" => $draft));
+    // Save the draft to the database if the conversation exists.
+    if ($conversation["conversationId"]) {
+        $this->setStatus($conversation["conversationId"], $memberId, array("draft" => $draft));
+    }
 
-	// Add or remove the draft label.
-	$this->addOrRemoveLabel($conversation, "draft", $draft !== null);
-	$conversation["draft"] = $draft;
+    // Add or remove the draft label.
+    $this->addOrRemoveLabel($conversation, "draft", $draft !== null);
+    $conversation["draft"] = $draft;
 
-	$this->trigger("setDraftAfter", array($conversation, $memberId, $draft));
+    $this->trigger("setDraftAfter", array($conversation, $memberId, $draft));
 
-	return true;
+    return true;
 }
 
 
@@ -945,15 +1026,17 @@ public function setDraft(&$conversation, $memberId, $draft = null)
  */
 public function setLastRead(&$conversation, $memberId, $lastRead, $force = false)
 {
-	$lastRead = min($lastRead, $conversation["countPosts"]);
-	if ($lastRead <= $conversation["lastRead"] and !$force) return true;
+    $lastRead = min($lastRead, $conversation["countPosts"]);
+    if ($lastRead <= $conversation["lastRead"] and !$force) {
+        return true;
+    }
 
-	// Set the last read status.
-	$this->setStatus($conversation["conversationId"], $memberId, array("lastRead" => $lastRead));
+    // Set the last read status.
+    $this->setStatus($conversation["conversationId"], $memberId, array("lastRead" => $lastRead));
 
-	$conversation["lastRead"] = $lastRead;
+    $conversation["lastRead"] = $lastRead;
 
-	return true;
+    return true;
 }
 
 
@@ -966,31 +1049,33 @@ public function setLastRead(&$conversation, $memberId, $lastRead, $force = false
  */
 public function markAsRead($conversationIds, $memberId)
 {
-	$conversationIds = array_values((array)$conversationIds);
+    $conversationIds = array_values((array) $conversationIds);
 
-	// Get the postCount of all these conversations.
-	$rows = ET::SQL()
-		->select("conversationId")
-		->select("countPosts")
-		->from("conversation")
-		->where("conversationId IN (:conversationIds)")
-		->bind(":conversationIds", $conversationIds)
-		->exec()
-		->allRows();
+    // Get the postCount of all these conversations.
+    $rows = ET::SQL()
+        ->select("conversationId")
+        ->select("countPosts")
+        ->from("conversation")
+        ->where("conversationId IN (:conversationIds)")
+        ->bind(":conversationIds", $conversationIds)
+        ->exec()
+        ->allRows();
 
-	$keys = array("type", "id", "conversationId", "lastRead");
-	$inserts = array();
-	foreach ($rows as $row) {
-		$inserts[] = array("member", $memberId, $row["conversationId"], $row["countPosts"]);
-	}
+    $keys = array("type", "id", "conversationId", "lastRead");
+    $inserts = array();
+    foreach ($rows as $row) {
+        $inserts[] = array("member", $memberId, $row["conversationId"], $row["countPosts"]);
+    }
 
-	if (empty($inserts)) return;
+    if (empty($inserts)) {
+        return;
+    }
 	
-	ET::SQL()
-		->insert("member_conversation")
-		->setMultiple($keys, $inserts)
-		->setOnDuplicateKey("lastRead", "VALUES(lastRead)", false)
-		->exec();
+    ET::SQL()
+        ->insert("member_conversation")
+        ->setMultiple($keys, $inserts)
+        ->setOnDuplicateKey("lastRead", "VALUES(lastRead)", false)
+        ->exec();
 }
 
 
@@ -1005,12 +1090,12 @@ public function markAsRead($conversationIds, $memberId)
  */
 public function setIgnored(&$conversation, $memberId, $ignored)
 {
-	$ignored = (bool)$ignored;
+    $ignored = (bool) $ignored;
 
-	$this->setStatus($conversation["conversationId"], $memberId, array("ignored" => $ignored));
+    $this->setStatus($conversation["conversationId"], $memberId, array("ignored" => $ignored));
 
-	$this->addOrRemoveLabel($conversation, "ignored", $ignored);
-	$conversation["ignored"] = $ignored;
+    $this->addOrRemoveLabel($conversation, "ignored", $ignored);
+    $conversation["ignored"] = $ignored;
 }
 
 
@@ -1024,14 +1109,14 @@ public function setIgnored(&$conversation, $memberId, $ignored)
  */
 public function setSticky(&$conversation, $sticky)
 {
-	$sticky = (bool)$sticky;
+    $sticky = (bool) $sticky;
 
-	$this->updateById($conversation["conversationId"], array(
-		"sticky" => $sticky
-	));
+    $this->updateById($conversation["conversationId"], array(
+        "sticky" => $sticky
+    ));
 
-	$this->addOrRemoveLabel($conversation, "sticky", $sticky);
-	$conversation["sticky"] = $sticky;
+    $this->addOrRemoveLabel($conversation, "sticky", $sticky);
+    $conversation["sticky"] = $sticky;
 }
 
 
@@ -1045,14 +1130,14 @@ public function setSticky(&$conversation, $sticky)
  */
 public function setLocked(&$conversation, $locked)
 {
-	$locked = (bool)$locked;
+    $locked = (bool) $locked;
 
-	$this->updateById($conversation["conversationId"], array(
-		"locked" => $locked
-	));
+    $this->updateById($conversation["conversationId"], array(
+        "locked" => $locked
+    ));
 
-	$this->addOrRemoveLabel($conversation, "locked", $locked);
-	$conversation["locked"] = $locked;
+    $this->addOrRemoveLabel($conversation, "locked", $locked);
+    $conversation["locked"] = $locked;
 }
 
 
@@ -1066,11 +1151,12 @@ public function setLocked(&$conversation, $locked)
  */
 public function addOrRemoveLabel(&$conversation, $label, $add = true)
 {
-	if ($add and !in_array($label, $conversation["labels"]))
-		$conversation["labels"][] = $label;
-	elseif (!$add and ($k = array_search($label, $conversation["labels"])) !== false)
-		unset($conversation["labels"][$k]);
-}
+    if ($add and !in_array($label, $conversation["labels"])) {
+            $conversation["labels"][] = $label;
+    } elseif (!$add and ($k = array_search($label, $conversation["labels"])) !== false) {
+            unset($conversation["labels"][$k]);
+    }
+    }
 
 
 /**
@@ -1083,19 +1169,21 @@ public function addOrRemoveLabel(&$conversation, $label, $add = true)
  */
 public function setTitle(&$conversation, $title)
 {
-	$this->validate("title", $title, array($this, "validateTitle"));
-	if ($this->errorCount()) return false;
+    $this->validate("title", $title, array($this, "validateTitle"));
+    if ($this->errorCount()) {
+        return false;
+    }
 
-	$this->updateById($conversation["conversationId"], array(
-		"title" => $title
-	));
+    $this->updateById($conversation["conversationId"], array(
+        "title" => $title
+    ));
 
-	// Update the title column in the posts table as well (which is used for fulltext searching).
-	ET::postModel()->update(array("title" => $title), array("conversationId" => $conversation["conversationId"]));
+    // Update the title column in the posts table as well (which is used for fulltext searching).
+    ET::postModel()->update(array("title" => $title), array("conversationId" => $conversation["conversationId"]));
 
-	$conversation["title"] = $title;
+    $conversation["title"] = $title;
 
-	return true;
+    return true;
 }
 
 
@@ -1103,12 +1191,14 @@ public function setTitle(&$conversation, $title)
  * Validate the title of a conversation.
  *
  * @param string $title The conversation title.
- * @return bool|string Returns an error string or false if there are no errors.
+ * @return string|null Returns an error string or false if there are no errors.
  */
 public function validateTitle($title)
 {
-	if (!strlen(trim($title))) return "emptyTitle";
-}
+    if (!strlen(trim($title))) {
+        return "emptyTitle";
+    }
+    }
 
 
 /**
@@ -1121,35 +1211,39 @@ public function validateTitle($title)
  */
 public function setChannel(&$conversation, $channelId)
 {
-	if (!ET::channelModel()->hasPermission($channelId, "start")) $this->error("channelId", T("message.noPermission"));
+    if (!ET::channelModel()->hasPermission($channelId, "start")) {
+        $this->error("channelId", T("message.noPermission"));
+    }
 
-	if ($this->errorCount()) return false;
+    if ($this->errorCount()) {
+        return false;
+    }
 
-	// Decrease the conversation/post count of the old channel.
-	ET::SQL()->update("channel")
-		->set("countConversations", "countConversations - 1", false)
-		->set("countPosts", "countPosts - :posts", false)
-		->bind(":posts", $conversation["countPosts"])
-		->where("channelId=:channelId")
-		->bind(":channelId", $conversation["channelId"])
-		->exec();
+    // Decrease the conversation/post count of the old channel.
+    ET::SQL()->update("channel")
+        ->set("countConversations", "countConversations - 1", false)
+        ->set("countPosts", "countPosts - :posts", false)
+        ->bind(":posts", $conversation["countPosts"])
+        ->where("channelId=:channelId")
+        ->bind(":channelId", $conversation["channelId"])
+        ->exec();
 
-	$this->updateById($conversation["conversationId"], array(
-		"channelId" => $channelId
-	));
+    $this->updateById($conversation["conversationId"], array(
+        "channelId" => $channelId
+    ));
 
-	// Increase the conversation/post count of the new channel.
-	ET::SQL()->update("channel")
-		->set("countConversations", "countConversations + 1", false)
-		->set("countPosts", "countPosts + :posts", false)
-		->bind(":posts", $conversation["countPosts"])
-		->where("channelId=:channelId")
-		->bind(":channelId", $channelId)
-		->exec();
+    // Increase the conversation/post count of the new channel.
+    ET::SQL()->update("channel")
+        ->set("countConversations", "countConversations + 1", false)
+        ->set("countPosts", "countPosts + :posts", false)
+        ->bind(":posts", $conversation["countPosts"])
+        ->where("channelId=:channelId")
+        ->bind(":channelId", $channelId)
+        ->exec();
 
-	$conversation["channelId"] = $channelId;
+    $conversation["channelId"] = $channelId;
 
-	return true;
+    return true;
 }
 
 
@@ -1163,47 +1257,49 @@ public function setChannel(&$conversation, $channelId)
  */
 public function getMemberFromName($name)
 {
-	$memberId = $memberName = false;
+    $memberId = $memberName = false;
 
-	// Get a list of all member groups, and add administrators + members to it.
-	$groups = ET::groupModel()->getAll();
-	$groups[GROUP_ID_ADMINISTRATOR] = array("name" => ACCOUNT_ADMINISTRATOR);
-	$groups[GROUP_ID_MEMBER] = array("name" => ACCOUNT_MEMBER);
+    // Get a list of all member groups, and add administrators + members to it.
+    $groups = ET::groupModel()->getAll();
+    $groups[GROUP_ID_ADMINISTRATOR] = array("name" => ACCOUNT_ADMINISTRATOR);
+    $groups[GROUP_ID_MEMBER] = array("name" => ACCOUNT_MEMBER);
 
-	// Go through each of the groups and see if one of them matches the name. If so, return its details.
-	$lowerName = strtolower($name);
-	foreach ($groups as $id => $group) {
-		$group = $group["name"];
-		if ($lowerName == strtolower(T("group.$group.plural", $group))) {
-			return array("type" => "group", "id" => $id, "name" => $group);
-		}
-	}
+    // Go through each of the groups and see if one of them matches the name. If so, return its details.
+    $lowerName = strtolower($name);
+    foreach ($groups as $id => $group) {
+        $group = $group["name"];
+        if ($lowerName == strtolower(T("group.$group.plural", $group))) {
+            return array("type" => "group", "id" => $id, "name" => $group);
+        }
+    }
 
-	// Otherwise, search for a member in the database with a matching name.
-	$name = str_replace("%", "", $name);
-	$result = ET::SQL()
-		->select("m.memberId")
-		->select("m.username")
-		->select("m.avatarFormat")
-		->select("m.account")
-		->select("GROUP_CONCAT(g.groupId)", "groups")
-		->from("member m")
-		->from("member_group g", "m.memberId=g.memberId", "left")
-		->where("m.username=:name OR m.username LIKE :nameLike")
-		->bind(":name", $name)
-		->bind(":nameLike", "%".$name."%")
-		->groupBy("m.memberId")
-		->orderBy("m.username=:nameOrder DESC")
-		->bind(":nameOrder", $name)
-		->limit(1)
-		->exec();
+    // Otherwise, search for a member in the database with a matching name.
+    $name = str_replace("%", "", $name);
+    $result = ET::SQL()
+        ->select("m.memberId")
+        ->select("m.username")
+        ->select("m.avatarFormat")
+        ->select("m.account")
+        ->select("GROUP_CONCAT(g.groupId)", "groups")
+        ->from("member m")
+        ->from("member_group g", "m.memberId=g.memberId", "left")
+        ->where("m.username=:name OR m.username LIKE :nameLike")
+        ->bind(":name", $name)
+        ->bind(":nameLike", "%" . $name . "%")
+        ->groupBy("m.memberId")
+        ->orderBy("m.username=:nameOrder DESC")
+        ->bind(":nameOrder", $name)
+        ->limit(1)
+        ->exec();
 
-	if (!$result->numRows()) return false;
+    if (!$result->numRows()) {
+        return false;
+    }
 
-	// Get the result and return it as an array.
-	$row = $result->firstRow();
-	$row["groups"] = ET::groupModel()->getGroupIds($row["account"], explode(",", $row["groups"]));
-	return array("type" => "member", "id" => $row["memberId"], "name" => $row["username"], "avatarFormat" => $row["avatarFormat"], "groups" => $row["groups"]);
+    // Get the result and return it as an array.
+    $row = $result->firstRow();
+    $row["groups"] = ET::groupModel()->getGroupIds($row["account"], explode(",", $row["groups"]));
+    return array("type" => "member", "id" => $row["memberId"], "name" => $row["username"], "avatarFormat" => $row["avatarFormat"], "groups" => $row["groups"]);
 }
 
 
@@ -1217,44 +1313,50 @@ public function getMemberFromName($name)
  */
 public function addMember(&$conversation, $member)
 {
-	// If the conversation exists, add this member to the database as allowed.
-	if ($conversation["conversationId"]) {
+    // If the conversation exists, add this member to the database as allowed.
+    if ($conversation["conversationId"]) {
 
-		// Email the member(s) - we have to do this before we put them in the db because it will only email them if they
-		// don't already have a record for this conversation in the status table.
-		if ($conversation["countPosts"] > 0 and $member["type"] == "member") $this->privateAddNotification($conversation, $member["id"]);
+        // Email the member(s) - we have to do this before we put them in the db because it will only email them if they
+        // don't already have a record for this conversation in the status table.
+        if ($conversation["countPosts"] > 0 and $member["type"] == "member") {
+            $this->privateAddNotification($conversation, $member["id"]);
+        }
 
-		// Set the conversation's private field to true and update the last action time.
-		if (!$conversation["private"]) {
-			$this->updateById($conversation["conversationId"], array("private" => true));
-			$conversation["private"] = true;
-		}
+        // Set the conversation's private field to true and update the last action time.
+        if (!$conversation["private"]) {
+            $this->updateById($conversation["conversationId"], array("private" => true));
+            $conversation["private"] = true;
+        }
 
-		// Allow the member to view the conversation in the status table.
-		$this->setStatus($conversation["conversationId"], $member["id"], array("allowed" => true), $member["type"]);
+        // Allow the member to view the conversation in the status table.
+        $this->setStatus($conversation["conversationId"], $member["id"], array("allowed" => true), $member["type"]);
 
-		// Make sure the the owner of the conversation is allowed to view it.
-		$this->setStatus($conversation["conversationId"], $conversation["startMemberId"], array("allowed" => true));
+        // Make sure the the owner of the conversation is allowed to view it.
+        $this->setStatus($conversation["conversationId"], $conversation["startMemberId"], array("allowed" => true));
 
-	}
+    }
 
-	// If the conversation doesn't exist, add this member to the session members allowed store.
-	else {
-		$membersAllowed = ET::$session->get("membersAllowed", array());
+    // If the conversation doesn't exist, add this member to the session members allowed store.
+    else {
+        $membersAllowed = ET::$session->get("membersAllowed", array());
 
-		$member = array("type" => $member["type"], "id" => $member["id"]);
-		if (!in_array($member, $membersAllowed)) $membersAllowed[] = $member;
+        $member = array("type" => $member["type"], "id" => $member["id"]);
+        if (!in_array($member, $membersAllowed)) {
+            $membersAllowed[] = $member;
+        }
 
-		// Make sure the the owner of the conversation is allowed to view it.
-		$member = array("type" => "member", "id" => $conversation["startMemberId"]);
-		if (!in_array($member, $membersAllowed)) $membersAllowed[] = $member;
+        // Make sure the the owner of the conversation is allowed to view it.
+        $member = array("type" => "member", "id" => $conversation["startMemberId"]);
+        if (!in_array($member, $membersAllowed)) {
+            $membersAllowed[] = $member;
+        }
 
-		ET::$session->store("membersAllowed", $membersAllowed);
-	}
+        ET::$session->store("membersAllowed", $membersAllowed);
+    }
 
-	// Add the private label to the conversation.
-	$this->addOrRemoveLabel($conversation, "private", true);
-	$conversation["private"] = true;
+    // Add the private label to the conversation.
+    $this->addOrRemoveLabel($conversation, "private", true);
+    $conversation["private"] = true;
 }
 
 
@@ -1269,39 +1371,44 @@ public function addMember(&$conversation, $member)
  */
 public function removeMember(&$conversation, $member)
 {
-	// If the conversation exists, remove the member from the database.
-	if ($conversation["conversationId"]) {
+    // If the conversation exists, remove the member from the database.
+    if ($conversation["conversationId"]) {
 
-		// Disallow the member to view the conversation in the status table.
-		// Also unstar the conversation so they will no longer receive email notifications.
-		$this->setStatus($conversation["conversationId"], $member["id"], array("allowed" => false, "starred" => false), $member["type"]);
+        // Disallow the member to view the conversation in the status table.
+        // Also unstar the conversation so they will no longer receive email notifications.
+        $this->setStatus($conversation["conversationId"], $member["id"], array("allowed" => false, "starred" => false), $member["type"]);
 
-	}
+    }
 
-	// Otherwise remove it from the session.
-	else {
-		$membersAllowed = ET::$session->get("membersAllowed", array());
-		foreach ($membersAllowed as $k => $m) {
-			if ($m["type"] == $member["type"] and $m["id"] == $member["id"]) unset($membersAllowed[$k]);
-		}
-		ET::$session->store("membersAllowed", $membersAllowed);
-	}
+    // Otherwise remove it from the session.
+    else {
+        $membersAllowed = ET::$session->get("membersAllowed", array());
+        foreach ($membersAllowed as $k => $m) {
+            if ($m["type"] == $member["type"] and $m["id"] == $member["id"]) {
+                unset($membersAllowed[$k]);
+            }
+        }
+        ET::$session->store("membersAllowed", $membersAllowed);
+    }
 
-	// Update the conversation's membersAllowed array.
-	foreach ($conversation["membersAllowed"] as $k => $m) {
-		if ($m["type"] == $member["type"] and $m["id"] == $member["id"]) unset($conversation["membersAllowed"][$k]);
-	}
+    // Update the conversation's membersAllowed array.
+    foreach ($conversation["membersAllowed"] as $k => $m) {
+        if ($m["type"] == $member["type"] and $m["id"] == $member["id"]) {
+            unset($conversation["membersAllowed"][$k]);
+        }
+    }
 
-	// If there are no members left allowed in the conversation, then unmark the conversation as private.
-	if (empty($conversation["membersAllowed"])) {
-		$conversation["membersAllowed"] = array();
-		$conversation["private"] = false;
-		$this->addOrRemoveLabel($conversation, "private", false);
+    // If there are no members left allowed in the conversation, then unmark the conversation as private.
+    if (empty($conversation["membersAllowed"])) {
+        $conversation["membersAllowed"] = array();
+        $conversation["private"] = false;
+        $this->addOrRemoveLabel($conversation, "private", false);
 
-		// Turn off conversation's private field in the database.
-		if ($conversation["conversationId"])
-			$this->updateById($conversation["conversationId"], array("private" => false));
-	}
+        // Turn off conversation's private field in the database.
+        if ($conversation["conversationId"]) {
+                    $this->updateById($conversation["conversationId"], array("private" => false));
+        }
+    }
 }
 
 
@@ -1318,43 +1425,53 @@ public function removeMember(&$conversation, $member)
  */
 protected function privateAddNotification($conversation, $memberIds, $notifyAll = false, $content = null)
 {
-	$memberIds = (array)$memberIds;
+    $memberIds = (array) $memberIds;
 
-	// Remove the currently logged in user from the list of member IDs.
-	if (($k = array_search(ET::$session->userId, $memberIds)) !== false) unset($memberIds[$k]);
+    // Remove the currently logged in user from the list of member IDs.
+    if (($k = array_search(ET::$session->userId, $memberIds)) !== false) {
+        unset($memberIds[$k]);
+    }
 
-	if (!count($memberIds)) return;
+    if (!count($memberIds)) {
+        return;
+    }
 
-	// Get the member details for this list of member IDs.
-	$sql = ET::SQL()
-		->from("member_conversation s", "s.conversationId=:conversationId AND s.type='member' AND s.id=m.memberId", "left")
-		->bind(":conversationId", $conversation["conversationId"])
-		->where("m.memberId IN (:memberIds)")
-		->bind(":memberIds", $memberIds);
+    // Get the member details for this list of member IDs.
+    $sql = ET::SQL()
+        ->from("member_conversation s", "s.conversationId=:conversationId AND s.type='member' AND s.id=m.memberId", "left")
+        ->bind(":conversationId", $conversation["conversationId"])
+        ->where("m.memberId IN (:memberIds)")
+        ->bind(":memberIds", $memberIds);
 
-	// Only get members where the member_conversation row doesn't exist (implying that this is the first time
-	// they've been added to the conversation.)
-	if (!$notifyAll) $sql->where("s.id IS NULL");
+    // Only get members where the member_conversation row doesn't exist (implying that this is the first time
+    // they've been added to the conversation.)
+    if (!$notifyAll) {
+        $sql->where("s.id IS NULL");
+    }
 
-	$members = ET::memberModel()->getWithSQL($sql);
+    $members = ET::memberModel()->getWithSQL($sql);
 
-	$data = array(
-		"conversationId" => $conversation["conversationId"],
-		"title" => $conversation["title"]
-	);
-	$emailData = array("content" => $content);
+    $data = array(
+        "conversationId" => $conversation["conversationId"],
+        "title" => $conversation["title"]
+    );
+    $emailData = array("content" => $content);
 
-	// Create the "privateAdd" activity which will send out a notification and an email if appropriate.
-	// Also get IDs of members who would like to automatically follow this conversation.
-	$followIds = array();
-	foreach ($members as $member) {
-		ET::activityModel()->create("privateAdd", $member, ET::$session->user, $data, $emailData);
+    // Create the "privateAdd" activity which will send out a notification and an email if appropriate.
+    // Also get IDs of members who would like to automatically follow this conversation.
+    $followIds = array();
+    foreach ($members as $member) {
+        ET::activityModel()->create("privateAdd", $member, ET::$session->user, $data, $emailData);
 
-		if (!empty($member["preferences"]["starPrivate"])) $followIds[] = $member["memberId"];
-	}
+        if (!empty($member["preferences"]["starPrivate"])) {
+            $followIds[] = $member["memberId"];
+        }
+    }
 
-	// Follow the conversation for the appropriate members.
-	if (!empty($followIds)) $this->setStatus($conversation["conversationId"], $followIds, array("starred" => true));
+    // Follow the conversation for the appropriate members.
+    if (!empty($followIds)) {
+        $this->setStatus($conversation["conversationId"], $followIds, array("starred" => true));
+    }
 
 }
 

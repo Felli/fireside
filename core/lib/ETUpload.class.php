@@ -2,7 +2,9 @@
 // Copyright 2011 Toby Zerner, Simon Zerner
 // This file is part of esoTalk. Please see the included license file for usage information.
 
-if (!defined("IN_ESOTALK")) exit;
+if (!defined("IN_ESOTALK")) {
+    exit;
+}
 
 /**
  * The ETUpload class provides a way to easily validate and manage uploaded files. Typically, an upload should
@@ -21,7 +23,7 @@ class ETUpload extends ETPluggable {
  */
 public function maxUploadSize()
 {
-	return min(iniToBytes(ini_get("post_max_size")), iniToBytes(ini_get("upload_max_filesize")));
+    return min(iniToBytes(ini_get("post_max_size")), iniToBytes(ini_get("upload_max_filesize")));
 }
 
 
@@ -34,35 +36,40 @@ public function maxUploadSize()
  */
 public function getUploadedFile($key, $allowedTypes = array())
 {
-	$error = false;
+    $error = false;
 
-	// If the uploaded file doesn't exist, then we have to fail.
-	if (!isset($_FILES[$key]) or !is_uploaded_file($_FILES[$key]["tmp_name"]))
-		$error = T("message.fileUploadFailed");
+    // If the uploaded file doesn't exist, then we have to fail.
+    if (!isset($_FILES[$key]) or !is_uploaded_file($_FILES[$key]["tmp_name"])) {
+            $error = T("message.fileUploadFailed");
+    }
 
-	// Otherwise, check for an error.
-	else {
-		$file = $_FILES[$key];
-		switch ($file["error"]) {
-			case 1:
-			case 2:
-				$error = sprintf(T("message.fileUploadTooBig"), ini_get("upload_max_filesize"));
-				break;
-			case 3:
-			case 4:
-			case 6:
-			case 7:
-			case 8:
-				$error = T("message.fileUploadFailed");
-		}
-	}
+    // Otherwise, check for an error.
+    else {
+        $file = $_FILES[$key];
+        switch ($file["error"]) {
+            case 1:
+            case 2:
+                $error = sprintf(T("message.fileUploadTooBig"), ini_get("upload_max_filesize"));
+                break;
+            case 3:
+            case 4:
+            case 6:
+            case 7:
+            case 8:
+                $error = T("message.fileUploadFailed");
+        }
+    }
 
-	// If there was an error, throw it as an exception.
-	if ($error) throw new Exception($error);
+    // If there was an error, throw it as an exception.
+    if ($error) {
+        throw new Exception($error);
+    }
 
-	// Otherwise, return the path to the uploaded file.
-	else return $file["tmp_name"];
-}
+    // Otherwise, return the path to the uploaded file.
+    else {
+        return $file["tmp_name"];
+    }
+    }
 
 
 /**
@@ -74,11 +81,12 @@ public function getUploadedFile($key, $allowedTypes = array())
  */
 public function saveAs($source, $destination)
 {
-	// Attempt to move the uploaded file to the destination. If we can't, throw an exception.
-	if (!move_uploaded_file($source, $destination))
-		throw new Exception(sprintf(T("message.fileUploadFailedMove"), $destination));
+    // Attempt to move the uploaded file to the destination. If we can't, throw an exception.
+    if (!move_uploaded_file($source, $destination)) {
+            throw new Exception(sprintf(T("message.fileUploadFailedMove"), $destination));
+    }
 
-	return $destination;
+    return $destination;
 }
 
 
@@ -99,100 +107,115 @@ public function saveAs($source, $destination)
  */
 public function saveAsImage($source, $destination, $width, $height, $sizeMode = "max")
 {
-	// Get information about the source image and make sure it actually is an image.
-	$size = getimagesize($source);
-	if ($size === false) throw new Exception(T("message.fileUploadNotImage"));
-	list($sourceWidth, $sourceHeight, $type) = $size;
+    // Get information about the source image and make sure it actually is an image.
+    $size = getimagesize($source);
+    if ($size === false) {
+        throw new Exception(T("message.fileUploadNotImage"));
+    }
+    list($sourceWidth, $sourceHeight, $type) = $size;
 
-	// Depending on the type of image, create a GD image object of it.
-	switch ($type) {
-		case 1:
-			$image = @imagecreatefromgif($source);
-			break;
-		case 2:
-			$image = @imagecreatefromjpeg($source);
-			break;
-		case 3:
-			$image = @imagecreatefrompng($source);
-	}
+    // Depending on the type of image, create a GD image object of it.
+    switch ($type) {
+        case 1:
+            $image = @imagecreatefromgif($source);
+            break;
+        case 2:
+            $image = @imagecreatefromjpeg($source);
+            break;
+        case 3:
+            $image = @imagecreatefrompng($source);
+    }
 
-	// If we weren't able to create a GD image from the source, throw an exception.
-	if (!$image) throw new Exception(T("message.fileUploadNotImage"));
+    // If we weren't able to create a GD image from the source, throw an exception.
+    if (!$image) {
+        throw new Exception(T("message.fileUploadNotImage"));
+    }
 
-	// Work out the image type which we will output the image as.
-	$outputType = pathinfo($destination, PATHINFO_EXTENSION);
-	$types = array(1 => "gif", 2 => "jpg", 3 => "png");
+    // Work out the image type which we will output the image as.
+    $outputType = pathinfo($destination, PATHINFO_EXTENSION);
+    $types = array(1 => "gif", 2 => "jpg", 3 => "png");
 
-	// If an extension was specified in the destination, we'll use that and strip the it off of the
-	// destination; otherwise, use the type from getimagesize().
-	if (!$outputType or !in_array($outputType, $types)) {
-		$outputType = $types[$type];
+    // If an extension was specified in the destination, we'll use that and strip the it off of the
+    // destination; otherwise, use the type from getimagesize().
+    if (!$outputType or !in_array($outputType, $types)) {
+        $outputType = $types[$type];
 
-		// We don't support gif output, as it makes transparency difficult.
-		if ($outputType == "gif") $outputType = "png";
-	}
-	else $destination = substr($destination, 0, -strlen($outputType) - 1);
+        // We don't support gif output, as it makes transparency difficult.
+        if ($outputType == "gif") {
+            $outputType = "png";
+        }
+    } else {
+        $destination = substr($destination, 0, -strlen($outputType) - 1);
+    }
 
-	// Work out the ratios needed to get the image to fit into the specified width or height.
-	$widthRatio = $width / $sourceWidth;
-	$heightRatio = $height / $sourceHeight;
+    // Work out the ratios needed to get the image to fit into the specified width or height.
+    $widthRatio = $width / $sourceWidth;
+    $heightRatio = $height / $sourceHeight;
 
-	// If we're cropping, use the larger of the two ratios so we fill the whole image area.
-	if ($sizeMode == "crop") $ratio = max($widthRatio, $heightRatio);
+    // If we're cropping, use the larger of the two ratios so we fill the whole image area.
+    if ($sizeMode == "crop") {
+        $ratio = max($widthRatio, $heightRatio);
+    }
 
-	// If not, use the smaller of the two so we get the whole image in the area.
-	else $ratio = min($widthRatio, $heightRatio);
+    // If not, use the smaller of the two so we get the whole image in the area.
+    else {
+        $ratio = min($widthRatio, $heightRatio);
+    }
 
-	// If the provided width x height is a minimum, the ratio must be no smaller than one.
-	if ($sizeMode == "min") $ratio = max(1, $ratio);
+    // If the provided width x height is a minimum, the ratio must be no smaller than one.
+    if ($sizeMode == "min") {
+        $ratio = max(1, $ratio);
+    }
 
-	// If the provided width x height is a maximum, the ratio must be no greater than one.
-	elseif ($sizeMode == "max") $ratio = min(1, $ratio);
+    // If the provided width x height is a maximum, the ratio must be no greater than one.
+    elseif ($sizeMode == "max") {
+        $ratio = min(1, $ratio);
+    }
 
-	// Work out the new width and height of the image depending on the selected ratio.
-	$newWidth = ceil($ratio * $sourceWidth);
-	$newHeight = ceil($ratio * $sourceHeight);
+    // Work out the new width and height of the image depending on the selected ratio.
+    $newWidth = ceil($ratio * $sourceWidth);
+    $newHeight = ceil($ratio * $sourceHeight);
 
-	// Work out the dimensions of the image we are creating.
-	if ($sizeMode == "max" or $sizeMode == "min") {
-		$width = $newWidth;
-		$height = $newHeight;
-	}
+    // Work out the dimensions of the image we are creating.
+    if ($sizeMode == "max" or $sizeMode == "min") {
+        $width = $newWidth;
+        $height = $newHeight;
+    }
 
-	// Create a new GD image of the specified width and height, and make sure we can handle transparency.
-	$newImage = imagecreatetruecolor($width, $height);
-	if ($outputType == "png") {
-		imagecolortransparent($newImage, imagecolorallocate($newImage, 0, 0, 0));
-		imagealphablending($newImage, false);
-		imagesavealpha($newImage, true);
-	}
+    // Create a new GD image of the specified width and height, and make sure we can handle transparency.
+    $newImage = imagecreatetruecolor($width, $height);
+    if ($outputType == "png") {
+        imagecolortransparent($newImage, imagecolorallocate($newImage, 0, 0, 0));
+        imagealphablending($newImage, false);
+        imagesavealpha($newImage, true);
+    }
 
-	// Work out how much to offset the image by in order to center it.
-	$x = $newWidth / 2 - $width / 2;
-	$y = $newHeight / 2 - $height / 2;
+    // Work out how much to offset the image by in order to center it.
+    $x = $newWidth / 2 - $width / 2;
+    $y = $newHeight / 2 - $height / 2;
 
-	// Copy the source image onto our new canvas.
-	imagecopyresampled($newImage, $image, -$x, -$y, 0, 0, $newWidth, $newHeight, $sourceWidth, $sourceHeight);
+    // Copy the source image onto our new canvas.
+    imagecopyresampled($newImage, $image, -$x, -$y, 0, 0, $newWidth, $newHeight, $sourceWidth, $sourceHeight);
 
-	// Save the image to the correct destination and format.
-	switch ($outputType) {
-		case "png":
-			imagepng($newImage, $outputFile = "$destination.png");
-			break;
+    // Save the image to the correct destination and format.
+    switch ($outputType) {
+        case "png":
+            imagepng($newImage, $outputFile = "$destination.png");
+            break;
 
-		case "gif":
-			imagegif($newImage, $outputFile = "$destination.gif");
-			break;
+        case "gif":
+            imagegif($newImage, $outputFile = "$destination.gif");
+            break;
 
-		default:
-			imagejpeg($newImage, $outputFile = "$destination.jpg", 90);
-	}
+        default:
+            imagejpeg($newImage, $outputFile = "$destination.jpg", 90);
+    }
 
-	// Clean up.
-	imagedestroy($newImage);
-	imagedestroy($image);
+    // Clean up.
+    imagedestroy($newImage);
+    imagedestroy($image);
 
-	return $outputFile;
+    return $outputFile;
 }
 
 }

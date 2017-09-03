@@ -2,7 +2,9 @@
 // Copyright 2011 Toby Zerner, Simon Zerner
 // This file is part of esoTalk. Please see the included license file for usage information.
 
-if (!defined("IN_ESOTALK")) exit;
+if (!defined("IN_ESOTALK")) {
+    exit;
+}
 
 /**
  * Displays a list of labels that apply to a conversation.
@@ -11,7 +13,7 @@ if (!defined("IN_ESOTALK")) exit;
  */
 
 foreach ($data["labels"] as $label) {
-	echo "<span class='label label-$label' title='".T("label.$label")."'><i class='".ETConversationModel::$labels[$label][1]."'></i></span>\n";
+    echo "<span class='label label-$label' title='" . T("label.$label") . "'><i class='" . ETConversationModel::$labels[$label][1] . "'></i></span>\n";
 }
 
 ?>

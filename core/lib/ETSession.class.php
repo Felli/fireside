@@ -2,7 +2,9 @@
 // Copyright 2011 Toby Zerner, Simon Zerner
 // This file is part of esoTalk. Please see the included license file for usage information.
 
-if (!defined("IN_ESOTALK")) exit;
+if (!defined("IN_ESOTALK")) {
+    exit;
+}
 
 /**
  * The Session model represents the current session and the current user. It provides functions for manipluating
@@ -48,41 +50,47 @@ public $ip;
  */
 public function __construct()
 {
-	// Start a session.
-	session_name(C("esoTalk.cookie.name")."_session");
-	session_start();
-	if (empty($_SESSION["token"])) $this->regenerateToken();
+    // Start a session.
+    session_name(C("esoTalk.cookie.name") . "_session");
+    session_start();
+    if (empty($_SESSION["token"])) {
+        $this->regenerateToken();
+    }
 
-	// Complicate session highjacking - check the current user agent against the one that initiated the session.
-	if (md5($_SERVER["HTTP_USER_AGENT"]) != $_SESSION["userAgent"]) session_destroy();
+    // Complicate session highjacking - check the current user agent against the one that initiated the session.
+    if (md5($_SERVER["HTTP_USER_AGENT"]) != $_SESSION["userAgent"]) {
+        session_destroy();
+    }
 
-	// Set the class properties to reference session variables.
-	$this->token = &$_SESSION["token"];
-	$this->ip = $_SERVER["REMOTE_ADDR"];
-	$this->userId = &$_SESSION["userId"];
+    // Set the class properties to reference session variables.
+    $this->token = &$_SESSION["token"];
+    $this->ip = $_SERVER["REMOTE_ADDR"];
+    $this->userId = &$_SESSION["userId"];
 
-	// If a persistent login cookie is set, attempt to log in.
-	if (C("esoTalk.enablePersistenceCookies") and !$this->userId and ($cookie = $this->getCookie("persistent"))) {
+    // If a persistent login cookie is set, attempt to log in.
+    if (C("esoTalk.enablePersistenceCookies") and !$this->userId and ($cookie = $this->getCookie("persistent"))) {
 
-		// Get the token and member ID from the cookie.
-		$token = substr($cookie, -32);
-		$memberId = (int)substr($cookie, 0, -32);
+        // Get the token and member ID from the cookie.
+        $token = substr($cookie, -32);
+        $memberId = (int) substr($cookie, 0, -32);
 
-		// Find a user with this memberId and token.
-		$member = ET::memberModel()->get(array(
-			"m.memberId" => $memberId,
-			"rememberToken" => $token
-		));
+        // Find a user with this memberId and token.
+        $member = ET::memberModel()->get(array(
+            "m.memberId" => $memberId,
+            "rememberToken" => $token
+        ));
 
-		// If we found them, log them in.
-		if ($member) {
-			$this->loginWithMemberId($memberId);
-		}
-	}
+        // If we found them, log them in.
+        if ($member) {
+            $this->loginWithMemberId($memberId);
+        }
+    }
 
-	// If there's a user logged in, get their user data.
-	if ($this->userId and C("esoTalk.installed")) $this->refreshUserData();
-}
+    // If there's a user logged in, get their user data.
+    if ($this->userId and C("esoTalk.installed")) {
+        $this->refreshUserData();
+    }
+    }
 
 
 /**
@@ -92,19 +100,22 @@ public function __construct()
  */
 public function refreshUserData()
 {
-	if (!$this->userId) return;
-	$this->user = ET::memberModel()->getById($this->userId);
+    if (!$this->userId) {
+        return;
+    }
+    $this->user = ET::memberModel()->getById($this->userId);
 }
 
 
 /**
  * Get the value of a specific preference for the currently logged in user.
  *
+ * @param string $key
  * @return mixed
  */
 public function preference($key, $default = false)
 {
-	return isset($this->user["preferences"][$key]) ? $this->user["preferences"][$key] : $default;
+    return isset($this->user["preferences"][$key]) ? $this->user["preferences"][$key] : $default;
 }
 
 
@@ -116,8 +127,10 @@ public function preference($key, $default = false)
  */
 public function setPreferences($values)
 {
-	if (!$this->userId) return;
-	$this->user["preferences"] = ET::memberModel()->setPreferences($this->user, $values);
+    if (!$this->userId) {
+        return;
+    }
+    $this->user["preferences"] = ET::memberModel()->setPreferences($this->user, $values);
 }
 
 
@@ -129,21 +142,24 @@ public function setPreferences($values)
  */
 protected function processLogin($member)
 {
-	// If registrations require confirmation but the user's account hasn't been confirmed, return a message.
-	if (!$member["confirmed"] and ($type = C("esoTalk.registration.requireConfirmation"))) {
-		if ($type == "email") $this->error("emailNotYetConfirmed");
-		elseif ($type == "approval") $this->error("accountNotYetApproved");
-		return false;
-	}
+    // If registrations require confirmation but the user's account hasn't been confirmed, return a message.
+    if (!$member["confirmed"] and ($type = C("esoTalk.registration.requireConfirmation"))) {
+        if ($type == "email") {
+            $this->error("emailNotYetConfirmed");
+        } elseif ($type == "approval") {
+            $this->error("accountNotYetApproved");
+        }
+        return false;
+    }
 
-	// Assign the user ID to a SESSION variable.
-	$_SESSION["userId"] = $member["memberId"];
-	$this->user = $member;
+    // Assign the user ID to a SESSION variable.
+    $_SESSION["userId"] = $member["memberId"];
+    $this->user = $member;
 
-	// Regenerate the session ID and token to prevent session fixation.
-	$this->regenerateToken();
+    // Regenerate the session ID and token to prevent session fixation.
+    $this->regenerateToken();
 
-	return true;
+    return true;
 }
 
 
@@ -155,46 +171,47 @@ protected function processLogin($member)
  */
 public function loginWithMemberId($memberId)
 {
-	$member = ET::memberModel()->getById($memberId);
-	return $this->processLogin($member);
+    $member = ET::memberModel()->getById($memberId);
+    return $this->processLogin($member);
 }
 
 
 /**
  * Log in the member with the specified username and password, and optionally set a persistent login cookie.
  *
- * @param string $username The username.
  * @param string $password The password.
  * @param bool $remember Whether or not to set a persistent login cookie.
  * @return bool true on success, false on failure.
  */
 public function login($name, $password, $remember = false)
 {
-	$return = $this->trigger("login", array($name, $password, $remember));
-	if (count($return)) return reset($return);
+    $return = $this->trigger("login", array($name, $password, $remember));
+    if (count($return)) {
+        return reset($return);
+    }
 
-	// Get the member with this username or email.
-	$sql = ET::SQL()
-		->where("m.username=:username OR m.email=:email")
-		->bind(":username", $name)
-		->bind(":email", $name);
-	$member = reset(ET::memberModel()->getWithSQL($sql));
+    // Get the member with this username or email.
+    $sql = ET::SQL()
+        ->where("m.username=:username OR m.email=:email")
+        ->bind(":username", $name)
+        ->bind(":email", $name);
+    $member = reset(ET::memberModel()->getWithSQL($sql));
 
-	// Check that the password is correct.
-	if (!$member or !ET::memberModel()->checkPassword($password, $member["password"])) {
-		$this->error("password", "incorrectLogin");
-		return false;
-	}
+    // Check that the password is correct.
+    if (!$member or !ET::memberModel()->checkPassword($password, $member["password"])) {
+        $this->error("password", "incorrectLogin");
+        return false;
+    }
 
-	// Process the login.
-	$return = $this->processLogin($member);
+    // Process the login.
+    $return = $this->processLogin($member);
 
-	// Set a persistent login "remember me" cookie?
-	if (C("esoTalk.enablePersistenceCookies") and $return === true and $remember) {
-		$this->setRememberCookie($this->userId);
-	}
+    // Set a persistent login "remember me" cookie?
+    if (C("esoTalk.enablePersistenceCookies") and $return === true and $remember) {
+        $this->setRememberCookie($this->userId);
+    }
 
-	return $return;
+    return $return;
 }
 
 
@@ -206,16 +223,16 @@ public function login($name, $password, $remember = false)
  */
 protected function getRememberToken($memberId)
 {
-	$member = ET::memberModel()->getById($memberId);
+    $member = ET::memberModel()->getById($memberId);
 
-	if (!empty($member["rememberToken"])) {
-		$token = $member["rememberToken"];
-	} else {
-		$token = generateRandomString(32);
-		ET::memberModel()->updateById($memberId, array("rememberToken" => $token));
-	}
+    if (!empty($member["rememberToken"])) {
+        $token = $member["rememberToken"];
+    } else {
+        $token = generateRandomString(32);
+        ET::memberModel()->updateById($memberId, array("rememberToken" => $token));
+    }
 
-	return $token;
+    return $token;
 }
 
 
@@ -227,11 +244,13 @@ protected function getRememberToken($memberId)
  */
 protected function clearRememberToken($memberId)
 {
-	ET::memberModel()->updateById($memberId, array("rememberToken" => null));
+    ET::memberModel()->updateById($memberId, array("rememberToken" => null));
 
-	// Eat the persistent login cookie. OM NOM NOM
-	if ($this->getCookie("persistent")) $this->setCookie("persistent", false, -1);
-}
+    // Eat the persistent login cookie. OM NOM NOM
+    if ($this->getCookie("persistent")) {
+        $this->setCookie("persistent", false, -1);
+    }
+    }
 
 
 /**
@@ -243,7 +262,7 @@ protected function clearRememberToken($memberId)
  */
 public function setCookie($name, $value, $expire = 0)
 {
-	return setcookie(C("esoTalk.cookie.name")."_".$name, $value, $expire, C("esoTalk.cookie.path", getWebPath('')), C("esoTalk.cookie.domain"), C("esoTalk.https"), true);
+    return setcookie(C("esoTalk.cookie.name") . "_" . $name, $value, $expire, C("esoTalk.cookie.path", getWebPath('')), C("esoTalk.cookie.domain"), C("esoTalk.https"), true);
 }
 
 
@@ -254,9 +273,9 @@ public function setCookie($name, $value, $expire = 0)
  */
 public function setRememberCookie($userId)
 {
-	$token = $this->getRememberToken($userId);
+    $token = $this->getRememberToken($userId);
 
-	$this->setCookie("persistent", $userId.$token, time() + C("esoTalk.cookie.expire"));
+    $this->setCookie("persistent", $userId . $token, time() + C("esoTalk.cookie.expire"));
 }
 
 
@@ -269,8 +288,8 @@ public function setRememberCookie($userId)
  */
 public function getCookie($name, $default = null)
 {
-	$name = C("esoTalk.cookie.name")."_".$name;
-	return isset($_COOKIE[$name]) ? $_COOKIE[$name] : $default;
+    $name = C("esoTalk.cookie.name") . "_" . $name;
+    return isset($_COOKIE[$name]) ? $_COOKIE[$name] : $default;
 }
 
 
@@ -281,14 +300,14 @@ public function getCookie($name, $default = null)
  */
 public function logout()
 {
-	// Clear the rememberToken for this user, effectively invalidating all persistence cookies.
-	$this->clearRememberToken($_SESSION["userId"]);
+    // Clear the rememberToken for this user, effectively invalidating all persistence cookies.
+    $this->clearRememberToken($_SESSION["userId"]);
 
-	// Destroy session data and regenerate the unique token to prevent session fixation.
-	unset($_SESSION["userId"]);
-	$this->regenerateToken();
+    // Destroy session data and regenerate the unique token to prevent session fixation.
+    unset($_SESSION["userId"]);
+    $this->regenerateToken();
 
-	$this->trigger("logout");
+    $this->trigger("logout");
 }
 
 
@@ -301,7 +320,7 @@ public function logout()
  */
 public function updateUser($key, $value)
 {
-	$this->user[$key] = $value;
+    $this->user[$key] = $value;
 }
 
 
@@ -313,7 +332,7 @@ public function updateUser($key, $value)
  */
 public function validateToken($token)
 {
-	return $token == $this->token;
+    return $token == $this->token;
 }
 
 
@@ -324,9 +343,9 @@ public function validateToken($token)
  */
 public function regenerateToken()
 {
-	session_regenerate_id(true);
-	$_SESSION["token"] = substr(md5(uniqid(rand())), 0, 13);
-	$_SESSION["userAgent"] = md5($_SERVER["HTTP_USER_AGENT"]);
+    session_regenerate_id(true);
+    $_SESSION["token"] = substr(md5(uniqid(rand())), 0, 13);
+    $_SESSION["userAgent"] = md5($_SERVER["HTTP_USER_AGENT"]);
 }
 
 
@@ -344,19 +363,21 @@ public function regenerateToken()
  */
 public function pushNavigation($id, $type, $url)
 {
-	$navigation = $this->get("navigation");
-	if (!is_array($navigation)) $navigation = array();
+    $navigation = $this->get("navigation");
+    if (!is_array($navigation)) {
+        $navigation = array();
+    }
 
-	// Look for an item with this $id that might already by in the navigation. If found, delete everything after it.
-	foreach ($navigation as $k => $item) {
-		if ($item["id"] == $id) {
-			array_splice($navigation, $k);
-			break;
-		}
-	}
-	$navigation[] = array("id" => $id, "type" => $type, "url" => $url);
+    // Look for an item with this $id that might already by in the navigation. If found, delete everything after it.
+    foreach ($navigation as $k => $item) {
+        if ($item["id"] == $id) {
+            array_splice($navigation, $k);
+            break;
+        }
+    }
+    $navigation[] = array("id" => $id, "type" => $type, "url" => $url);
 
-	$this->store("navigation", $navigation);
+    $this->store("navigation", $navigation);
 }
 
 
@@ -369,14 +390,17 @@ public function pushNavigation($id, $type, $url)
  */
 public function getNavigation($currentId)
 {
-	$navigation = $this->get("navigation");
-	if (!empty($navigation)) {
-		$return = end($navigation);
-		if ($return["id"] == $currentId) $return = prev($navigation);
-		return $return;
-	}
-	else return false;
-}
+    $navigation = $this->get("navigation");
+    if (!empty($navigation)) {
+        $return = end($navigation);
+        if ($return["id"] == $currentId) {
+            $return = prev($navigation);
+        }
+        return $return;
+    } else {
+        return false;
+    }
+    }
 
 
 /**
@@ -386,7 +410,7 @@ public function getNavigation($currentId)
  */
 public function isAdmin()
 {
-	return $this->user["account"] == ACCOUNT_ADMINISTRATOR or $this->userId == C("esoTalk.rootAdmin");
+    return $this->user["account"] == ACCOUNT_ADMINISTRATOR or $this->userId == C("esoTalk.rootAdmin");
 }
 
 
@@ -397,7 +421,7 @@ public function isAdmin()
  */
 public function isSuspended()
 {
-	return $this->user["account"] == ACCOUNT_SUSPENDED;
+    return $this->user["account"] == ACCOUNT_SUSPENDED;
 }
 
 
@@ -408,25 +432,27 @@ public function isSuspended()
  */
 public function isFlooding()
 {
-	// If there's no wait time between posting configured, they're not flooding.
-	if (C("esoTalk.conversation.timeBetweenPosts") <= 0) return false;
+    // If there's no wait time between posting configured, they're not flooding.
+    if (C("esoTalk.conversation.timeBetweenPosts") <= 0) {
+        return false;
+    }
 
-	// Otherwise, make sure the time of their most recent conversation/post is more than the time limit ago.
-	$time = time() - C("esoTalk.conversation.timeBetweenPosts");
-	$recentConversation = (bool)ET::SQL()
-		->select("MAX(startTime)>$time")
-		->from("conversation")
-		->where("startMemberId", $this->userId)
-		->exec()
-		->result();
-	$recentPost = (bool)ET::SQL()
-		->select("MAX(time)>$time")
-		->from("post p")
-		->where("memberId", $this->userId)
-		->exec()
-		->result();
+    // Otherwise, make sure the time of their most recent conversation/post is more than the time limit ago.
+    $time = time() - C("esoTalk.conversation.timeBetweenPosts");
+    $recentConversation = (bool) ET::SQL()
+        ->select("MAX(startTime)>$time")
+        ->from("conversation")
+        ->where("startMemberId", $this->userId)
+        ->exec()
+        ->result();
+    $recentPost = (bool) ET::SQL()
+        ->select("MAX(time)>$time")
+        ->from("post p")
+        ->where("memberId", $this->userId)
+        ->exec()
+        ->result();
 
-	return $recentConversation or $recentPost;
+    return $recentConversation or $recentPost;
 }
 
 
@@ -437,41 +463,47 @@ public function isFlooding()
  */
 public function getGroupIds()
 {
-	if ($this->user) return ET::groupModel()->getGroupIds($this->user["account"], array_keys($this->user["groups"]));
-	else return ET::groupModel()->getGroupIds(false, false);
-}
+    if ($this->user) {
+        return ET::groupModel()->getGroupIds($this->user["account"], array_keys($this->user["groups"]));
+    } else {
+        return ET::groupModel()->getGroupIds(false, false);
+    }
+    }
 
 
 /**
  * Store a value in the session data store.
  *
+ * @param string $key
  * @return void
  */
 public function store($key, $value)
 {
-	$_SESSION[$key] = $value;
+    $_SESSION[$key] = $value;
 }
 
 
 /**
  * Retrieve a value from the session data store.
  *
+ * @param string $key
  * @return mixed
  */
 public function get($key, $default = null)
 {
-	return isset($_SESSION[$key]) ? $_SESSION[$key] : $default;
+    return isset($_SESSION[$key]) ? $_SESSION[$key] : $default;
 }
 
 
 /**
  * Remove a value from the session data store.
  *
+ * @param string $key
  * @return void
  */
 public function remove($key)
 {
-	unset($_SESSION[$key]);
+    unset($_SESSION[$key]);
 }
 
 }

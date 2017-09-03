@@ -2,16 +2,18 @@
 // Copyright 2011 Toby Zerner, Simon Zerner
 // This file is part of esoTalk. Please see the included license file for usage information.
 
-if (!defined("IN_ESOTALK")) exit;
+if (!defined("IN_ESOTALK")) {
+    exit;
+}
 
 ET::$pluginInfo["BBCode"] = array(
-	"name" => "BBCode",
-	"description" => "Formats BBCode within posts, allowing users to style their text.",
-	"version" => ESOTALK_VERSION,
-	"author" => "esoTalk Team",
-	"authorEmail" => "support@esotalk.org",
-	"authorURL" => "http://esotalk.org",
-	"license" => "GPLv2"
+    "name" => "BBCode",
+    "description" => "Formats BBCode within posts, allowing users to style their text.",
+    "version" => ESOTALK_VERSION,
+    "author" => "esoTalk Team",
+    "authorEmail" => "support@esotalk.org",
+    "authorURL" => "http://esotalk.org",
+    "license" => "GPLv2"
 );
 
 
@@ -32,8 +34,8 @@ class ETPlugin_BBCode extends ETPlugin {
  */
 public function handler_conversationController_renderBefore($sender)
 {
-	$sender->addJSFile($this->resource("bbcode.js"));
-	$sender->addCSSFile($this->resource("bbcode.css"));
+    $sender->addJSFile($this->resource("bbcode.js"));
+    $sender->addCSSFile($this->resource("bbcode.css"));
 }
 
 
@@ -45,13 +47,13 @@ public function handler_conversationController_renderBefore($sender)
  */
 public function handler_conversationController_getEditControls($sender, &$controls, $id)
 {
-	addToArrayString($controls, "fixed", "<a href='javascript:BBCode.fixed(\"$id\");void(0)' title='".T("Code")."' class='control-fixed'><i class='icon-code'></i></a>", 0);
-	addToArrayString($controls, "image", "<a href='javascript:BBCode.image(\"$id\");void(0)' title='".T("Image")."' class='control-img'><i class='icon-picture'></i></a>", 0);
-	addToArrayString($controls, "link", "<a href='javascript:BBCode.link(\"$id\");void(0)' title='".T("Link")."' class='control-link'><i class='icon-link'></i></a>", 0);
-	addToArrayString($controls, "strike", "<a href='javascript:BBCode.strikethrough(\"$id\");void(0)' title='".T("Strike")."' class='control-s'><i class='icon-strikethrough'></i></a>", 0);
-	addToArrayString($controls, "header", "<a href='javascript:BBCode.header(\"$id\");void(0)' title='".T("Header")."' class='control-h'><i class='icon-h-sign'></i></a>", 0);
-	addToArrayString($controls, "italic", "<a href='javascript:BBCode.italic(\"$id\");void(0)' title='".T("Italic")."' class='control-i'><i class='icon-italic'></i></a>", 0);
-	addToArrayString($controls, "bold", "<a href='javascript:BBCode.bold(\"$id\");void(0)' title='".T("Bold")."' class='control-b'><i class='icon-bold'></i></a>", 0);
+    addToArrayString($controls, "fixed", "<a href='javascript:BBCode.fixed(\"$id\");void(0)' title='" . T("Code") . "' class='control-fixed'><i class='icon-code'></i></a>", 0);
+    addToArrayString($controls, "image", "<a href='javascript:BBCode.image(\"$id\");void(0)' title='" . T("Image") . "' class='control-img'><i class='icon-picture'></i></a>", 0);
+    addToArrayString($controls, "link", "<a href='javascript:BBCode.link(\"$id\");void(0)' title='" . T("Link") . "' class='control-link'><i class='icon-link'></i></a>", 0);
+    addToArrayString($controls, "strike", "<a href='javascript:BBCode.strikethrough(\"$id\");void(0)' title='" . T("Strike") . "' class='control-s'><i class='icon-strikethrough'></i></a>", 0);
+    addToArrayString($controls, "header", "<a href='javascript:BBCode.header(\"$id\");void(0)' title='" . T("Header") . "' class='control-h'><i class='icon-h-sign'></i></a>", 0);
+    addToArrayString($controls, "italic", "<a href='javascript:BBCode.italic(\"$id\");void(0)' title='" . T("Italic") . "' class='control-i'><i class='icon-italic'></i></a>", 0);
+    addToArrayString($controls, "bold", "<a href='javascript:BBCode.bold(\"$id\");void(0)' title='" . T("Bold") . "' class='control-b'><i class='icon-bold'></i></a>", 0);
 
 }
 
@@ -63,30 +65,30 @@ public function handler_conversationController_getEditControls($sender, &$contro
  */
 public function handler_format_beforeFormat($sender)
 {
-	$this->blockFixedContents = array();
-	$this->inlineFixedContents = array();
-	$self = $this;
+    $this->blockFixedContents = array();
+    $this->inlineFixedContents = array();
+    $self = $this;
 
-	$regexp = "/(.*)^\s*\[code\]\n?(.*?)\n?\[\/code]$/ims";
-	while (preg_match($regexp, $sender->content)) {
-		if ($sender->inline) {
-			$sender->content = preg_replace_callback($regexp, function ($matches) use ($self) {
-				$self->inlineFixedContents[] = $matches[2];
-				return $matches[1].'<code></code>';
-			}, $sender->content);
-		} else {
-			$sender->content = preg_replace_callback($regexp, function ($matches) use ($self) {
-				$self->blockFixedContents[] = $matches[2];
-				return $matches[1].'</p><pre></pre><p>';
-			}, $sender->content);
-		}
-	}
+    $regexp = "/(.*)^\s*\[code\]\n?(.*?)\n?\[\/code]$/ims";
+    while (preg_match($regexp, $sender->content)) {
+        if ($sender->inline) {
+            $sender->content = preg_replace_callback($regexp, function($matches) use ($self) {
+                $self->inlineFixedContents[] = $matches[2];
+                return $matches[1] . '<code></code>';
+            }, $sender->content);
+        } else {
+            $sender->content = preg_replace_callback($regexp, function($matches) use ($self) {
+                $self->blockFixedContents[] = $matches[2];
+                return $matches[1] . '</p><pre></pre><p>';
+            }, $sender->content);
+        }
+    }
 
-	// Inline-level [fixed] tags will become <code>.
-	$sender->content = preg_replace_callback("/\[code\]\n?(.*?)\n?\[\/code]/is", function ($matches) use ($self) {
-		$self->inlineFixedContents[] = $matches[1];
-		return '<code></code>';
-	}, $sender->content);
+    // Inline-level [fixed] tags will become <code>.
+    $sender->content = preg_replace_callback("/\[code\]\n?(.*?)\n?\[\/code]/is", function($matches) use ($self) {
+        $self->inlineFixedContents[] = $matches[1];
+        return '<code></code>';
+    }, $sender->content);
 }
 
 /**
@@ -96,31 +98,31 @@ public function handler_format_beforeFormat($sender)
  */
 public function handler_format_format($sender)
 {
-	// TODO: Rewrite BBCode parser to use the method found here:
-	// http://stackoverflow.com/questions/1799454/is-there-a-solid-bb-code-parser-for-php-that-doesnt-have-any-dependancies/1799788#1799788
-	// Remove control characters from the post.
-	//$sender->content = preg_replace('/[\x00-\x09\x0B\x0C\x0E-\x1F\x7F]/', '', $sender->content);
-	// \[ (i|b|color|url|somethingelse) \=? ([^]]+)? \] (?: ([^]]*) \[\/\1\] )
+    // TODO: Rewrite BBCode parser to use the method found here:
+    // http://stackoverflow.com/questions/1799454/is-there-a-solid-bb-code-parser-for-php-that-doesnt-have-any-dependancies/1799788#1799788
+    // Remove control characters from the post.
+    //$sender->content = preg_replace('/[\x00-\x09\x0B\x0C\x0E-\x1F\x7F]/', '', $sender->content);
+    // \[ (i|b|color|url|somethingelse) \=? ([^]]+)? \] (?: ([^]]*) \[\/\1\] )
 
-	// Images: [img]url[/img]
-	$replacement = $sender->inline ? "[image]" : "<img src='$1' alt='-image-'/>";
-	$sender->content = preg_replace("/\[img\](https?.*?)\[\/img\]/i", $replacement, $sender->content);
+    // Images: [img]url[/img]
+    $replacement = $sender->inline ? "[image]" : "<img src='$1' alt='-image-'/>";
+    $sender->content = preg_replace("/\[img\](https?.*?)\[\/img\]/i", $replacement, $sender->content);
 
-	// Links with display text: [url=http://url]text[/url]
-	$sender->content = preg_replace_callback("/\[url=(?!\s+)(\w{2,6}:\/\/)?([^\]]*?)\](.*?)\[\/url\]/i", array($this, "linksCallback"), $sender->content);
+    // Links with display text: [url=http://url]text[/url]
+    $sender->content = preg_replace_callback("/\[url=(?!\s+)(\w{2,6}:\/\/)?([^\]]*?)\](.*?)\[\/url\]/i", array($this, "linksCallback"), $sender->content);
 
-	// Bold: [b]bold text[/b]
-	$sender->content = preg_replace("/\[b\](.*?)\[\/b\]/si", "<b>$1</b>", $sender->content);
+    // Bold: [b]bold text[/b]
+    $sender->content = preg_replace("/\[b\](.*?)\[\/b\]/si", "<b>$1</b>", $sender->content);
 
-	// Italics: [i]italic text[/i]
-	$sender->content = preg_replace("/\[i\](.*?)\[\/i\]/si", "<i>$1</i>", $sender->content);
+    // Italics: [i]italic text[/i]
+    $sender->content = preg_replace("/\[i\](.*?)\[\/i\]/si", "<i>$1</i>", $sender->content);
 
-	// Strikethrough: [s]strikethrough[/s]
-	$sender->content = preg_replace("/\[s\](.*?)\[\/s\]/si", "<del>$1</del>", $sender->content);
+    // Strikethrough: [s]strikethrough[/s]
+    $sender->content = preg_replace("/\[s\](.*?)\[\/s\]/si", "<del>$1</del>", $sender->content);
 
-	// Headers: [h]header[/h]
-	$replacement = $sender->inline ? "<b>$1</b>" : "</p><h4>$1</h4><p>";
-	$sender->content = preg_replace("/\[h\](.*?)\[\/h\]/", $replacement, $sender->content);
+    // Headers: [h]header[/h]
+    $replacement = $sender->inline ? "<b>$1</b>" : "</p><h4>$1</h4><p>";
+    $sender->content = preg_replace("/\[h\](.*?)\[\/h\]/", $replacement, $sender->content);
 }
 
 
@@ -132,7 +134,7 @@ public function handler_format_format($sender)
  */
 public function linksCallback($matches)
 {
-	return ET::formatter()->formatLink($matches[1].$matches[2], $matches[3]);
+    return ET::formatter()->formatLink($matches[1] . $matches[2], $matches[3]);
 }
 
 
@@ -143,19 +145,19 @@ public function linksCallback($matches)
  */
 public function handler_format_afterFormat($sender)
 {
-	$self = $this;
+    $self = $this;
 
-	// Retrieve the contents of the inline <code> tags from the array in which they are stored.
-	$sender->content = preg_replace_callback("/<code><\/code>/i", function ($matches) use ($self) {
-		return '<code>'.array_shift($self->inlineFixedContents).'</code>';
-	}, $sender->content);
+    // Retrieve the contents of the inline <code> tags from the array in which they are stored.
+    $sender->content = preg_replace_callback("/<code><\/code>/i", function($matches) use ($self) {
+        return '<code>' . array_shift($self->inlineFixedContents) . '</code>';
+    }, $sender->content);
 
-	// Retrieve the contents of the block <pre> tags from the array in which they are stored.
-	if (!$sender->inline) {
-		$sender->content = preg_replace_callback("/<pre><\/pre>/i", function ($matches) use ($self) {
-			return '<pre>'.array_pop($self->blockFixedContents).'</pre>';
-		}, $sender->content);
-	}
+    // Retrieve the contents of the block <pre> tags from the array in which they are stored.
+    if (!$sender->inline) {
+        $sender->content = preg_replace_callback("/<pre><\/pre>/i", function($matches) use ($self) {
+            return '<pre>' . array_pop($self->blockFixedContents) . '</pre>';
+        }, $sender->content);
+    }
 }
 
 }

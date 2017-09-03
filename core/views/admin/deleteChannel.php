@@ -2,7 +2,9 @@
 // Copyright 2011 Toby Zerner, Simon Zerner
 // This file is part of esoTalk. Please see the included license file for usage information.
 
-if (!defined("IN_ESOTALK")) exit;
+if (!defined("IN_ESOTALK")) {
+    exit;
+}
 
 /**
  * Displays a sheet to delete a channel.
@@ -31,8 +33,10 @@ $form = $data["form"];
 <?php
 $moveOptions = array();
 foreach ($data["channels"] as $id => $ch) {
-	if ($id == $channel["channelId"]) continue;
-	$moveOptions[$id] = str_repeat("&nbsp;", $ch["depth"] * 5).$ch["title"];
+    if ($id == $channel["channelId"]) {
+        continue;
+    }
+    $moveOptions[$id] = str_repeat("&nbsp;", $ch["depth"] * 5) . $ch["title"];
 }
 echo $form->select("moveToChannelId", $moveOptions);
 ?>
