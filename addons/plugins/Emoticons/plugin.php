@@ -25,7 +25,9 @@ public function handler_renderBefore($sender)
 
 public function handler_format_format($sender)
 {
-    if ($sender->inline) return;
+    if ($sender->inline) {
+        return;
+    }
 
     $styles = array();
     $styles[":)"] = "background-position:0 0";

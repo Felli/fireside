@@ -83,7 +83,9 @@ public function action_index($conversationId = false, $year = false, $month = fa
 
             // If a post ID was found, redirect to its position within the conversation.
             $startFrom = max(0, min($conversation["lastRead"], $conversation["countPosts"] - C("esoTalk.conversation.postsPerPage")));
-            if ($id) $this->redirect(URL(conversationURL($conversation["conversationId"], $conversation["title"]) . "/$startFrom#p$id"));
+            if ($id) {
+                $this->redirect(URL(conversationURL($conversation["conversationId"], $conversation["title"]) . "/$startFrom#p$id"));
+            }
 
         }
 
@@ -138,14 +140,19 @@ public function action_index($conversationId = false, $year = false, $month = fa
 
         // Otherwise, interpret it is a plain page number, or position.
         else {
-            if ($year[0] == "p") $startFrom = ((int) ltrim($year, "p") - 1) * C("esoTalk.conversation.postsPerPage");
-            else $startFrom = (int) $year;
+            if ($year[0] == "p") {
+                $startFrom = ((int) ltrim($year, "p") - 1) * C("esoTalk.conversation.postsPerPage");
+            } else {
+                $startFrom = (int) $year;
+            }
         }
     }
 
     // Make sure the startFrom number is within range.
     $startFrom = max(0, $startFrom);
-    if ($this->responseType === RESPONSE_TYPE_DEFAULT) $startFrom = min($startFrom, max(0, $conversation["countPosts"] - 1));
+    if ($this->responseType === RESPONSE_TYPE_DEFAULT) {
+        $startFrom = min($startFrom, max(0, $conversation["countPosts"] - 1));
+    }
 
     if (ET::$session->userId) {
 
@@ -308,7 +315,9 @@ public function action_index($conversationId = false, $year = false, $month = fa
         // Quote a post: get the post details (id, name, content) and then set the value of the reply textarea appropriately.
         if ($postId = (int) R("quote")) {
             $post = $this->getPostForQuoting($postId, $conversation["conversationId"]);
-            if ($post) $conversation["draft"] = "[quote=$postId:" . $post["username"] . "]" . ET::formatter()->init($post["content"])->removeQuotes()->get() . "[/quote]";
+            if ($post) {
+                $conversation["draft"] = "[quote=$postId:" . $post["username"] . "]" . ET::formatter()->init($post["content"])->removeQuotes()->get() . "[/quote]";
+            }
         }
 
         // Set up the reply form.
@@ -804,16 +813,19 @@ public function action_save($conversationId = false)
     // interact with the session channelId variable.
     else {
 
-        if ($channelId = $form->getValue("channel"))
-            ET::$session->store("channelId", (int) $channelId);
+        if ($channelId = $form->getValue("channel")) {
+                    ET::$session->store("channelId", (int) $channelId);
+        }
 
         // If there are errors, show them.
-        if ($model->errorCount())
-            $this->messages($model->errors(), "warning");
+        if ($model->errorCount()) {
+                    $this->messages($model->errors(), "warning");
+        }
 
         // Otherwise, redirect to the start conversation page.
-        elseif ($this->responseType === RESPONSE_TYPE_DEFAULT)
-            redirect(URL(R("return", "conversation/start")));
+        elseif ($this->responseType === RESPONSE_TYPE_DEFAULT) {
+                    redirect(URL(R("return", "conversation/start")));
+        }
 
         // Fetch the new conversation details.
         $conversation = $model->getEmptyConversation();
@@ -1245,15 +1257,18 @@ public function action_preview()
  */
 public function action_editPost($postId = false)
 {
-    if (!($post = $this->getPostForEditing($postId))) return;
+    if (!($post = $this->getPostForEditing($postId))) {
+        return;
+    }
 
     // Set up a form.
     $form = ETFactory::make("form");
     $form->action = URL("conversation/editPost/" . $post["postId"]);
     $form->setValue("content", $post["content"]);
 
-    if ($form->isPostBack("cancel"))
-        $this->redirect(URL(R("return", postURL($postId))));
+    if ($form->isPostBack("cancel")) {
+            $this->redirect(URL(R("return", postURL($postId))));
+    }
 
     // Are we saving the post?
     if ($form->validPostBack("save")) {
@@ -1388,23 +1403,32 @@ public function formatPostForTemplate($post, $conversation)
         // Add the user's online status / last action next to their name.
         if (empty($post["preferences"]["hideOnline"])) {
             $lastAction = ET::memberModel()->getLastActionInfo($post["lastActionTime"], $post["lastActionDetail"]);
-            if ($lastAction[0]) $lastAction[0] = " (" . sanitizeHTML($lastAction[0]) . ")";
-            if ($lastAction) array_unshift($formatted["info"], "<" . (!empty($lastAction[1]) ? "a href='{$lastAction[1]}'" : "span") . " class='online' title='" . T("Online") . "{$lastAction[0]}'><i class='icon-circle'></i></" . (!empty($lastAction[1]) ? "a" : "span") . ">");
+            if ($lastAction[0]) {
+                $lastAction[0] = " (" . sanitizeHTML($lastAction[0]) . ")";
+            }
+            if ($lastAction) {
+                array_unshift($formatted["info"], "<" . (!empty($lastAction[1]) ? "a href='{$lastAction[1]}'" : "span") . " class='online' title='" . T("Online") . "{$lastAction[0]}'><i class='icon-circle'></i></" . (!empty($lastAction[1]) ? "a" : "span") . ">");
+            }
         }
 
         // Show the user's group type.
         $formatted["info"][] = "<span class='group'>" . memberGroup($post["account"], $post["groups"]) . "</span>";
         $formatted["class"][] = "group-" . $post["account"];
         foreach ($post["groups"] as $k => $v) {
-            if ($k) $formatted["class"][] = "group-" . $k;
+            if ($k) {
+                $formatted["class"][] = "group-" . $k;
+            }
         }
 
         // If the post has been edited, show the time and by whom next to the controls.
-        if ($post["editMemberId"]) $formatted["controls"][] = "<span class='editedBy'>" . sprintf(T("Edited %s by %s"), "<span title='" . strftime(T("date.full"), $post["editTime"]) . "' data-timestamp='" . $post["editTime"] . "'>" . relativeTime($post["editTime"], true) . "</span>", memberLink($post["editMemberId"], $post["editMemberName"])) . "</span>";
+        if ($post["editMemberId"]) {
+            $formatted["controls"][] = "<span class='editedBy'>" . sprintf(T("Edited %s by %s"), "<span title='" . strftime(T("date.full"), $post["editTime"]) . "' data-timestamp='" . $post["editTime"] . "'>" . relativeTime($post["editTime"], true) . "</span>", memberLink($post["editMemberId"], $post["editMemberName"])) . "</span>";
+        }
 
         // If the user can reply, add a quote control.
-        if ($conversation["canReply"])
-            $formatted["controls"][] = "<a href='" . URL(conversationURL($conversation["conversationId"], $conversation["title"]) . "/?quote=" . $post["postId"] . "#reply") . "' title='" . T("Quote") . "' class='control-quote'><i class='icon-quote-left'></i></a>";
+        if ($conversation["canReply"]) {
+                    $formatted["controls"][] = "<a href='" . URL(conversationURL($conversation["conversationId"], $conversation["title"]) . "/?quote=" . $post["postId"] . "#reply") . "' title='" . T("Quote") . "' class='control-quote'><i class='icon-quote-left'></i></a>";
+        }
 
         // If the user can edit the post, add edit/delete controls.
         if ($canEdit) {
@@ -1427,11 +1451,14 @@ public function formatPostForTemplate($post, $conversation)
     else {
 
         // Add the "deleted by" information.
-        if ($post["deleteMemberId"]) $formatted["controls"][] = "<span>" . sprintf(T("Deleted %s by %s"), "<span title='" . strftime(T("date.full"), $post["deleteTime"]) . "' data-timestamp='" . $post["deleteTime"] . "'>" . relativeTime($post["deleteTime"], true) . "</span>", memberLink($post["deleteMemberId"], $post["deleteMemberName"])) . "</span>";
+        if ($post["deleteMemberId"]) {
+            $formatted["controls"][] = "<span>" . sprintf(T("Deleted %s by %s"), "<span title='" . strftime(T("date.full"), $post["deleteTime"]) . "' data-timestamp='" . $post["deleteTime"] . "'>" . relativeTime($post["deleteTime"], true) . "</span>", memberLink($post["deleteMemberId"], $post["deleteMemberName"])) . "</span>";
+        }
 
         // If the user can edit the post, add a restore control.
-        if ($canEdit)
-            $formatted["controls"][] = "<a href='" . URL("conversation/restorePost/" . $post["postId"] . "?token=" . ET::$session->token) . "' title='" . T("Restore") . "' class='control-restore'><i class='icon-reply'></i></a>";
+        if ($canEdit) {
+                    $formatted["controls"][] = "<a href='" . URL("conversation/restorePost/" . $post["postId"] . "?token=" . ET::$session->token) . "' title='" . T("Restore") . "' class='control-restore'><i class='icon-reply'></i></a>";
+        }
     }
 
     $this->trigger("formatPostForTemplate", array(&$formatted, $post, $conversation));

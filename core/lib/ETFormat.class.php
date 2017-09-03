@@ -169,12 +169,14 @@ public function closeTags()
     for ($i = 0; $i < $numOpened; $i++) {
 
         // If there's no closing tag for this opening tag, append it.
-        if (!in_array($openedTags[$i], $closedTags))
-            $this->content .= "</" . $openedTags[$i] . ">";
+        if (!in_array($openedTags[$i], $closedTags)) {
+                    $this->content .= "</" . $openedTags[$i] . ">";
+        }
 
         // Otherwise, remove it from the closed tags array.
-        else
-            unset($closedTags[array_search($openedTags[$i], $closedTags)]);
+        else {
+                    unset($closedTags[array_search($openedTags[$i], $closedTags)]);
+        }
     }
 
     return $this;
@@ -239,7 +241,7 @@ public function linksCallback($matches)
         return "<iframe class='video' type='text/html' width='$width' height='$height' src='https://www.youtube.com/embed/$id?$options' allowfullscreen frameborder='0'></iframe>";
     }
 
-    return $this->formatLink($matches[1].$matches[2], $matches[0]);
+    return $this->formatLink($matches[1] . $matches[2], $matches[0]);
 }
 
 
@@ -252,17 +254,17 @@ public function formatLink($url, $text = null)
         $text = $url;
     }
     if (!preg_match("/^(\w+:\/\/)/", $url)) {
-        $url = "http://".$url;
+        $url = "http://" . $url;
     }
 
     // If this is an internal link...
     $baseURL = C("esoTalk.baseURL");
     if (substr($url, 0, strlen($baseURL)) == $baseURL) {
-        return "<a href='".$url."' target='_blank' class='link-internal'>".$text."</a>";
+        return "<a href='" . $url . "' target='_blank' class='link-internal'>" . $text . "</a>";
     }
 
     // Otherwise, return an external HTML anchor tag.
-    return "<a href='".$url."' rel='nofollow external' target='_blank' class='link-external'>".$text." <i class='icon-external-link'></i></a>";
+    return "<a href='" . $url . "' rel='nofollow external' target='_blank' class='link-external'>" . $text . " <i class='icon-external-link'></i></a>";
 }
 
 
@@ -321,17 +323,22 @@ public function quotes()
 public function makeQuote($text, $citation = "")
 {
     // If there is a citation and it has a : in it, split it into a post ID and the rest.
-    if ($citation and strpos($citation, ":") !== false)
-        list($postId, $citation) = explode(":", $citation, 2);
+    if ($citation and strpos($citation, ":") !== false) {
+            list($postId, $citation) = explode(":", $citation, 2);
+    }
 
     // Construct the quote.
     $quote = "<blockquote><p>";
 
     // If we extracted a post ID from the citation, add a "find this post" link.
-    if (!empty($postId)) $quote .= "<a href='" . URL(postURL($postId), true) . "' rel='post' data-id='$postId' class='control-search postRef'><i class='icon-search'></i></a> ";
+    if (!empty($postId)) {
+        $quote .= "<a href='" . URL(postURL($postId), true) . "' rel='post' data-id='$postId' class='control-search postRef'><i class='icon-search'></i></a> ";
+    }
 
     // If there is a citation, add it.
-    if (!empty($citation)) $quote .= "<cite>$citation</cite> ";
+    if (!empty($citation)) {
+        $quote .= "<cite>$citation</cite> ";
+    }
 
     // Finish constructing and return the quote.
     $quote .= "$text\n</p></blockquote>";
@@ -399,7 +406,9 @@ public function getMentions($content)
 public function highlight($words)
 {
     $highlight = array_unique((array) $words);
-    if (!empty($highlight)) $this->content = highlight($this->content, $highlight);
+    if (!empty($highlight)) {
+        $this->content = highlight($this->content, $highlight);
+    }
 
     return $this;
 }

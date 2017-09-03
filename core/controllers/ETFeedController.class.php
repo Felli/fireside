@@ -25,7 +25,9 @@ function init()
     $this->esoTalk->view = "feed.php";
     header("Content-type: text/xml; charset={$language["charset"]}");
 
-    if ($return = $this->fireEvent("init")) return;
+    if ($return = $this->fireEvent("init")) {
+        return;
+    }
 
     // Work out what type of feed we're doing, based on the URL:
     // conversation/[id] -> fetch the posts in conversation [id].
@@ -36,7 +38,7 @@ function init()
         case "conversation":
 
             // Get the conversation details.
-            $conversationId = (int)$_GET["q3"];
+            $conversationId = (int) $_GET["q3"];
             if (!$conversationId or !($conversation = $this->esoTalk->db->fetchAssoc("SELECT c.conversationId AS id, c.title AS title, c.slug AS slug, c.private AS private, c.posts AS posts, c.startMember AS startMember, c.lastActionTime AS lastActionTime, GROUP_CONCAT(t.tag ORDER BY t.tag ASC SEPARATOR ', ') AS tags FROM " . config("esoTalk.database.prefix") . "conversations c LEFT JOIN " . config("esoTalk.database.prefix") . "tags t USING (conversationId) WHERE c.conversationId=$conversationId GROUP BY c.conversationId")))
                 $this->esoTalk->fatalError($messages["cannotViewConversation"]["message"]);
 

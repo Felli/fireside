@@ -2181,14 +2181,12 @@ class GeSHi {
             if ($this->lexic_permissions['REGEXPS'][$key]) {
                 if (!$this->use_classes) {
                     $attributes = ' style="' . $this->language_data['STYLES']['REGEXPS'][$key] . '"';
-                }
-                else {
+                } else {
                     if (is_array($this->language_data['REGEXPS'][$key]) &&
                             array_key_exists(GESHI_CLASS, $this->language_data['REGEXPS'][$key])) {
                         $attributes = ' class="'
                             . $this->language_data['REGEXPS'][$key][GESHI_CLASS] . '"';
-                    }
-                    else {
+                    } else {
                         $attributes = ' class="re' . $key . '"';
                     }
                 }
