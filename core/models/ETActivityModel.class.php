@@ -66,7 +66,9 @@ public static function getTypesWithProjection($projection)
 {
     $types = array();
     foreach (self::$types as $k => $v) {
-        if (!empty($v[$projection])) $types[] = $k;
+        if (!empty($v[$projection])) {
+            $types[] = $k;
+        }
     }
     return $types;
 }
@@ -103,8 +105,9 @@ public static function addType($type, $projections)
 public function create($type, $member, $fromMember = null, $data = null, $emailData = null)
 {
     // Make sure we have a definition for this type of activity.
-    if (empty(self::$types[$type]))
-        throw new Exception("Cannot create activity with non-existent type '$type'.");
+    if (empty(self::$types[$type])) {
+            throw new Exception("Cannot create activity with non-existent type '$type'.");
+    }
 
     // Get the projections that are handled by this type.
     $projections = self::$types[$type];
@@ -126,7 +129,7 @@ public function create($type, $member, $fromMember = null, $data = null, $emailD
     }
 
     // Set some more information about the activity.
-    $activity["data"] = (array)$data + (array)$emailData;
+    $activity["data"] = (array) $data + (array) $emailData;
     $activity["fromMemberName"] = $fromMember ? $fromMember["username"] : null;
     $activity["activityId"] = $activityId;
 
@@ -145,7 +148,7 @@ public function create($type, $member, $fromMember = null, $data = null, $emailD
         list($subject, $body) = call_user_func($projections[self::PROJECTION_EMAIL], $activity, $member);
 
         // Send the email, prepending/appending a common email header/footer.
-        sendEmail($member["email"], $subject, sprintf(T("email.header"), $member["username"]).$body.sprintf(T("email.footer"), URL("settings", true)));
+        sendEmail($member["email"], $subject, sprintf(T("email.header"), $member["username"]) . $body . sprintf(T("email.footer"), URL("settings", true)));
 
         // Revert back to esoTalk's old language definitions.
         ET::revertLanguageState();
@@ -262,7 +265,9 @@ public function getActivity($member, $offset = 0, $limit = 11)
     while ($item = $result->nextRow()) {
 
         // If there's no activity type handler for this item and the "activity" projection, discard it.
-        if (empty(self::$types[$item["type"]][self::PROJECTION_ACTIVITY])) continue;
+        if (empty(self::$types[$item["type"]][self::PROJECTION_ACTIVITY])) {
+            continue;
+        }
 
         // Expand the activity data.
         $item["data"] = unserialize($item["data"]);
@@ -287,7 +292,9 @@ public function getActivity($member, $offset = 0, $limit = 11)
  */
 public function getNotifications($limit = 5)
 {
-    if (!ET::$session->user) return null;
+    if (!ET::$session->user) {
+        return null;
+    }
 
     $result = ET::SQL()
         ->select("a.fromMemberId")
@@ -324,7 +331,9 @@ public function getNotifications($limit = 5)
     while ($item = $result->nextRow()) {
 
         // If there's no activity type handler for this item and the "notification" projection, discard it.
-        if (empty(self::$types[$item["type"]][self::PROJECTION_NOTIFICATION])) continue;
+        if (empty(self::$types[$item["type"]][self::PROJECTION_NOTIFICATION])) {
+            continue;
+        }
 
         // Expand the activity data.
         $item["data"] = unserialize($item["data"]);
@@ -375,7 +384,7 @@ public function markNotificationsAsRead($type = null, $conversationId = null)
 public static function postActivity($item, $member)
 {
     return array(
-        sprintf(T($item["start"] ? "%s started the conversation %s." : "%s posted in %s."), name($member["username"]), "<a href='".URL(postURL($item["postId"]))."'>".sanitizeHTML($item["title"])."</a>"),
+        sprintf(T($item["start"] ? "%s started the conversation %s." : "%s posted in %s."), name($member["username"]), "<a href='" . URL(postURL($item["postId"])) . "'>" . sanitizeHTML($item["title"]) . "</a>"),
         ET::formatter()->init($item["content"])->format()->get()
     );
 }
@@ -391,7 +400,7 @@ public static function postActivity($item, $member)
 public static function postNotification(&$item)
 {
     return array(
-        "<i class='star icon-star'></i> ".sprintf(T("%s posted in %s."), name($item["fromMemberName"]), "<strong>".sanitizeHTML($item["data"]["title"])."</strong>"),
+        "<i class='star icon-star'></i> " . sprintf(T("%s posted in %s."), name($item["fromMemberName"]), "<strong>" . sanitizeHTML($item["data"]["title"]) . "</strong>"),
         URL(postURL($item["postId"]))
     );
 }
@@ -421,7 +430,7 @@ public static function groupChangeNotification($item)
 {
     $groups = memberGroup($item["data"]["account"], $item["data"]["groups"], true);
     return array(
-        "<i class='icon-user'></i> ".sprintf(T("%s changed your group to %s."), name($item["fromMemberName"]), "<strong>".$groups."</strong>"),
+        "<i class='icon-user'></i> " . sprintf(T("%s changed your group to %s."), name($item["fromMemberName"]), "<strong>" . $groups . "</strong>"),
         URL(memberURL("me"))
     );
 }
@@ -437,7 +446,7 @@ public static function groupChangeActivity($item, $member)
 {
     $groups = memberGroup($item["data"]["account"], $item["data"]["groups"], true);
     return array(
-        sprintf(T("%s changed %s's group to %s."), name($item["fromMemberName"]), name($member["username"]), "<strong>".$groups."</strong>"),
+        sprintf(T("%s changed %s's group to %s."), name($item["fromMemberName"]), name($member["username"]), "<strong>" . $groups . "</strong>"),
         false
     );
 }
@@ -452,7 +461,7 @@ public static function groupChangeActivity($item, $member)
 public static function mentionNotification($item)
 {
     return array(
-        sprintf("@ ".T("%s mentioned you in %s."), name($item["fromMemberName"]), "<strong>".sanitizeHTML($item["data"]["title"])."</strong>"),
+        sprintf("@ " . T("%s mentioned you in %s."), name($item["fromMemberName"]), "<strong>" . sanitizeHTML($item["data"]["title"]) . "</strong>"),
         URL(postURL($item["data"]["postId"]))
     );
 }
@@ -486,7 +495,7 @@ public static function mentionEmail($item, $member)
 public static function privateAddNotification(&$item)
 {
     return array(
-        label("private")." ".sprintf(T("%s invited you to %s."), name($item["fromMemberName"]), "<strong>".sanitizeHTML($item["data"]["title"])."</strong>"),
+        label("private") . " " . sprintf(T("%s invited you to %s."), name($item["fromMemberName"]), "<strong>" . sanitizeHTML($item["data"]["title"]) . "</strong>"),
         URL(conversationURL($item["conversationId"]))
     );
 }
@@ -516,7 +525,7 @@ public static function privateAddEmail($item, $member)
 public static function postEmail($item, $member)
 {
     $content = ET::formatter()->init($item["data"]["content"])->format()->get();
-    $url = URL(conversationURL($item["data"]["conversationId"], $item["data"]["title"])."/unread", true);
+    $url = URL(conversationURL($item["data"]["conversationId"], $item["data"]["title"]) . "/unread", true);
     return array(
         sprintf(T("email.post.subject"), $item["data"]["title"]),
         sprintf(T("email.post.body"), name($item["fromMemberName"]), sanitizeHTML($item["data"]["title"]), $content, "<a href='$url'>$url</a>")
@@ -532,7 +541,7 @@ public static function postEmail($item, $member)
 public static function updateAvailableNotification($item)
 {
     return array(
-        "<i class='icon-wrench'></i> ".sprintf(T("A new version of esoTalk (%s) is available."), "<strong>".$item["data"]["version"]."</strong>"),
+        "<i class='icon-wrench'></i> " . sprintf(T("A new version of esoTalk (%s) is available."), "<strong>" . $item["data"]["version"] . "</strong>"),
         !empty($item["data"]["releaseNotes"]) ? $item["data"]["releaseNotes"] : "http://esotalk.org/"
     );
 }
@@ -546,7 +555,7 @@ public static function updateAvailableNotification($item)
 public static function unapprovedNotification($item)
 {
     return array(
-        "<i class='icon-user'></i> ".sprintf(T("%s has registered and is awaiting approval."), "<strong>".name($item["data"]["username"])."</strong>"),
+        "<i class='icon-user'></i> " . sprintf(T("%s has registered and is awaiting approval."), "<strong>" . name($item["data"]["username"]) . "</strong>"),
         URL("admin/unapproved")
     );
 }

@@ -98,7 +98,9 @@ public $queries = array();
  */
 public function structure()
 {
-    if (!$this->structure) $this->structure = ETFactory::make("databaseStructure");
+    if (!$this->structure) {
+        $this->structure = ETFactory::make("databaseStructure");
+    }
     return $this->structure;
 }
 
@@ -122,7 +124,7 @@ public function SQL()
 public function connection()
 {
     if (!$this->pdoConnection) {
-        $dsn = "mysql:host=".$this->host.($this->port ? ";port=".$this->port : "").";dbname=".$this->dbName;
+        $dsn = "mysql:host=" . $this->host . ($this->port ? ";port=" . $this->port : "") . ";dbname=" . $this->dbName;
         $this->pdoConnection = @new PDO($dsn, $this->user, $this->password, $this->connectionOptions);
     }
     return $this->pdoConnection;
@@ -201,7 +203,9 @@ public function beginTransaction()
  */
 public function rollbackTransaction()
 {
-    if (!$this->inTransaction) return;
+    if (!$this->inTransaction) {
+        return;
+    }
     $this->connection()->rollback();
     $this->inTransaction = false;
 }
@@ -214,7 +218,9 @@ public function rollbackTransaction()
  */
 public function commitTransaction()
 {
-    if (!$this->inTransaction) return;
+    if (!$this->inTransaction) {
+        return;
+    }
     $this->connection()->commit();
     $this->inTransaction = false;
 }
@@ -242,20 +248,29 @@ public function lastInsertId()
 public function escapeValue($value, $dataType = null)
 {
     // If the value is a raw SQL query object, don't sanitize it.
-    if ($value instanceof ETSQLRaw) return $value;
+    if ($value instanceof ETSQLRaw) {
+        return $value;
+    }
 
     // If the value is an array, escape each element individually and return a comma-separated string.
     if (is_array($value)) {
-        foreach ($value as &$v) $v = $this->escapeValue($v, $dataType);
+        foreach ($value as &$v) {
+            $v = $this->escapeValue($v, $dataType);
+        }
         return implode(",", $value);
     }
 
     // If no data type was specified, work it out based on the variable content.
     if ($dataType === null) {
-        if ($value === true or $value === false) $dataType = PDO::PARAM_BOOL;
-        elseif ($value === null) $dataType = PDO::PARAM_NULL;
-        elseif (is_int($value)) $dataType = PDO::PARAM_INT;
-        else $dataType = PDO::PARAM_STR;
+        if ($value === true or $value === false) {
+            $dataType = PDO::PARAM_BOOL;
+        } elseif ($value === null) {
+            $dataType = PDO::PARAM_NULL;
+        } elseif (is_int($value)) {
+            $dataType = PDO::PARAM_INT;
+        } else {
+            $dataType = PDO::PARAM_STR;
+        }
     }
 
     // Now escape the value according to the data type.
@@ -267,12 +282,12 @@ public function escapeValue($value, $dataType = null)
             return "NULL";
 
         case PDO::PARAM_INT:
-            $value = (int)$value;
-            return $value ? (string)$value : "0";
+            $value = (int) $value;
+            return $value ? (string) $value : "0";
 
         default:
             $value = str_replace(array('\\', "\0", "\n", "\r", "'", '"', "\x1a"), array('\\\\', '\\0', '\\n', '\\r', "\\'", '\\"', '\\Z'), $value);
-            return "'".$value."'";
+            return "'" . $value . "'";
     }
 }
 
@@ -286,7 +301,9 @@ public function escapeValue($value, $dataType = null)
 public function query($query)
 {
     // If the query is empty, don't bother proceeding.
-    if (!$query) return false;
+    if (!$query) {
+        return false;
+    }
 
     // Get the database connection.
     $connection = $this->connection();
@@ -300,7 +317,7 @@ public function query($query)
     // Was there an error?
     if (!$statement) {
         $error = $connection->errorInfo();
-        throw new Exception("SQL Error (".$error[0].", ".$error[1]."): ".$error[2]."<br><br><pre>".$this->highlightQueryErrors($query, $error[2])."</pre>");
+        throw new Exception("SQL Error (" . $error[0] . ", " . $error[1] . "): " . $error[2] . "<br><br><pre>" . $this->highlightQueryErrors($query, $error[2]) . "</pre>");
     }
 
     // Set up a new ETSQLResult object with the result statement.
@@ -324,7 +341,9 @@ protected function highlightQueryErrors($query, $error)
 {
     $query = sanitizeHTML($query);
     preg_match("/'(.+?)'/", $error, $matches);
-    if (!empty($matches[1])) $query = str_replace($matches[1], "<span class='highlight'>{$matches[1]}</span>", $query);
+    if (!empty($matches[1])) {
+        $query = str_replace($matches[1], "<span class='highlight'>{$matches[1]}</span>", $query);
+    }
     return $query;
 }
 

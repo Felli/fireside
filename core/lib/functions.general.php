@@ -143,7 +143,9 @@ function file_force_contents($file, $contents) {
     $file = array_pop($parts);
     $dir = "";
     foreach ($parts as $part) {
-            if (!is_dir($dir .= "$part/")) mkdir($dir);
+            if (!is_dir($dir .= "$part/")) {
+                mkdir($dir);
+            }
     }
     return file_put_contents("$dir$file", $contents);
 }

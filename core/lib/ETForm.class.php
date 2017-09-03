@@ -107,7 +107,9 @@ public function removeSection($id)
  */
 public function addField($section, $id, $renderCallback, $processCallback = null, $position = false)
 {
-    if (!isset($this->fields[$section])) $this->fields[$section] = array();
+    if (!isset($this->fields[$section])) {
+        $this->fields[$section] = array();
+    }
     addToArrayString($this->fields[$section], $id, array(
         "renderCallback" => $renderCallback,
         "processCallback" => $processCallback
@@ -167,8 +169,9 @@ public function runFieldCallbacks(&$collector = null)
 {
     foreach ($this->fields as $fields) {
         foreach ($fields as $k => $callbacks) {
-            if ($callbacks["processCallback"] !== null)
-                call_user_func_array($callbacks["processCallback"], array($this, $k, &$collector));
+            if ($callbacks["processCallback"] !== null) {
+                            call_user_func_array($callbacks["processCallback"], array($this, $k, &$collector));
+            }
         }
     }
 }
@@ -185,9 +188,9 @@ public function open()
     $this->addHidden("token", ET::$session->token);
     $hidden = "";
     foreach ($this->hiddenInputs as $field)
-        $hidden .= "<input type='hidden' name='$field' value='".htmlentities($this->getValue($field), ENT_QUOTES, "UTF-8")."'/>\n";
+        $hidden .= "<input type='hidden' name='$field' value='" . htmlentities($this->getValue($field), ENT_QUOTES, "UTF-8") . "'/>\n";
 
-    return "<form action='".sanitizeHTML($this->action)."' method='post' enctype='multipart/form-data'>\n".$hidden;
+    return "<form action='" . sanitizeHTML($this->action) . "' method='post' enctype='multipart/form-data'>\n" . $hidden;
 }
 
 
@@ -235,7 +238,7 @@ public function isPostBack($field = "")
 public function getError($field)
 {
     if (!empty($this->errors[$field]))
-        return "<div class='error'>".$this->errors[$field]."</div>";
+        return "<div class='error'>" . $this->errors[$field] . "</div>";
 }
 
 
@@ -247,8 +250,9 @@ public function getError($field)
 public function getErrors()
 {
     $errors = array();
-    foreach ($this->errors as $k => $v)
-        $errors[$k] = $this->getError($k);
+    foreach ($this->errors as $k => $v) {
+            $errors[$k] = $this->getError($k);
+    }
 
     return $errors;
 }
@@ -287,11 +291,13 @@ public function getValue($field, $default = "")
         // and therefore we can assume that whatever data has been posted back is what
         // we want to use. This is important especially for checkboxes ($_POST['checkbox']
         // isn't set, but that implies that its value is empty, not whatever $default is.)
-        else return isset($_POST[$field]) ? $_POST[$field] : "";
+        else {
+            return isset($_POST[$field]) ? $_POST[$field] : "";
+        }
+    } else {
+            return isset($this->values[$field]) ? $this->values[$field] : $default;
     }
-    else
-        return isset($this->values[$field]) ? $this->values[$field] : $default;
-}
+    }
 
 
 /**
@@ -326,9 +332,10 @@ public function setValue($field, $value)
  */
 public function setValues($values)
 {
-    foreach ($values as $field => $value)
-        $this->setValue($field, $value);
-}
+    foreach ($values as $field => $value) {
+            $this->setValue($field, $value);
+    }
+    }
 
 
 /**
@@ -358,25 +365,29 @@ public function input($name, $type = "text", $attributes = array())
     $attributes["name"] = $name;
 
     // If there's an error for this field, add the "error" class.
-    if (!empty($this->errors[$name])) $this->addClass($attributes, "error");
+    if (!empty($this->errors[$name])) {
+        $this->addClass($attributes, "error");
+    }
 
     // If a value attribute is not explicitly specified, get what the value should be.
-    if (!isset($attributes["value"])) $attributes["value"] = $this->getValue($name);
+    if (!isset($attributes["value"])) {
+        $attributes["value"] = $this->getValue($name);
+    }
 
     // If this is a textarea, make some custom HTML.
     if ($type == "textarea") {
         $value = htmlentities($attributes["value"], ENT_NOQUOTES, "UTF-8");
         unset($attributes["value"]);
-        $input = "<textarea".$this->getAttributes($attributes).">$value</textarea>";
+        $input = "<textarea" . $this->getAttributes($attributes) . ">$value</textarea>";
     }
 
     // But any other type of input we can use the <input> tag.
     else {
-        $input = "<input type='$type'".$this->getAttributes($attributes)."/>";
+        $input = "<input type='$type'" . $this->getAttributes($attributes) . "/>";
     }
 
     // Append an error if there is one.
-    if (!empty($this->errors[$name])) $input .= " ".$this->getError($name);
+    if (!empty($this->errors[$name])) $input .= " " . $this->getError($name);
 
     return $input;
 }
@@ -392,7 +403,7 @@ protected function getAttributes($attributes)
 {
     $string = "";
     foreach ($attributes as $k => $v) {
-        $string .= " $k='".htmlentities($v, ENT_QUOTES, "UTF-8")."'";
+        $string .= " $k='" . htmlentities($v, ENT_QUOTES, "UTF-8") . "'";
     }
     return $string;
 }
@@ -407,9 +418,12 @@ protected function getAttributes($attributes)
  */
 protected function addClass(&$attributes, $class)
 {
-    if (empty($attributes["class"])) $attributes["class"] = $class;
-    else $attributes["class"] .= " $class";
-}
+    if (empty($attributes["class"])) {
+        $attributes["class"] = $class;
+    } else {
+        $attributes["class"] .= " $class";
+    }
+    }
 
 
 /**
@@ -424,19 +438,19 @@ public function select($name, $options, $attributes = array())
 {
     // Construct the opening select tag.
     $attributes["name"] = $name;
-    $select = "<select".$this->getAttributes($attributes).">\n";
+    $select = "<select" . $this->getAttributes($attributes) . ">\n";
 
     // Get the currently-selected value of this field.
-    $values = (array)$this->getValue($name);
+    $values = (array) $this->getValue($name);
 
     // Loop through the options and add a tag for each one, selecting the appropriate one.
     foreach ($options as $k => $v)
-        $select .= "<option value='$k'".(in_array($k, $values) ? " selected='selected'" : "").">$v</option>\n";
+        $select .= "<option value='$k'" . (in_array($k, $values) ? " selected='selected'" : "") . ">$v</option>\n";
 
     $select .= "</select>";
 
     // Append an error if there is one.
-    if (!empty($this->errors[$name])) $select .= " ".$this->getError($name);
+    if (!empty($this->errors[$name])) $select .= " " . $this->getError($name);
 
     return $select;
 }
@@ -451,10 +465,14 @@ public function select($name, $options, $attributes = array())
  */
 public function checkbox($name, $attributes = array())
 {
-    if (!isset($attributes["value"])) $attributes["value"] = 1;
+    if (!isset($attributes["value"])) {
+        $attributes["value"] = 1;
+    }
 
     // Check (pun intended) if this checkbox should be checked.
-    if ($this->getValue($name) == $attributes["value"]) $attributes["checked"] = "checked";
+    if ($this->getValue($name) == $attributes["value"]) {
+        $attributes["checked"] = "checked";
+    }
 
     return $this->input($name, "checkbox", $attributes);
 }
@@ -472,7 +490,9 @@ public function radio($name, $value, $attributes = array())
 {
     // Check if this radio button should be checked.
     $attributes["value"] = $value;
-    if ($this->getValue($name) == $attributes["value"]) $attributes["checked"] = "checked";
+    if ($this->getValue($name) == $attributes["value"]) {
+        $attributes["checked"] = "checked";
+    }
 
     return $this->input($name, "radio", $attributes);
 }
@@ -490,9 +510,9 @@ public function button($name, $label = "", $attributes = array())
 {
     $this->addClass($attributes, "button");
     if (isset($attributes["tag"]) and $attributes["tag"] == "button")
-        return "<button type='submit' name='$name'".$this->getAttributes($attributes).">$label</button>";
+        return "<button type='submit' name='$name'" . $this->getAttributes($attributes) . ">$label</button>";
     else
-        return "<input type='submit' name='$name' value='$label'".$this->getAttributes($attributes)."/>";
+        return "<input type='submit' name='$name' value='$label'" . $this->getAttributes($attributes) . "/>";
 }
 
 
@@ -539,8 +559,10 @@ public function error($field, $message)
  */
 public function errors($errors)
 {
-    foreach ($errors as $k => $v) $this->error($k, T("message.$v"));
-}
+    foreach ($errors as $k => $v) {
+        $this->error($k, T("message.$v"));
+    }
+    }
 
 
 /**

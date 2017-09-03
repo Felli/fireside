@@ -94,7 +94,7 @@ public function getContents()
         if ($v == "separator") {
             if ($i != 0 and $i != $count - 1) $return .= "<li class='sep'></li>\n";
         }
-        else $return .= "<li class='item-$k".(in_array($k, $this->highlight) ? " selected" : "")."'>$v</li>\n";
+        else $return .= "<li class='item-$k" . (in_array($k, $this->highlight) ? " selected" : "") . "'>$v</li>\n";
         $i++;
     }
     return $return;

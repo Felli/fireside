@@ -64,12 +64,14 @@ public function create(&$values)
     if (empty($values["preferences"])) {
         $preferences = array("email.privateAdd", "email.post", "starOnReply", "email.mention");
         foreach ($preferences as $p) {
-            $values["preferences"][$p] = C("esoTalk.preferences.".$p);
+            $values["preferences"][$p] = C("esoTalk.preferences." . $p);
         }
     }
     $values["preferences"] = serialize($values["preferences"]);
 
-    if ($this->errorCount()) return false;
+    if ($this->errorCount()) {
+        return false;
+    }
 
     $memberId = parent::create($values);
     $values["memberId"] = $memberId;
@@ -83,8 +85,9 @@ public function create(&$values)
     $channels = ET::channelModel()->getAll();
     $inserts = array();
     foreach ($channels as $channel) {
-        if (!empty($channel["attributes"]["defaultUnsubscribed"]))
-            $inserts[] = array($memberId, $channel["channelId"], 1);
+        if (!empty($channel["attributes"]["defaultUnsubscribed"])) {
+                    $inserts[] = array($memberId, $channel["channelId"], 1);
+        }
     }
     if (count($inserts)) {
         ET::SQL()
@@ -111,8 +114,9 @@ public function update($values, $wheres = array())
         $this->validate("username", $values["username"], array($this, "validateUsername"));
     }
 
-    if (isset($values["email"]))
-        $this->validate("email", $values["email"], array($this, "validateEmail"));
+    if (isset($values["email"])) {
+            $this->validate("email", $values["email"], array($this, "validateEmail"));
+    }
 
     if (isset($values["password"])) {
         $this->validate("password", $values["password"], array($this, "validatePassword"));
@@ -120,9 +124,13 @@ public function update($values, $wheres = array())
     }
 
     // Serialize preferences.
-    if (isset($values["preferences"])) $values["preferences"] = serialize($values["preferences"]);
+    if (isset($values["preferences"])) {
+        $values["preferences"] = serialize($values["preferences"]);
+    }
 
-    if ($this->errorCount()) return false;
+    if ($this->errorCount()) {
+        return false;
+    }
 
     return parent::update($values, $wheres);
 }
@@ -154,7 +162,9 @@ public function getWithSQL($sql)
     $members = $sql->exec()->allRows();
 
     // Expand the member data.
-    foreach ($members as &$member) $this->expand($member);
+    foreach ($members as &$member) {
+        $this->expand($member);
+    }
 
     return $members;
 }
@@ -200,13 +210,15 @@ public function expand(&$member)
 {
     // Make the groups into an array of groupId => names. (Possibly consider using ETGroupModel::getAll()
     // instead of featching the groupNames in getWithSQL()?)
-    if (array_key_exists("groups", $member) and array_key_exists("groupNames", $member))
-        $member["groups"] = array_combine(explode(",", $member["groups"]), explode(",", $member["groupNames"]));
+    if (array_key_exists("groups", $member) and array_key_exists("groupNames", $member)) {
+            $member["groups"] = array_combine(explode(",", $member["groups"]), explode(",", $member["groupNames"]));
+    }
 
     // Unserialize the member's preferences.
-    if (isset($member["preferences"]))
-        $member["preferences"] = unserialize($member["preferences"]);
-}
+    if (isset($member["preferences"])) {
+            $member["preferences"] = unserialize($member["preferences"]);
+    }
+    }
 
 
 /**
@@ -217,7 +229,7 @@ public function expand(&$member)
  */
 public function hashPassword($password)
 {
-    require_once PATH_LIBRARY."/vendor/phpass/PasswordHash.php";
+    require_once PATH_LIBRARY . "/vendor/phpass/PasswordHash.php";
     $hasher = new PasswordHash(8, FALSE);
     return $hasher->HashPassword($password);
 }
@@ -232,7 +244,7 @@ public function hashPassword($password)
  */
 public function checkPassword($password, $hash)
 {
-    require_once PATH_LIBRARY."/vendor/phpass/PasswordHash.php";
+    require_once PATH_LIBRARY . "/vendor/phpass/PasswordHash.php";
     $hasher = new PasswordHash(8, FALSE);
     return $hasher->CheckPassword($password, $hash);
 }
@@ -248,16 +260,21 @@ public function checkPassword($password, $hash)
 public function validateUsername($username, $checkForDuplicate = true)
 {
     // Make sure the name isn't a reserved word.
-    if (in_array(strtolower($username), self::$reservedNames)) return "nameTaken";
+    if (in_array(strtolower($username), self::$reservedNames)) {
+        return "nameTaken";
+    }
 
     // Make sure the username is not too small or large.
     $length = mb_strlen($username, "UTF-8");
-    if ($length < 3 or $length > 20) return "invalidUsername";
+    if ($length < 3 or $length > 20) {
+        return "invalidUsername";
+    }
 
     // Make sure there's no other member with the same username.
-    if ($checkForDuplicate and ET::SQL()->select("1")->from("member")->where("username=:username")->bind(":username", $username)->exec()->numRows())
-        return "nameTaken";
-}
+    if ($checkForDuplicate and ET::SQL()->select("1")->from("member")->where("username=:username")->bind(":username", $username)->exec()->numRows()) {
+            return "nameTaken";
+    }
+    }
 
 
 /**
@@ -270,12 +287,15 @@ public function validateUsername($username, $checkForDuplicate = true)
 public function validateEmail($email, $checkForDuplicate = true)
 {
     // Check it against a regular expression to make sure it's a valid email address.
-    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) return "invalidEmail";
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        return "invalidEmail";
+    }
 
     // Make sure there's no other member with the same email.
-    if ($checkForDuplicate and ET::SQL()->select("1")->from("member")->where("email=:email")->bind(":email", $email)->exec()->numRows())
-        return "emailTaken";
-}
+    if ($checkForDuplicate and ET::SQL()->select("1")->from("member")->where("email=:email")->bind(":email", $email)->exec()->numRows()) {
+            return "emailTaken";
+    }
+    }
 
 
 /**
@@ -287,8 +307,10 @@ public function validateEmail($email, $checkForDuplicate = true)
 public function validatePassword($password)
 {
     // Make sure the password isn't too short.
-    if (strlen($password) < C("esoTalk.minPasswordLength")) return "passwordTooShort";
-}
+    if (strlen($password) < C("esoTalk.minPasswordLength")) {
+        return "passwordTooShort";
+    }
+    }
 
 
 /**
@@ -357,10 +379,13 @@ public function canSuspend($member)
 public function setGroups($member, $account, $groups = array())
 {
     // Make sure the account is valid.
-    if (!in_array($account, array(ACCOUNT_MEMBER, ACCOUNT_ADMINISTRATOR, ACCOUNT_SUSPENDED, ACCOUNT_PENDING)))
-        $this->error("account", "invalidAccount");
+    if (!in_array($account, array(ACCOUNT_MEMBER, ACCOUNT_ADMINISTRATOR, ACCOUNT_SUSPENDED, ACCOUNT_PENDING))) {
+            $this->error("account", "invalidAccount");
+    }
 
-    if ($this->errorCount()) return false;
+    if ($this->errorCount()) {
+        return false;
+    }
 
     // Set the member's new account.
     $this->updateById($member["memberId"], array("account" => $account));
@@ -374,17 +399,22 @@ public function setGroups($member, $account, $groups = array())
 
     // Insert new member-group associations.
     $inserts = array();
-    foreach ($groups as $id) $inserts[] = array($member["memberId"], $id);
-    if (count($inserts))
-        ET::SQL()
+    foreach ($groups as $id) {
+        $inserts[] = array($member["memberId"], $id);
+    }
+    if (count($inserts)) {
+            ET::SQL()
             ->insert("member_group")
             ->setMultiple(array("memberId", "groupId"), $inserts)
             ->exec();
+    }
 
     // Now we need to create a new activity item, and to do that we need the names of the member's groups.
     $groupData = ET::groupModel()->getAll();
     $groupNames = array();
-    foreach ($groups as $id) $groupNames[$id] = $groupData[$id]["name"];
+    foreach ($groups as $id) {
+        $groupNames[$id] = $groupData[$id]["name"];
+    }
 
     ET::activityModel()->create("groupChange", $member, ET::$session->user, array("account" => $account, "groups" => $groupNames));
 
@@ -402,7 +432,7 @@ public function setGroups($member, $account, $groups = array())
 public function setPreferences($member, $preferences)
 {
     // Merge the member's old preferences with the new ones, giving preference to the new ones. Geddit?!
-    $preferences = array_merge((array)$member["preferences"], $preferences);
+    $preferences = array_merge((array) $member["preferences"], $preferences);
 
     $this->updateById($member["memberId"], array(
         "preferences" => $preferences
@@ -487,7 +517,9 @@ public function deleteById($memberId, $deletePosts = false)
  */
 public function updateLastAction($type, $data = array())
 {
-    if (!ET::$session->user) return false;
+    if (!ET::$session->user) {
+        return false;
+    }
 
     $data["type"] = $type;
     ET::$session->updateUser("lastActionTime", time());
@@ -526,19 +558,25 @@ public static function addLastActionType($type, $callback)
 public static function getLastActionInfo($time, $action)
 {
     // If there is no action, or the time passed since the user was last seen is too great, then return no info.
-    if (!$action or $time < time() - C("esoTalk.userOnlineExpire"))
-        return false;
+    if (!$action or $time < time() - C("esoTalk.userOnlineExpire")) {
+            return false;
+    }
 
     $data = unserialize($action);
-    if (!isset($data["type"])) return false;
+    if (!isset($data["type"])) {
+        return false;
+    }
 
     // If there's a callback for this last action type, return its output.
-    if (isset(self::$lastActionTypes[$data["type"]]))
-        return call_user_func(self::$lastActionTypes[$data["type"]], $data) + array(null, null);
+    if (isset(self::$lastActionTypes[$data["type"]])) {
+            return call_user_func(self::$lastActionTypes[$data["type"]], $data) + array(null, null);
+    }
 
     // Otherwise, return an empty array.
-    else return array(null, null);
-}
+    else {
+        return array(null, null);
+    }
+    }
 
 
 /**
@@ -549,7 +587,9 @@ public static function getLastActionInfo($time, $action)
  */
 public static function lastActionViewingConversation($data)
 {
-    if (empty($data["conversationId"])) return array(sprintf(T("Viewing %s"), T("a private conversation")));
+    if (empty($data["conversationId"])) {
+        return array(sprintf(T("Viewing %s"), T("a private conversation")));
+    }
     return array(
         sprintf(T("Viewing: %s"), $data["title"]),
         URL(conversationURL($data["conversationId"], $data["title"]))
