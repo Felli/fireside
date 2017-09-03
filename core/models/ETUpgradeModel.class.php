@@ -293,15 +293,15 @@ public function install($info)
 
     // Create a welcome conversation.
     ET::conversationModel()->create(array(
-        "title" => "Welcome to ".$info["forumTitle"]."!",
-        "content" => "[b]Welcome to ".$info["forumTitle"]."![/b]\n\n".$info["forumTitle"]." is powered by [url=http://esotalk.org]esoTalk[/url], the simple, fast, free web-forum.\n\nFeel free to edit or delete this conversation. Otherwise, it's time to get posting!\n\nAnyway, good luck, and we hope you enjoy using esoTalk.",
+        "title" => "Welcome to " . $info["forumTitle"] . "!",
+        "content" => "[b]Welcome to " . $info["forumTitle"] . "![/b]\n\n" . $info["forumTitle"] . " is powered by [url=http://esotalk.org]esoTalk[/url], the simple, fast, free web-forum.\n\nFeel free to edit or delete this conversation. Otherwise, it's time to get posting!\n\nAnyway, good luck, and we hope you enjoy using esoTalk.",
         "channelId" => 1
     ));
 
     // Create a helpful private conversation with the administrator.
     ET::conversationModel()->create(array(
         "title" => "Pssst! Want a few tips?",
-        "content" => "Hey {$info["adminUser"]}, congrats on getting esoTalk installed!\n\nCool! Your forum is now good-to-go, but you might want to customize it with your own logo, design, and settings—so here's how.\n\n[h]Changing the Logo[/h]\n\n1. Go to the [url=".C("esoTalk.baseURL")."admin/settings]Forum Settings[/url] section of your administration panel.\n2. Select 'Show an image in the header' for the 'Forum header' setting.\n3. Find and select the image file you wish to use.\n4. Click 'Save Changes'. The logo will automatically be resized so it fits nicely in the header.\n\n[h]Changing the Appearance[/h]\n\n1. Go to the [url=".C("esoTalk.baseURL")."admin/appearance]Appearance[/url] section of your administration panel.\n2. Choose colors for the header, page background, or select a background image. (More skins will be available soon.)\n3. Click 'Save Changes', and your forum's appearance will be updated!\n\n[h]Managing Channels[/h]\n\n'Channels' are a way to categorize conversations in your forum. You can create as many or as few channels as you like, nest them, and give them custom permissions.\n\n1. Go to the [url=".C("esoTalk.baseURL")."admin/channels]Channels[/url] section of your administration panel.\n2. Click 'Create Channel' and fill out a title, description, and select permissions to add a new channel.\n3. Drag and drop channels to rearrange and nest them.\n\n[h]Getting Help[/h]\n\nIf you need help, come and give us a yell at the [url=http://esotalk.org/forum]esoTalk Support Forum[/url]. Don't worry—we don't bite!",
+        "content" => "Hey {$info["adminUser"]}, congrats on getting esoTalk installed!\n\nCool! Your forum is now good-to-go, but you might want to customize it with your own logo, design, and settings—so here's how.\n\n[h]Changing the Logo[/h]\n\n1. Go to the [url=" . C("esoTalk.baseURL") . "admin/settings]Forum Settings[/url] section of your administration panel.\n2. Select 'Show an image in the header' for the 'Forum header' setting.\n3. Find and select the image file you wish to use.\n4. Click 'Save Changes'. The logo will automatically be resized so it fits nicely in the header.\n\n[h]Changing the Appearance[/h]\n\n1. Go to the [url=" . C("esoTalk.baseURL") . "admin/appearance]Appearance[/url] section of your administration panel.\n2. Choose colors for the header, page background, or select a background image. (More skins will be available soon.)\n3. Click 'Save Changes', and your forum's appearance will be updated!\n\n[h]Managing Channels[/h]\n\n'Channels' are a way to categorize conversations in your forum. You can create as many or as few channels as you like, nest them, and give them custom permissions.\n\n1. Go to the [url=" . C("esoTalk.baseURL") . "admin/channels]Channels[/url] section of your administration panel.\n2. Click 'Create Channel' and fill out a title, description, and select permissions to add a new channel.\n3. Drag and drop channels to rearrange and nest them.\n\n[h]Getting Help[/h]\n\nIf you need help, come and give us a yell at the [url=http://esotalk.org/forum]esoTalk Support Forum[/url]. Don't worry—we don't bite!",
         "channelId" => 1
     ), array(array("type" => "member", "id" => 1)));
 
@@ -346,7 +346,7 @@ public function upgrade($currentVersion = "")
     if (version_compare($currentVersion, "1.0.0g3", "<")) {
         ET::SQL()
             ->update("conversation c")
-            ->set("countPosts", "(".ET::SQL()->select("COUNT(*)")->from("post p")->where("p.conversationId=c.conversationId").")", false)
+            ->set("countPosts", "(" . ET::SQL()->select("COUNT(*)")->from("post p")->where("p.conversationId=c.conversationId") . ")", false)
             ->exec();
     }
 }

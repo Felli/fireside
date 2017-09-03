@@ -125,18 +125,23 @@ public function getByConversation($conversationId, $criteria = array())
 
     // If we're getting posts based on the when they were created...
     if (isset($criteria["time"])) {
-        $time = (int)$criteria["time"];
+        $time = (int) $criteria["time"];
         $sql->where("time>:time1")
             ->bind(":time1", $time);
     }
 
     // If we're gettings posts based on a fulltext search...
-    if (isset($criteria["search"]))
-        $this->whereSearch($sql, $criteria["search"]);
+    if (isset($criteria["search"])) {
+            $this->whereSearch($sql, $criteria["search"]);
+    }
 
     // Impose an offset/limit if necessary.
-    if (isset($criteria["startFrom"])) $sql->offset(abs($criteria["startFrom"]));
-    if (isset($criteria["limit"])) $sql->limit(abs($criteria["limit"]));
+    if (isset($criteria["startFrom"])) {
+        $sql->offset(abs($criteria["startFrom"]));
+    }
+    if (isset($criteria["limit"])) {
+        $sql->limit(abs($criteria["limit"]));
+    }
 
     // Get the posts!
     $posts = $this->getWithSQL($sql);
@@ -196,7 +201,9 @@ public function create($conversationId, $memberId, $content, $title = "")
     // Validate the post content.
     $this->validate("content", $content, array($this, "validateContent"));
 
-    if ($this->errorCount()) return false;
+    if ($this->errorCount()) {
+        return false;
+    }
 
     // Prepare the post details for the query.
     $data = array(
@@ -240,7 +247,7 @@ public function create($conversationId, $memberId, $content, $title = "")
 
             $data = array(
                 "conversationId" => $conversationId,
-                "postId" => (int)$id,
+                "postId" => (int) $id,
                 "title" => $title
             );
             $emailData = array("content" => $content);
@@ -249,7 +256,9 @@ public function create($conversationId, $memberId, $content, $title = "")
             foreach ($members as $member) {
 
                 // Only send notifications to the first 10 members who are mentioned to prevent abuse of the system.
-                if ($i++ > 10) break;
+                if ($i++ > 10) {
+                    break;
+                }
 
                 // Check if this member is allowed to view this conversation before sending them a notification.
                 $sql = ET::SQL()
@@ -257,7 +266,9 @@ public function create($conversationId, $memberId, $content, $title = "")
                     ->from("conversation c")
                     ->where("conversationId", $conversationId);
                 ET::conversationModel()->addAllowedPredicate($sql, $member);
-                if (!$sql->exec()->numRows()) continue;
+                if (!$sql->exec()->numRows()) {
+                    continue;
+                }
 
                 ET::activityModel()->create("mention", $member, ET::$session->user, $data, $emailData);
             }
@@ -282,7 +293,9 @@ public function editPost(&$post, $content)
     // Validate the post content.
     $this->validate("content", $content, array($this, "validateContent"));
 
-    if ($this->errorCount()) return false;
+    if ($this->errorCount()) {
+        return false;
+    }
 
     // Update the post.
     $time = time();
@@ -361,9 +374,13 @@ public function validateContent($content)
     $content = trim($content);
 
     // Make sure it's not too long but has at least one character.
-    if (strlen($content) > C("esoTalk.conversation.maxCharsPerPost")) return sprintf(T("message.postTooLong"), C("esoTalk.conversation.maxCharsPerPost"));
-    if (!strlen($content)) return "emptyPost";
-}
+    if (strlen($content) > C("esoTalk.conversation.maxCharsPerPost")) {
+        return sprintf(T("message.postTooLong"), C("esoTalk.conversation.maxCharsPerPost"));
+    }
+    if (!strlen($content)) {
+        return "emptyPost";
+    }
+    }
 
 
 /**
@@ -376,7 +393,9 @@ public function validateContent($content)
 public function canEditPost($post, $conversation)
 {
     // If the user can moderate the conversation, they can always edit any post.
-    if ($conversation["canModerate"]) return true;
+    if ($conversation["canModerate"]) {
+        return true;
+    }
 
     if (!$conversation["locked"] // If the conversation isn't locked...
         and !ET::$session->isSuspended() // And the user isn't suspended...
@@ -388,8 +407,10 @@ public function canEditPost($post, $conversation)
             or (C("esoTalk.conversation.editPostTimeLimit") === "reply" and $conversation["lastPostTime"] <= $post["time"] and $conversation["lastPostMemberId"] == $post["memberId"])
             // Or users have permission to edit their posts for a certain number of seconds which hasn't yet passed...
             or (time() - $post["time"] < C("esoTalk.conversation.editPostTimeLimit"))
-        ))
-        return true; // Then they can edit!
+        )) {
+            return true;
+    }
+    // Then they can edit!
 
     return false;
 }

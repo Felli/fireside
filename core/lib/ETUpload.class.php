@@ -39,8 +39,9 @@ public function getUploadedFile($key, $allowedTypes = array())
     $error = false;
 
     // If the uploaded file doesn't exist, then we have to fail.
-    if (!isset($_FILES[$key]) or !is_uploaded_file($_FILES[$key]["tmp_name"]))
-        $error = T("message.fileUploadFailed");
+    if (!isset($_FILES[$key]) or !is_uploaded_file($_FILES[$key]["tmp_name"])) {
+            $error = T("message.fileUploadFailed");
+    }
 
     // Otherwise, check for an error.
     else {
@@ -60,11 +61,15 @@ public function getUploadedFile($key, $allowedTypes = array())
     }
 
     // If there was an error, throw it as an exception.
-    if ($error) throw new Exception($error);
+    if ($error) {
+        throw new Exception($error);
+    }
 
     // Otherwise, return the path to the uploaded file.
-    else return $file["tmp_name"];
-}
+    else {
+        return $file["tmp_name"];
+    }
+    }
 
 
 /**
@@ -77,8 +82,9 @@ public function getUploadedFile($key, $allowedTypes = array())
 public function saveAs($source, $destination)
 {
     // Attempt to move the uploaded file to the destination. If we can't, throw an exception.
-    if (!move_uploaded_file($source, $destination))
-        throw new Exception(sprintf(T("message.fileUploadFailedMove"), $destination));
+    if (!move_uploaded_file($source, $destination)) {
+            throw new Exception(sprintf(T("message.fileUploadFailedMove"), $destination));
+    }
 
     return $destination;
 }
@@ -103,7 +109,9 @@ public function saveAsImage($source, $destination, $width, $height, $sizeMode = 
 {
     // Get information about the source image and make sure it actually is an image.
     $size = getimagesize($source);
-    if ($size === false) throw new Exception(T("message.fileUploadNotImage"));
+    if ($size === false) {
+        throw new Exception(T("message.fileUploadNotImage"));
+    }
     list($sourceWidth, $sourceHeight, $type) = $size;
 
     // Depending on the type of image, create a GD image object of it.
@@ -119,7 +127,9 @@ public function saveAsImage($source, $destination, $width, $height, $sizeMode = 
     }
 
     // If we weren't able to create a GD image from the source, throw an exception.
-    if (!$image) throw new Exception(T("message.fileUploadNotImage"));
+    if (!$image) {
+        throw new Exception(T("message.fileUploadNotImage"));
+    }
 
     // Work out the image type which we will output the image as.
     $outputType = pathinfo($destination, PATHINFO_EXTENSION);
@@ -131,25 +141,36 @@ public function saveAsImage($source, $destination, $width, $height, $sizeMode = 
         $outputType = $types[$type];
 
         // We don't support gif output, as it makes transparency difficult.
-        if ($outputType == "gif") $outputType = "png";
+        if ($outputType == "gif") {
+            $outputType = "png";
+        }
+    } else {
+        $destination = substr($destination, 0, -strlen($outputType) - 1);
     }
-    else $destination = substr($destination, 0, -strlen($outputType) - 1);
 
     // Work out the ratios needed to get the image to fit into the specified width or height.
     $widthRatio = $width / $sourceWidth;
     $heightRatio = $height / $sourceHeight;
 
     // If we're cropping, use the larger of the two ratios so we fill the whole image area.
-    if ($sizeMode == "crop") $ratio = max($widthRatio, $heightRatio);
+    if ($sizeMode == "crop") {
+        $ratio = max($widthRatio, $heightRatio);
+    }
 
     // If not, use the smaller of the two so we get the whole image in the area.
-    else $ratio = min($widthRatio, $heightRatio);
+    else {
+        $ratio = min($widthRatio, $heightRatio);
+    }
 
     // If the provided width x height is a minimum, the ratio must be no smaller than one.
-    if ($sizeMode == "min") $ratio = max(1, $ratio);
+    if ($sizeMode == "min") {
+        $ratio = max(1, $ratio);
+    }
 
     // If the provided width x height is a maximum, the ratio must be no greater than one.
-    elseif ($sizeMode == "max") $ratio = min(1, $ratio);
+    elseif ($sizeMode == "max") {
+        $ratio = min(1, $ratio);
+    }
 
     // Work out the new width and height of the image depending on the selected ratio.
     $newWidth = ceil($ratio * $sourceWidth);

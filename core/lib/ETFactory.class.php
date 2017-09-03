@@ -60,15 +60,14 @@ public static function make($class, $parameter1 = null, $parameter2 = null, $par
         if (!class_exists($className, false)) {
             if (file_exists(self::$classes[$class][1])) require_once self::$classes[$class][1];
             else {
-                throw new Exception("ETFactory: The file '".self::$classes[$class][1]."' for the class '$className' does not exist.");
+                throw new Exception("ETFactory: The file '" . self::$classes[$class][1] . "' for the class '$className' does not exist.");
             }
         }
     }
 
     if (!class_exists($className, false)) {
         throw new Exception("ETFactory: The class '$className' does not exist.");
-    }
-    else {
+    } else {
         $object = new $className($parameter1, $parameter2, $parameter3);
         $object->className = $class;
         return $object;
@@ -100,7 +99,7 @@ public static function register($class, $className, $file = "")
  */
 public static function registerController($slug, $className, $file)
 {
-    $newSlug = $slug."Controller";
+    $newSlug = $slug . "Controller";
     self::$controllers[$slug] = $newSlug;
     self::register($newSlug, $className, $file);
 }
@@ -116,7 +115,7 @@ public static function registerController($slug, $className, $file)
  */
 public static function registerAdminController($slug, $className, $file)
 {
-    $newSlug = $slug."AdminController";
+    $newSlug = $slug . "AdminController";
     self::$adminControllers[$slug] = $newSlug;
     self::register($newSlug, $className, $file);
 }
