@@ -154,13 +154,17 @@ public function select($expression, $as = false)
     $this->mode = "select";
 
     // If an AS name was specified, set a keyed value in the array.
-    if ($as !== false) $this->select[$as] = $expression;
+    if ($as !== false) {
+        $this->select[$as] = $expression;
+    }
 
     // Otherwise, cast the expression to an array and add all its values to the SELECTs array.
     else {
         $expressions = (array) $expression;
         foreach ($expressions as $expression) {
-            if (!empty($expression)) $this->select[] = $expression;
+            if (!empty($expression)) {
+                $this->select[] = $expression;
+            }
         }
     }
 
@@ -188,11 +192,14 @@ public function from($table, $on = false, $type = false)
     }
 
     // If a JOIN type or condition was specified, add the table with JOIN syntax.
-    if (!empty($type) or !empty($on))
-        $this->tables[] = strtoupper($type ? $type : "inner") . " JOIN $table" . (!empty($on) ? " ON ($on)" : "");
+    if (!empty($type) or !empty($on)) {
+            $this->tables[] = strtoupper($type ? $type : "inner") . " JOIN $table" . (!empty($on) ? " ON ($on)" : "");
+    }
 
     // Otherwise, just add the table name normally.
-    else array_unshift($this->tables, $table);
+    else {
+        array_unshift($this->tables, $table);
+    }
 
     return $this;
 }
@@ -587,12 +594,16 @@ protected function getInsert()
 
     // Make a list of rows and their values to insert.
     $rows = array();
-    foreach ($this->set as $row) $rows[] = "(" . implode(", ", $row) . ")";
+    foreach ($this->set as $row) {
+        $rows[] = "(" . implode(", ", $row) . ")";
+    }
     $values = implode(", ", $rows);
 
     // Construct the ON DUPLICATE KEY UPDATE clause.
     $onDuplicateKey = array();
-    foreach ($this->setDuplicateKey as $k => $v) $onDuplicateKey[] = "$k=$v";
+    foreach ($this->setDuplicateKey as $k => $v) {
+        $onDuplicateKey[] = "$k=$v";
+    }
     $onDuplicateKey = implode(", ", $onDuplicateKey);
 
     return "INSERT INTO $tables ($fields) VALUES $values" . ($onDuplicateKey ? " ON DUPLICATE KEY UPDATE $onDuplicateKey" : "");
@@ -636,7 +647,9 @@ protected function getUnion()
 {
     // Convert the queries that we want to UNION to strings.
     $selects = $this->union;
-    foreach ($selects as &$sql) $sql = "\t(" . $sql->get() . ")";
+    foreach ($selects as &$sql) {
+        $sql = "\t(" . $sql->get() . ")";
+    }
 
     // Implode them with the UNION keyword.
     $selects = implode("\nUNION\n", $this->indent($selects));

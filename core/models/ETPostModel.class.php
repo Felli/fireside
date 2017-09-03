@@ -2,7 +2,9 @@
 // Copyright 2011 Toby Zerner, Simon Zerner
 // This file is part of esoTalk. Please see the included license file for usage information.
 
-if (!defined("IN_ESOTALK")) exit;
+if (!defined("IN_ESOTALK")) {
+    exit;
+}
 
 /**
  * The post model provides functions for retrieving and managing post data.
@@ -19,7 +21,7 @@ class ETPostModel extends ETModel {
  */
 public function __construct()
 {
-	parent::__construct("post");
+    parent::__construct("post");
 }
 
 
@@ -31,49 +33,49 @@ public function __construct()
  */
 public function getWithSQL($sql)
 {
-	$sql->select("p.*")
-		->select("m.memberId", "memberId")
-		->select("m.username", "username")
-		->select("m.account", "account")
-		->select("m.email", "email")
-		->select("m.avatarFormat", "avatarFormat")
-		->select("m.preferences", "preferences")
-		->select("em.memberId", "editMemberId")
-		->select("em.username", "editMemberName")
-		->select("dm.memberId", "deleteMemberId")
-		->select("dm.username", "deleteMemberName")
-		->select("m.lastActionTime", "lastActionTime")
-		->select("m.lastActionDetail", "lastActionDetail")
+    $sql->select("p.*")
+        ->select("m.memberId", "memberId")
+        ->select("m.username", "username")
+        ->select("m.account", "account")
+        ->select("m.email", "email")
+        ->select("m.avatarFormat", "avatarFormat")
+        ->select("m.preferences", "preferences")
+        ->select("em.memberId", "editMemberId")
+        ->select("em.username", "editMemberName")
+        ->select("dm.memberId", "deleteMemberId")
+        ->select("dm.username", "deleteMemberName")
+        ->select("m.lastActionTime", "lastActionTime")
+        ->select("m.lastActionDetail", "lastActionDetail")
 
-		->select("GROUP_CONCAT(g.groupId)", "groups")
-		->select("GROUP_CONCAT(g.name)", "groupNames")
+        ->select("GROUP_CONCAT(g.groupId)", "groups")
+        ->select("GROUP_CONCAT(g.name)", "groupNames")
 
-		->from("post p")
-		->from("member m", "m.memberId=p.memberId", "left")
-		->from("member em", "em.memberId=p.editMemberId", "left")
-		->from("member dm", "dm.memberId=p.deleteMemberId", "left")
-		->from("member_group mg", "m.memberId=mg.memberId", "left")
-		->from("group g", "g.groupId=mg.groupId", "left")
+        ->from("post p")
+        ->from("member m", "m.memberId=p.memberId", "left")
+        ->from("member em", "em.memberId=p.editMemberId", "left")
+        ->from("member dm", "dm.memberId=p.deleteMemberId", "left")
+        ->from("member_group mg", "m.memberId=mg.memberId", "left")
+        ->from("group g", "g.groupId=mg.groupId", "left")
 
-		->groupBy("p.postId")
-		->orderBy("p.time ASC");
+        ->groupBy("p.postId")
+        ->orderBy("p.time ASC");
 
-	$this->trigger("getPostsBefore", array($sql));
+    $this->trigger("getPostsBefore", array($sql));
 
-	$result = $sql->exec();
+    $result = $sql->exec();
 
-	// Loop through the results and compile them into an array of posts.
-	$posts = array();
-	while ($post = $result->nextRow()) {
+    // Loop through the results and compile them into an array of posts.
+    $posts = array();
+    while ($post = $result->nextRow()) {
 
-		ET::memberModel()->expand($post);
-		$posts[] = $post;
+        ET::memberModel()->expand($post);
+        $posts[] = $post;
 
-	}
+    }
 
-	$this->trigger("getPostsAfter", array(&$posts));
+    $this->trigger("getPostsAfter", array(&$posts));
 
-	return $posts;
+    return $posts;
 }
 
 
@@ -85,10 +87,10 @@ public function getWithSQL($sql)
  */
 public function get($wheres = array())
 {
-	$sql = ET::SQL();
-	$sql->where($wheres);
+    $sql = ET::SQL();
+    $sql->where($wheres);
 
-	return $this->getWithSQL($sql);
+    return $this->getWithSQL($sql);
 }
 
 
@@ -100,7 +102,7 @@ public function get($wheres = array())
  */
 public function getById($postId)
 {
-	return reset($this->get(array("p.postId" => $postId)));
+    return reset($this->get(array("p.postId" => $postId)));
 }
 
 
@@ -117,29 +119,29 @@ public function getById($postId)
  */
 public function getByConversation($conversationId, $criteria = array())
 {
-	$sql = ET::SQL()
-		->where("p.conversationId=:conversationId")
-		->bind(":conversationId", $conversationId);
+    $sql = ET::SQL()
+        ->where("p.conversationId=:conversationId")
+        ->bind(":conversationId", $conversationId);
 
-	// If we're getting posts based on the when they were created...
-	if (isset($criteria["time"])) {
-		$time = (int)$criteria["time"];
-		$sql->where("time>:time1")
-			->bind(":time1", $time);
-	}
+    // If we're getting posts based on the when they were created...
+    if (isset($criteria["time"])) {
+        $time = (int)$criteria["time"];
+        $sql->where("time>:time1")
+            ->bind(":time1", $time);
+    }
 
-	// If we're gettings posts based on a fulltext search...
-	if (isset($criteria["search"]))
-		$this->whereSearch($sql, $criteria["search"]);
+    // If we're gettings posts based on a fulltext search...
+    if (isset($criteria["search"]))
+        $this->whereSearch($sql, $criteria["search"]);
 
-	// Impose an offset/limit if necessary.
-	if (isset($criteria["startFrom"])) $sql->offset(abs($criteria["startFrom"]));
-	if (isset($criteria["limit"])) $sql->limit(abs($criteria["limit"]));
+    // Impose an offset/limit if necessary.
+    if (isset($criteria["startFrom"])) $sql->offset(abs($criteria["startFrom"]));
+    if (isset($criteria["limit"])) $sql->limit(abs($criteria["limit"]));
 
-	// Get the posts!
-	$posts = $this->getWithSQL($sql);
+    // Get the posts!
+    $posts = $this->getWithSQL($sql);
 
-	return $posts;
+    return $posts;
 }
 
 /**
@@ -147,17 +149,17 @@ public function getByConversation($conversationId, $criteria = array())
  *
  * @param int $conversationId The ID of the conversation that's being searched.
  * @param string $search The search string.
- * @return int The number of posts that match the string in a fulltext search.
+ * @return string The number of posts that match the string in a fulltext search.
  */
 public function getSearchResultsCount($conversationId, $search)
 {
-	$sql = ET::SQL()
-		->select("COUNT(1)")
-		->from("post")
-		->where("conversationId=:conversationId")
-		->bind(":conversationId", $conversationId);
-	$this->whereSearch($sql, $search);
-	return $sql->exec()->result();
+    $sql = ET::SQL()
+        ->select("COUNT(1)")
+        ->from("post")
+        ->where("conversationId=:conversationId")
+        ->bind(":conversationId", $conversationId);
+    $this->whereSearch($sql, $search);
+    return $sql->exec()->result();
 }
 
 
@@ -170,11 +172,11 @@ public function getSearchResultsCount($conversationId, $search)
  */
 private function whereSearch(&$sql, $search)
 {
-	$sql->where("MATCH (content) AGAINST (:search IN BOOLEAN MODE)")
-		->where("deleteMemberId IS NULL")
-		->bind(":search", $search);
+    $sql->where("MATCH (content) AGAINST (:search IN BOOLEAN MODE)")
+        ->where("deleteMemberId IS NULL")
+        ->bind(":search", $search);
 
-	$this->trigger("whereSearch", array($sql, $search));
+    $this->trigger("whereSearch", array($sql, $search));
 }
 
 
@@ -187,83 +189,83 @@ private function whereSearch(&$sql, $search)
  * @param int $memberId The ID of the author of the post.
  * @param string $content The post content.
  * @param string $title The title of the conversation (so it can be added alongside the post, for fulltext purposes.)
- * @return bool|int The new post's ID, or false if there were errors.
+ * @return false|string The new post's ID, or false if there were errors.
  */
 public function create($conversationId, $memberId, $content, $title = "")
 {
-	// Validate the post content.
-	$this->validate("content", $content, array($this, "validateContent"));
+    // Validate the post content.
+    $this->validate("content", $content, array($this, "validateContent"));
 
-	if ($this->errorCount()) return false;
+    if ($this->errorCount()) return false;
 
-	// Prepare the post details for the query.
-	$data = array(
-		"conversationId" => $conversationId,
-		"memberId" => $memberId,
-		"time" => time(),
-		"content" => $content,
-		"title" => $title
-	);
+    // Prepare the post details for the query.
+    $data = array(
+        "conversationId" => $conversationId,
+        "memberId" => $memberId,
+        "time" => time(),
+        "content" => $content,
+        "title" => $title
+    );
 
-	$id = parent::create($data);
+    $id = parent::create($data);
 
-	// Update the member's post count.
-	ET::SQL()
-		->update("member")
-		->set("countPosts", "countPosts + 1", false)
-		->where("memberId", $memberId)
-		->exec();
+    // Update the member's post count.
+    ET::SQL()
+        ->update("member")
+        ->set("countPosts", "countPosts + 1", false)
+        ->where("memberId", $memberId)
+        ->exec();
 
-	// Update the channel's post count.
-	ET::SQL()
-		->update("channel")
-		->set("countPosts", "countPosts + 1", false)
-		->where("channelId", ET::SQL()->select("channelId")->from("conversation")->where("conversationId=:conversationId")->bind(":conversationId", $conversationId)->exec()->result())
-		->exec();
+    // Update the channel's post count.
+    ET::SQL()
+        ->update("channel")
+        ->set("countPosts", "countPosts + 1", false)
+        ->where("channelId", ET::SQL()->select("channelId")->from("conversation")->where("conversationId=:conversationId")->bind(":conversationId", $conversationId)->exec()->result())
+        ->exec();
 
-	// Parse the post content for @mentions, and notify any members who were mentioned.
-	if (C("esoTalk.format.mentions")) {
+    // Parse the post content for @mentions, and notify any members who were mentioned.
+    if (C("esoTalk.format.mentions")) {
 
-		$names = ET::formatter()->getMentions($content);
+        $names = ET::formatter()->getMentions($content);
 
-		if (count($names)) {
+        if (count($names)) {
 
-			// Get the member details from the database.
-			$sql = ET::SQL()
-				->where("m.username IN (:names)")
-				->bind(":names", $names)
-				->where("m.memberId != :userId")
-				->bind(":userId", $memberId);
-			$members = ET::memberModel()->getWithSQL($sql);
+            // Get the member details from the database.
+            $sql = ET::SQL()
+                ->where("m.username IN (:names)")
+                ->bind(":names", $names)
+                ->where("m.memberId != :userId")
+                ->bind(":userId", $memberId);
+            $members = ET::memberModel()->getWithSQL($sql);
 
-			$data = array(
-				"conversationId" => $conversationId,
-				"postId" => (int)$id,
-				"title" => $title
-			);
-			$emailData = array("content" => $content);
+            $data = array(
+                "conversationId" => $conversationId,
+                "postId" => (int)$id,
+                "title" => $title
+            );
+            $emailData = array("content" => $content);
 
-			$i = 0;
-			foreach ($members as $member) {
+            $i = 0;
+            foreach ($members as $member) {
 
-				// Only send notifications to the first 10 members who are mentioned to prevent abuse of the system.
-				if ($i++ > 10) break;
+                // Only send notifications to the first 10 members who are mentioned to prevent abuse of the system.
+                if ($i++ > 10) break;
 
-				// Check if this member is allowed to view this conversation before sending them a notification.
-				$sql = ET::SQL()
-					->select("conversationId")
-					->from("conversation c")
-					->where("conversationId", $conversationId);
-				ET::conversationModel()->addAllowedPredicate($sql, $member);
-				if (!$sql->exec()->numRows()) continue;
+                // Check if this member is allowed to view this conversation before sending them a notification.
+                $sql = ET::SQL()
+                    ->select("conversationId")
+                    ->from("conversation c")
+                    ->where("conversationId", $conversationId);
+                ET::conversationModel()->addAllowedPredicate($sql, $member);
+                if (!$sql->exec()->numRows()) continue;
 
-				ET::activityModel()->create("mention", $member, ET::$session->user, $data, $emailData);
-			}
-		}
+                ET::activityModel()->create("mention", $member, ET::$session->user, $data, $emailData);
+            }
+        }
 
-	}
+    }
 
-	return $id;
+    return $id;
 }
 
 
@@ -277,27 +279,27 @@ public function create($conversationId, $memberId, $content, $title = "")
  */
 public function editPost(&$post, $content)
 {
-	// Validate the post content.
-	$this->validate("content", $content, array($this, "validateContent"));
+    // Validate the post content.
+    $this->validate("content", $content, array($this, "validateContent"));
 
-	if ($this->errorCount()) return false;
+    if ($this->errorCount()) return false;
 
-	// Update the post.
-	$time = time();
-	$this->updateById($post["postId"], array(
-		"content" => $content,
-		"editMemberId" => ET::$session->userId,
-		"editTime" => $time
-	));
+    // Update the post.
+    $time = time();
+    $this->updateById($post["postId"], array(
+        "content" => $content,
+        "editMemberId" => ET::$session->userId,
+        "editTime" => $time
+    ));
 
-	$post["content"] = $content;
-	$post["editMemberId"] = ET::$session->userId;
-	$post["editMemberName"] = ET::$session->user["username"];
-	$post["editTime"] = $time;
+    $post["content"] = $content;
+    $post["editMemberId"] = ET::$session->userId;
+    $post["editMemberName"] = ET::$session->user["username"];
+    $post["editTime"] = $time;
 
-	$this->trigger("editPostAfter", array($post));
+    $this->trigger("editPostAfter", array($post));
 
-	return true;
+    return true;
 }
 
 
@@ -310,18 +312,18 @@ public function editPost(&$post, $content)
  */
 public function deletePost(&$post)
 {
-	// Update the post.
-	$time = time();
-	$this->updateById($post["postId"], array(
-		"deleteMemberId" => ET::$session->userId,
-		"deleteTime" => $time
-	));
+    // Update the post.
+    $time = time();
+    $this->updateById($post["postId"], array(
+        "deleteMemberId" => ET::$session->userId,
+        "deleteTime" => $time
+    ));
 
-	$post["deleteMemberId"] = ET::$session->userId;
-	$post["deleteMemberName"] = ET::$session->user["username"];
-	$post["deleteTime"] = $time;
+    $post["deleteMemberId"] = ET::$session->userId;
+    $post["deleteMemberName"] = ET::$session->user["username"];
+    $post["deleteTime"] = $time;
 
-	return true;
+    return true;
 }
 
 
@@ -333,18 +335,18 @@ public function deletePost(&$post)
  */
 public function restorePost(&$post)
 {
-	// Update the post.
-	$time = time();
-	$this->updateById($post["postId"], array(
-		"deleteMemberId" => null,
-		"deleteTime" => null
-	));
+    // Update the post.
+    $time = time();
+    $this->updateById($post["postId"], array(
+        "deleteMemberId" => null,
+        "deleteTime" => null
+    ));
 
-	$post["deleteMemberId"] = null;
-	$post["deleteMemberName"] = null;
-	$post["deleteTime"] = null;
+    $post["deleteMemberId"] = null;
+    $post["deleteMemberName"] = null;
+    $post["deleteTime"] = null;
 
-	return true;
+    return true;
 }
 
 
@@ -352,15 +354,15 @@ public function restorePost(&$post)
  * Validate a post's content.
  *
  * @param string $content The post content.
- * @return bool|string Returns an error string or false if there are no errors.
+ * @return string|null Returns an error string or false if there are no errors.
  */
 public function validateContent($content)
 {
-	$content = trim($content);
+    $content = trim($content);
 
-	// Make sure it's not too long but has at least one character.
-	if (strlen($content) > C("esoTalk.conversation.maxCharsPerPost")) return sprintf(T("message.postTooLong"), C("esoTalk.conversation.maxCharsPerPost"));
-	if (!strlen($content)) return "emptyPost";
+    // Make sure it's not too long but has at least one character.
+    if (strlen($content) > C("esoTalk.conversation.maxCharsPerPost")) return sprintf(T("message.postTooLong"), C("esoTalk.conversation.maxCharsPerPost"));
+    if (!strlen($content)) return "emptyPost";
 }
 
 
@@ -373,23 +375,23 @@ public function validateContent($content)
  */
 public function canEditPost($post, $conversation)
 {
-	// If the user can moderate the conversation, they can always edit any post.
-	if ($conversation["canModerate"]) return true;
+    // If the user can moderate the conversation, they can always edit any post.
+    if ($conversation["canModerate"]) return true;
 
-	if (!$conversation["locked"] // If the conversation isn't locked...
-		and !ET::$session->isSuspended() // And the user isn't suspended...
-		and $post["memberId"] == ET::$session->userId // And this post is authored by the current user...
-		and (!$post["deleteMemberId"] or $post["deleteMemberId"] == ET::$session->userId) // And the post hasn't been deleted, or was deleted by the current user...
-		and (
-			C("esoTalk.conversation.editPostTimeLimit") === -1 // And users have permission to edit their posts forever...
-			// Or users have permission to edit their posts until someone replies, and this is the most recent post...
-			or (C("esoTalk.conversation.editPostTimeLimit") === "reply" and $conversation["lastPostTime"] <= $post["time"] and $conversation["lastPostMemberId"] == $post["memberId"])
-			// Or users have permission to edit their posts for a certain number of seconds which hasn't yet passed...
-			or (time() - $post["time"] < C("esoTalk.conversation.editPostTimeLimit"))
-		))
-		return true; // Then they can edit!
+    if (!$conversation["locked"] // If the conversation isn't locked...
+        and !ET::$session->isSuspended() // And the user isn't suspended...
+        and $post["memberId"] == ET::$session->userId // And this post is authored by the current user...
+        and (!$post["deleteMemberId"] or $post["deleteMemberId"] == ET::$session->userId) // And the post hasn't been deleted, or was deleted by the current user...
+        and (
+            C("esoTalk.conversation.editPostTimeLimit") === -1 // And users have permission to edit their posts forever...
+            // Or users have permission to edit their posts until someone replies, and this is the most recent post...
+            or (C("esoTalk.conversation.editPostTimeLimit") === "reply" and $conversation["lastPostTime"] <= $post["time"] and $conversation["lastPostMemberId"] == $post["memberId"])
+            // Or users have permission to edit their posts for a certain number of seconds which hasn't yet passed...
+            or (time() - $post["time"] < C("esoTalk.conversation.editPostTimeLimit"))
+        ))
+        return true; // Then they can edit!
 
-	return false;
+    return false;
 }
 
 }
