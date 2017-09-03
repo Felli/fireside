@@ -20,11 +20,15 @@ class ETPlugin_SMTP extends ETPlugin {
 
     function handler_sendEmailBefore($mail, &$to, &$subject, &$body)
     {
-        if (!C("plugin.SMTP.server")) return;
+        if (!C("plugin.SMTP.server")) {
+            return;
+        }
 
         $mail->IsSMTP();
         $mail->SMTPAuth   = true;
-        if (C("plugin.SMTP.auth")) $mail->SMTPSecure = C("plugin.SMTP.auth");
+        if (C("plugin.SMTP.auth")) {
+            $mail->SMTPSecure = C("plugin.SMTP.auth");
+        }
         $mail->Host       = C("plugin.SMTP.server");
         $mail->Port       = C("plugin.SMTP.port");
         $mail->Username   = C("plugin.SMTP.username");

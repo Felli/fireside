@@ -39,14 +39,17 @@ function init()
 
             // Get the conversation details.
             $conversationId = (int) $_GET["q3"];
-            if (!$conversationId or !($conversation = $this->esoTalk->db->fetchAssoc("SELECT c.conversationId AS id, c.title AS title, c.slug AS slug, c.private AS private, c.posts AS posts, c.startMember AS startMember, c.lastActionTime AS lastActionTime, GROUP_CONCAT(t.tag ORDER BY t.tag ASC SEPARATOR ', ') AS tags FROM " . config("esoTalk.database.prefix") . "conversations c LEFT JOIN " . config("esoTalk.database.prefix") . "tags t USING (conversationId) WHERE c.conversationId=$conversationId GROUP BY c.conversationId")))
-                $this->esoTalk->fatalError($messages["cannotViewConversation"]["message"]);
+            if (!$conversationId or !($conversation = $this->esoTalk->db->fetchAssoc("SELECT c.conversationId AS id, c.title AS title, c.slug AS slug, c.private AS private, c.posts AS posts, c.startMember AS startMember, c.lastActionTime AS lastActionTime, GROUP_CONCAT(t.tag ORDER BY t.tag ASC SEPARATOR ', ') AS tags FROM " . config("esoTalk.database.prefix") . "conversations c LEFT JOIN " . config("esoTalk.database.prefix") . "tags t USING (conversationId) WHERE c.conversationId=$conversationId GROUP BY c.conversationId"))) {
+                            $this->esoTalk->fatalError($messages["cannotViewConversation"]["message"]);
+            }
 
             // Do we need authentication to view this conversation (ie. is it private or a draft)?
             if ($conversation["private"] or $conversation["posts"] == 0) {
 
                 // Try to login with provided credentials.
-                if (isset($_SERVER["PHP_AUTH_USER"])) $this->esoTalk->login($_SERVER["PHP_AUTH_USER"], $_SERVER["PHP_AUTH_PW"]);
+                if (isset($_SERVER["PHP_AUTH_USER"])) {
+                    $this->esoTalk->login($_SERVER["PHP_AUTH_USER"], $_SERVER["PHP_AUTH_PW"]);
+                }
 
                 // Still not logged in? Ask them again!
                 if (!$this->esoTalk->user) {

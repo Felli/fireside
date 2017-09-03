@@ -72,26 +72,39 @@ if (!file_exists("sitemap.xml") or filemtime("sitemap.xml") < time() - $config["
                 $urlset .= "<url><loc>{$config["baseURL"]}" . makeLink($conversationId, $slug) . "</loc><lastmod>" . gmdate("Y-m-d\TH:i:s+00:00", $lastUpdated) . "</lastmod><changefreq>";
 
                 // How often should we tell them to check for updates?
-                if ($postsPerDay < 0.006) $urlset .= "yearly";
-                elseif ($postsPerDay < 0.07) $urlset .= "monthly";
-                elseif ($postsPerDay < 0.3) $urlset .= "weekly";
-                elseif ($postsPerDay < 3) $urlset .= "daily";
-                else $urlset .= "hourly";
+                if ($postsPerDay < 0.006) {
+                    $urlset .= "yearly";
+                } elseif ($postsPerDay < 0.07) {
+                    $urlset .= "monthly";
+                } elseif ($postsPerDay < 0.3) {
+                    $urlset .= "weekly";
+                } elseif ($postsPerDay < 3) {
+                    $urlset .= "daily";
+                } else {
+                    $urlset .= "hourly";
+                }
                 $urlset .= "</changefreq>";
 
                 // Estimate the conversation's importance based upon the number of posts.
                 if ($posts < 50); // Default priority is 0.5, so specifying it is redundant.
-                elseif ($posts < 100) $urlset .= "<priority>0.6</priority>";
-                elseif ($posts < 500) $urlset .= "<priority>0.7</priority>";
-                elseif ($posts < 1000) $urlset .= "<priority>0.8</priority>";
-                else $urlset .= "<priority>0.9</priority>";
+                elseif ($posts < 100) {
+                    $urlset .= "<priority>0.6</priority>";
+                } elseif ($posts < 500) {
+                    $urlset .= "<priority>0.7</priority>";
+                } elseif ($posts < 1000) {
+                    $urlset .= "<priority>0.8</priority>";
+                } else {
+                    $urlset .= "<priority>0.9</priority>";
+                }
                 $urlset .= "</url>";
 
             }
 
             // [Encode, and] write out the file.
             $urlset .= "</urlset>";
-            if (ZLIB) $urlset = gzencode($urlset, 9);
+            if (ZLIB) {
+                $urlset = gzencode($urlset, 9);
+            }
             writeFile($filename, $urlset);
 
             // And increment the counter for the next cycle.
