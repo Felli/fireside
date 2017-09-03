@@ -41,7 +41,7 @@ protected function getPlugins()
         while (false !== ($file = readdir($handle))) {
 
             // Make sure the plugin is valid, and include its plugin.php file.
-            if ($file[0] != "." and file_exists($pluginFile = PATH_PLUGINS."/$file/plugin.php") and (include_once $pluginFile)) {
+            if ($file[0] != "." and file_exists($pluginFile = PATH_PLUGINS . "/$file/plugin.php") and (include_once $pluginFile)) {
 
                 // Add the plugin's information and status to the array.
                 $plugins[$file] = array(
@@ -51,7 +51,9 @@ protected function getPlugins()
                 );
 
                 // If this skin's settings function returns a view path, then store it.
-                if ($plugins[$file]["loaded"]) $plugins[$file]["settings"] = method_exists(ET::$plugins[$file], "settings");
+                if ($plugins[$file]["loaded"]) {
+                    $plugins[$file]["settings"] = method_exists(ET::$plugins[$file], "settings");
+                }
             }
 
         }
@@ -72,11 +74,15 @@ protected function getPlugins()
  */
 public function action_toggle($plugin = "")
 {
-    if (!$this->validateToken()) return;
+    if (!$this->validateToken()) {
+        return;
+    }
 
     // Get the plugin.
     $plugins = $this->getPlugins();
-    if (!$plugin or !array_key_exists($plugin, $plugins)) return;
+    if (!$plugin or !array_key_exists($plugin, $plugins)) {
+        return;
+    }
 
     // Get the list of currently enabled plugins.
     $enabledPlugins = C("esoTalk.enabledPlugins");
@@ -92,9 +98,11 @@ public function action_toggle($plugin = "")
 
     // Otherwise, if it's not enabled, add it to the array.
     else {
-        if (isset($plugins[$plugin]["info"]["priority"]))
-            addToArray($enabledPlugins, $plugin, $plugins[$plugin]["info"]["priority"]);
-        else $enabledPlugins[] = $plugin;
+        if (isset($plugins[$plugin]["info"]["priority"])) {
+                    addToArray($enabledPlugins, $plugin, $plugins[$plugin]["info"]["priority"]);
+        } else {
+            $enabledPlugins[] = $plugin;
+        }
 
         // Check the plugin's dependencies.
         $dependencyFailure = false;
@@ -118,10 +126,10 @@ public function action_toggle($plugin = "")
         }
 
         // Set up an instance of the plugin so we can call its setup function.
-        if (file_exists($file = PATH_PLUGINS."/".sanitizeFileName($plugin)."/plugin.php")) include_once $file;
+        if (file_exists($file = PATH_PLUGINS . "/" . sanitizeFileName($plugin) . "/plugin.php")) include_once $file;
         $className = "ETPlugin_$plugin";
         if (class_exists($className)) {
-            $pluginObject = new $className("addons/plugins/".$plugin);
+            $pluginObject = new $className("addons/plugins/" . $plugin);
 
             // Call the plugin's setup function. If the setup failed, show a message.
             if (($msg = $pluginObject->setup(C("$plugin.version"))) !== true) {
@@ -151,11 +159,15 @@ public function action_settings($plugin = "")
 {
     // Get the plugin.
     $plugins = $this->getPlugins();
-    if (!$plugin or !array_key_exists($plugin, $plugins)) return;
+    if (!$plugin or !array_key_exists($plugin, $plugins)) {
+        return;
+    }
     $pluginArray = $plugins[$plugin];
 
     // If the plugin isn't loaded or doesn't have settings, we can't access its settings.
-    if (!$pluginArray["loaded"] or !$pluginArray["settings"]) return;
+    if (!$pluginArray["loaded"] or !$pluginArray["settings"]) {
+        return;
+    }
 
     // Call the plugin's settings function and get the view it wants rendered.
     $view = ET::$plugins[$plugin]->settings($this);
@@ -175,11 +187,15 @@ public function action_settings($plugin = "")
  */
 public function action_uninstall($plugin = "")
 {
-    if (!$this->validateToken()) return;
+    if (!$this->validateToken()) {
+        return;
+    }
 
     // Get the plugin.
     $plugins = $this->getPlugins();
-    if (!$plugin or !array_key_exists($plugin, $plugins)) return;
+    if (!$plugin or !array_key_exists($plugin, $plugins)) {
+        return;
+    }
 
     $enabledPlugins = C("esoTalk.enabledPlugins");
 
@@ -195,7 +211,7 @@ public function action_uninstall($plugin = "")
     }
 
     // Set up an instance of the plugin so we can call its uninstall function.
-    if (file_exists($file = PATH_PLUGINS."/".sanitizeFileName($plugin)."/plugin.php")) include_once $file;
+    if (file_exists($file = PATH_PLUGINS . "/" . sanitizeFileName($plugin) . "/plugin.php")) include_once $file;
     $className = "ETPlugin_$plugin";
     if (class_exists($className)) {
         $pluginObject = new $className;
@@ -203,7 +219,7 @@ public function action_uninstall($plugin = "")
     }
 
     // Attempt to remove the directory. If we couldn't, show a "not writable" message.
-    if (!is_writable($file = PATH_PLUGINS) or !is_writable($file = PATH_PLUGINS."/$plugin") or !rrmdir($file))
+    if (!is_writable($file = PATH_PLUGINS) or !is_writable($file = PATH_PLUGINS . "/$plugin") or !rrmdir($file))
         $this->message(sprintf(T("message.notWritable"), $file), "warning");
 
     // Otherwise, show a success message.

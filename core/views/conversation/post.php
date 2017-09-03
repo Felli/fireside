@@ -15,9 +15,9 @@ if (!defined("IN_ESOTALK")) {
 $post = $data["post"];
 ?>
 
-<div class='post hasControls <?php echo implode(" ", (array)$post["class"]); ?>' id='<?php echo $post["id"]; ?>'<?php
+<div class='post hasControls <?php echo implode(" ", (array) $post["class"]); ?>' id='<?php echo $post["id"]; ?>'<?php
 if (!empty($post["data"])):
-foreach ((array)$post["data"] as $dk => $dv)
+foreach ((array) $post["data"] as $dk => $dv)
     echo " data-$dk='$dv'";
 endif; ?>>
 
@@ -30,10 +30,16 @@ endif; ?>>
 <div class='postHeader'>
 <div class='info'>
 <h3><?php echo $post["title"]; ?></h3>
-<?php if (!empty($post["info"])) foreach ((array) $post["info"] as $info) echo $info, "\n"; ?>
+<?php if (!empty($post["info"])) {
+    foreach ((array) $post["info"] as $info) echo $info, "\n";
+}
+?>
 </div>
 <div class='controls'>
-<?php if (!empty($post["controls"])) foreach ((array) $post["controls"] as $control) echo $control, "\n"; ?>
+<?php if (!empty($post["controls"])) {
+    foreach ((array) $post["controls"] as $control) echo $control, "\n";
+}
+?>
 </div>
 </div>
 
@@ -45,7 +51,10 @@ endif; ?>>
 
 <?php if (!empty($post["footer"])): ?>
 <div class='postFooter'>
-<?php foreach ((array) $post["footer"] as $footer) echo $footer, "\n"; ?>
+<?php foreach ((array) $post["footer"] as $footer) {
+    echo $footer, "\n";
+}
+?>
 </div>
 <?php endif; ?>
 

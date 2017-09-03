@@ -39,36 +39,42 @@ public function action_index()
 public function action_edit($groupId = "")
 {
     // Get this group's details. If it doesn't exist, show an error.
-    if (!($group = ET::groupModel()->getById((int)$groupId))) {
+    if (!($group = ET::groupModel()->getById((int) $groupId))) {
         $this->render404();
         return;
     }
 
     // Set up the form.
     $form = ETFactory::make("form");
-    $form->action = URL("admin/groups/edit/".$group["groupId"]);
+    $form->action = URL("admin/groups/edit/" . $group["groupId"]);
     $form->setValues($group);
 
     // Was the cancel button pressed?
-    if ($form->isPostBack("cancel")) $this->redirect(URL("admin/groups"));
+    if ($form->isPostBack("cancel")) {
+        $this->redirect(URL("admin/groups"));
+    }
 
     // Was the save button pressed?
     if ($form->validPostBack("save")) {
 
         $data = array(
             "name" => $form->getValue("name"),
-            "canSuspend" => (bool)$form->getValue("canSuspend"),
-            "private" => (bool)$form->getValue("private")
+            "canSuspend" => (bool) $form->getValue("canSuspend"),
+            "private" => (bool) $form->getValue("private")
         );
 
         $model = ET::groupModel();
         $model->updateById($group["groupId"], $data);
 
         // If there were errors, pass them on to the form.
-        if ($model->errorCount()) $form->errors($model->errors());
+        if ($model->errorCount()) {
+            $form->errors($model->errors());
+        }
 
         // Otherwise, redirect back to the groups page.
-        else $this->redirect(URL("admin/groups"));
+        else {
+            $this->redirect(URL("admin/groups"));
+        }
     }
 
     $this->data("form", $form);
@@ -89,22 +95,26 @@ public function action_create()
     $form->action = URL("admin/groups/create");
 
     // Was the cancel button pressed?
-    if ($form->isPostBack("cancel")) $this->redirect(URL("admin/groups"));
+    if ($form->isPostBack("cancel")) {
+        $this->redirect(URL("admin/groups"));
+    }
 
     // Was the save button pressed?
     if ($form->validPostBack("save")) {
 
         $data = array(
             "name" => $form->getValue("name"),
-            "canSuspend" => (bool)$form->getValue("canSuspend"),
-            "private" => (bool)$form->getValue("private")
+            "canSuspend" => (bool) $form->getValue("canSuspend"),
+            "private" => (bool) $form->getValue("private")
         );
 
         $model = ET::groupModel();
         $groupId = $model->create($data);
 
         // If there were errors, pass them on to the form.
-        if ($model->errorCount()) $form->errors($model->errors());
+        if ($model->errorCount()) {
+            $form->errors($model->errors());
+        }
 
         // Otherwise...
         else {
@@ -148,10 +158,12 @@ public function action_create()
  */
 public function action_delete($groupId = "")
 {
-    if (!$this->validateToken()) return;
+    if (!$this->validateToken()) {
+        return;
+    }
 
     // Get this group's details. If it doesn't exist, show an error.
-    if (!($group = ET::groupModel()->getById((int)$groupId))) {
+    if (!($group = ET::groupModel()->getById((int) $groupId))) {
         $this->render404();
         return;
     }

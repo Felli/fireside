@@ -73,7 +73,9 @@ public function action_errors()
 public function action_warnings()
 {
     $errors = $this->warningChecks();
-    if (!$errors) $this->redirect(URL("install/info"));
+    if (!$errors) {
+        $this->redirect(URL("install/info"));
+    }
 
     $this->data("errors", $errors);
     $this->render("install/warnings");
@@ -96,7 +98,9 @@ public function action_info()
     $form->setValue("tablePrefix", "et");
 
     // If we have values stored in the session, use them.
-    if ($values = ET::$session->get("install")) $form->setValues($values);
+    if ($values = ET::$session->get("install")) {
+        $form->setValues($values);
+    }
 
     // Work out what the base URL is.
     $dir = substr($_SERVER["PHP_SELF"], 0, strrpos($_SERVER["PHP_SELF"], "/index.php"));
@@ -104,7 +108,9 @@ public function action_info()
     $form->setValue("baseURL", $baseURL);
 
     // Work out if we can handle friendly URLs.
-    if (!empty($_SERVER["REQUEST_URI"])) $form->setValue("friendlyURLs", true);
+    if (!empty($_SERVER["REQUEST_URI"])) {
+        $form->setValue("friendlyURLs", true);
+    }
 
     // If the form was submitted...
     if ($form->isPostBack("submit")) {
@@ -112,14 +118,23 @@ public function action_info()
         $values = $form->getValues();
 
         // Make sure the title isn't empty.
-        if (!strlen($values["forumTitle"]))
-            $form->error("forumTitle", T("message.empty"));
+        if (!strlen($values["forumTitle"])) {
+                    $form->error("forumTitle", T("message.empty"));
+        }
 
         // Make sure the admin's details are valid.
-        if ($error = ET::memberModel()->validateUsername($values["adminUser"], false)) $form->error("adminUser", T("message.$error"));
-        if ($error = ET::memberModel()->validateEmail($values["adminEmail"], false)) $form->error("adminEmail", T("message.$error"));
-        if ($error = ET::memberModel()->validatePassword($values["adminPass"])) $form->error("adminPass", T("message.$error"));
-        if ($values["adminPass"] != $values["adminConfirm"]) $form->error("adminConfirm", T("message.passwordsDontMatch"));
+        if ($error = ET::memberModel()->validateUsername($values["adminUser"], false)) {
+            $form->error("adminUser", T("message.$error"));
+        }
+        if ($error = ET::memberModel()->validateEmail($values["adminEmail"], false)) {
+            $form->error("adminEmail", T("message.$error"));
+        }
+        if ($error = ET::memberModel()->validatePassword($values["adminPass"])) {
+            $form->error("adminPass", T("message.$error"));
+        }
+        if ($values["adminPass"] != $values["adminConfirm"]) {
+            $form->error("adminConfirm", T("message.passwordsDontMatch"));
+        }
 
         // Try and connect to the database.
         try {
@@ -137,10 +152,12 @@ public function action_info()
             // Get a list of all existing tables.
             $theirTables = array();
             $result = ET::SQL("SHOW TABLES");
-            while ($table = $result->result()) $theirTables[] = $table;
+            while ($table = $result->result()) {
+                $theirTables[] = $table;
+            }
 
             // Just do a check for the member table. If it exists with this prefix, we have a conflict.
-            if (in_array($values["tablePrefix"]."_member", $theirTables)) {
+            if (in_array($values["tablePrefix"] . "_member", $theirTables)) {
 
                 $form->error("tablePrefix", T("message.tablePrefixConflict"));
 
@@ -173,10 +190,14 @@ public function action_info()
 public function action_install()
 {
     // If we aren't supposed to be here, get out.
-    if (!($info = ET::$session->get("install"))) $this->redirect(URL("install/info"));
+    if (!($info = ET::$session->get("install"))) {
+        $this->redirect(URL("install/info"));
+    }
 
     // Make sure the base URL has a trailing slash.
-    if (substr($info["baseURL"], -1) != "/") $info["baseURL"] .= "/";
+    if (substr($info["baseURL"], -1) != "/") {
+        $info["baseURL"] .= "/";
+    }
 
     // Prepare the $config variable with the installation settings.
     $config = array(
@@ -186,7 +207,7 @@ public function action_install()
         "esoTalk.database.user" => $info["mysqlUser"],
         "esoTalk.database.password" => $info["mysqlPass"],
         "esoTalk.database.dbName" => $info["mysqlDB"],
-        "esoTalk.database.prefix" => $info["tablePrefix"]."_",
+        "esoTalk.database.prefix" => $info["tablePrefix"] . "_",
         "esoTalk.forumTitle" => $info["forumTitle"],
         "esoTalk.baseURL" => $info["baseURL"],
         "esoTalk.emailFrom" => "do_not_reply@{$_SERVER["HTTP_HOST"]}",
@@ -209,18 +230,18 @@ public function action_install()
     }
 
     // Write the $config variable to config.php.
-    @unlink(PATH_CONFIG."/config.php");
+    @unlink(PATH_CONFIG . "/config.php");
     ET::writeConfig($config);
 
     // Write custom.css and index.html as empty files (if they're not already there.)
-    if (!file_exists(PATH_CONFIG."/custom.css")) file_put_contents(PATH_CONFIG."/custom.css", "");
-    file_put_contents(PATH_CONFIG."/index.html", "");
-    file_put_contents(PATH_UPLOADS."/index.html", "");
-    file_put_contents(PATH_UPLOADS."/avatars/index.html", "");
+    if (!file_exists(PATH_CONFIG . "/custom.css")) file_put_contents(PATH_CONFIG . "/custom.css", "");
+    file_put_contents(PATH_CONFIG . "/index.html", "");
+    file_put_contents(PATH_UPLOADS . "/index.html", "");
+    file_put_contents(PATH_UPLOADS . "/avatars/index.html", "");
 
     // Write a .htaccess file if they are using friendly URLs (and mod_rewrite).
     if (C("esoTalk.urls.rewrite")) {
-        file_put_contents(PATH_ROOT."/.htaccess", "# Generated by esoTalk
+        file_put_contents(PATH_ROOT . "/.htaccess", "# Generated by esoTalk
 <IfModule mod_rewrite.c>
 RewriteEngine On
 RewriteCond %{REQUEST_FILENAME} !-f
@@ -229,7 +250,7 @@ RewriteRule ^(.*)$ index.php/$1 [QSA,L]
     }
 
     // Write a robots.txt file.
-    file_put_contents(PATH_ROOT."/robots.txt", "User-agent: *
+    file_put_contents(PATH_ROOT . "/robots.txt", "User-agent: *
 Crawl-delay: 10
 Disallow: /conversations/*?search=*
 Disallow: /members/
@@ -272,13 +293,19 @@ protected function warningChecks()
     $errors = array();
 
     // We don't like register_globals!
-    if (ini_get("register_globals")) $errors[] = T("message.registerGlobalsWarning");
+    if (ini_get("register_globals")) {
+        $errors[] = T("message.registerGlobalsWarning");
+    }
 
     // Check for safe_mode.
-    if (ini_get("safe_mode")) $errors[] = T("message.safeModeWarning");
+    if (ini_get("safe_mode")) {
+        $errors[] = T("message.safeModeWarning");
+    }
 
     // Check for the gd extension.
-    if (!extension_loaded("gd") and !extension_loaded("gd2")) $errors[] = T("message.gdNotEnabledWarning");
+    if (!extension_loaded("gd") and !extension_loaded("gd2")) {
+        $errors[] = T("message.gdNotEnabledWarning");
+    }
 
     return $errors;
 }
@@ -294,13 +321,19 @@ protected function fatalChecks()
     $errors = array();
 
     // Make sure the installer is not locked.
-    if (C("esoTalk.installed")) $errors[] = T("message.esoTalkAlreadyInstalled");
+    if (C("esoTalk.installed")) {
+        $errors[] = T("message.esoTalkAlreadyInstalled");
+    }
 
     // Check the PHP version.
-    if (!version_compare(PHP_VERSION, "5.3.0", ">=")) $errors[] = sprintf(T("message.greaterPHPVersionRequired"), "5.3.0");
+    if (!version_compare(PHP_VERSION, "5.3.0", ">=")) {
+        $errors[] = sprintf(T("message.greaterPHPVersionRequired"), "5.3.0");
+    }
 
     // Check for the MySQL extension.
-    if (!extension_loaded("mysql")) $errors[] = T("message.greaterMySQLVersionRequired");
+    if (!extension_loaded("mysql")) {
+        $errors[] = T("message.greaterMySQLVersionRequired");
+    }
 
     // Check file permissions.
     $fileErrors = array();
@@ -312,14 +345,14 @@ protected function fatalChecks()
 
         // If it doesn't exist and we can't create it, or if it does exist but we can't write to it, add it as
         // an errorous file.
-        if ((!file_exists(PATH_ROOT."/$file") and !@mkdir(PATH_ROOT."/$file")) or (!is_writable(PATH_ROOT."/$file") and !@chmod(PATH_ROOT."/$file", 0777))) {
+        if ((!file_exists(PATH_ROOT . "/$file") and !@mkdir(PATH_ROOT . "/$file")) or (!is_writable(PATH_ROOT . "/$file") and !@chmod(PATH_ROOT . "/$file", 0777))) {
 
             // If this directory name is empty (referring to the root directory), use the directory one level up.
             if (!$file) {
                 $realPath = realpath($file);
-                $fileErrors[] = substr($realPath, strrpos($realPath, "/") + 1)."/";
+                $fileErrors[] = substr($realPath, strrpos($realPath, "/") + 1) . "/";
             }
-            else $fileErrors[] = $file."/";
+            else $fileErrors[] = $file . "/";
 
         }
     }

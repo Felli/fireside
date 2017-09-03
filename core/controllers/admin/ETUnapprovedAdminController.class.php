@@ -42,10 +42,12 @@ public function action_index()
  */
 public function action_approve($memberId)
 {
-    if (!$this->validateToken()) return;
+    if (!$this->validateToken()) {
+        return;
+    }
 
     // Get this member's details. If it doesn't exist or is already approved, show an error.
-    if (!($member = ET::memberModel()->getById((int)$memberId)) or $member["confirmed"]) {
+    if (!($member = ET::memberModel()->getById((int) $memberId)) or $member["confirmed"]) {
         $this->redirect(URL("admin/unapproved"));
         return;
     }
@@ -54,7 +56,7 @@ public function action_approve($memberId)
 
     sendEmail($member["email"],
         sprintf(T("email.approved.subject"), $member["username"]),
-        sprintf(T("email.header"), $member["username"]).sprintf(T("email.approved.body"), C("esoTalk.forumTitle"), URL("user/login", true))
+        sprintf(T("email.header"), $member["username"]) . sprintf(T("email.approved.body"), C("esoTalk.forumTitle"), URL("user/login", true))
     );
 
     $this->message(T("message.changesSaved"), "success autoDismiss");
@@ -70,10 +72,12 @@ public function action_approve($memberId)
  */
 public function action_deny($memberId)
 {
-    if (!$this->validateToken()) return;
+    if (!$this->validateToken()) {
+        return;
+    }
 
     // Get this member's details. If it doesn't exist or is already approved, show an error.
-    if (!($member = ET::memberModel()->getById((int)$memberId)) or $member["confirmed"]) {
+    if (!($member = ET::memberModel()->getById((int) $memberId)) or $member["confirmed"]) {
         $this->redirect(URL("admin/unapproved"));
         return;
     }
@@ -92,7 +96,9 @@ public function action_deny($memberId)
  */
 public function action_denyAll()
 {
-    if (!$this->validateToken()) return;
+    if (!$this->validateToken()) {
+        return;
+    }
 
     ET::memberModel()->delete(array("confirmed" => 0));
 

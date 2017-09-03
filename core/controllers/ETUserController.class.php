@@ -43,7 +43,9 @@ public function action_index()
 public function action_login()
 {
     // If we're already logged in, redirect to the forum index.
-    if (ET::$session->user) $this->redirect(URL(""));
+    if (ET::$session->user) {
+        $this->redirect(URL(""));
+    }
 
     // Construct a form.
     $form = ETFactory::make("form");
@@ -61,7 +63,7 @@ public function action_login()
 
     // Add the password field to the form structure. We also use a processing callback on this field to attempt
     // the login because the password is the specific mechanism of authentication in this instance.
-    $form->addSection("password", T("Password")." <small><a href='".URL("user/forgot")."' class='link-forgot' tabindex='-1'>".T("Forgot?")."</a></small>");
+    $form->addSection("password", T("Password") . " <small><a href='" . URL("user/forgot") . "' class='link-forgot' tabindex='-1'>" . T("Forgot?") . "</a></small>");
     $form->addField("password", "password", function($form)
     {
         return $form->input("password", "password");
@@ -69,10 +71,14 @@ public function action_login()
     function($form, $key, &$success) use ($controller)
     {
         // If the login was successful...
-        if (ET::$session->login($form->getValue("username"), $form->getValue("password"), $form->getValue("remember"))) $success = true;
+        if (ET::$session->login($form->getValue("username"), $form->getValue("password"), $form->getValue("remember"))) {
+            $success = true;
+        }
 
         // If not, get the errors that occurred and pass them to the form.
-        else $form->errors(ET::$session->errors());
+        else {
+            $form->errors(ET::$session->errors());
+        }
     });
 
     // Add the "remember me" field to the form structure.
@@ -80,24 +86,30 @@ public function action_login()
         $form->addSection("remember");
         $form->addField("remember", "remember", function($form)
         {
-            return "<label class='checkbox'>".$form->checkbox("remember")." ".T("Keep me logged in")."</label>";
+            return "<label class='checkbox'>" . $form->checkbox("remember") . " " . T("Keep me logged in") . "</label>";
         });
     }
 
     $this->trigger("initLogin", array($form));
 
     // If the cancel button was pressed, return to where the user was before.
-    if ($form->isPostBack("cancel")) $this->redirect(URL(R("return")));
+    if ($form->isPostBack("cancel")) {
+        $this->redirect(URL(R("return")));
+    }
 
     // If the login form was submitted, run the field processing callbacks. If one of them says we
     // were successful in logging in, then we can redirect back to where the user came from.
     $success = false;
-    if ($form->validPostBack()) $form->runFieldCallbacks($success);
-    if ($success) $this->redirect(URL(R("return")));
+    if ($form->validPostBack()) {
+        $form->runFieldCallbacks($success);
+    }
+    if ($success) {
+        $this->redirect(URL(R("return")));
+    }
 
     // Instead of showing some specific errors on the form, render them as messages.
     if (isset($form->errors["emailNotYetConfirmed"])) {
-        $this->renderMessage("Error", sprintf(T("message.emailNotYetConfirmed"), URL("user/sendConfirmation/".$form->getValue("username"))));
+        $this->renderMessage("Error", sprintf(T("message.emailNotYetConfirmed"), URL("user/sendConfirmation/" . $form->getValue("username"))));
         return;
     }
     if (isset($form->errors["accountNotYetApproved"])) {
@@ -118,7 +130,9 @@ public function action_login()
  */
 public function action_logout()
 {
-    if (!$this->validateToken()) return;
+    if (!$this->validateToken()) {
+        return;
+    }
 	
     ET::$session->remove("messages");
     ET::$session->logout();
@@ -135,7 +149,9 @@ public function action_logout()
 public function action_join()
 {
     // If we're already logged in, get out of here.
-    if (ET::$session->user) $this->redirect(URL(""));
+    if (ET::$session->user) {
+        $this->redirect(URL(""));
+    }
 
     // If registration is closed, show a message.
     if (!C("esoTalk.registration.open")) {
@@ -167,7 +183,7 @@ public function action_join()
     $form->addSection("email", T("Email"));
     $form->addField("email", "email", function($form)
     {
-        return $form->input("email")."<br><small>".T("Used to verify your account and subscribe to conversations")."</small>";
+        return $form->input("email") . "<br><small>" . T("Used to verify your account and subscribe to conversations") . "</small>";
     },
     function($form, $key, &$data)
     {
@@ -178,7 +194,7 @@ public function action_join()
     $form->addSection("password", T("Password"));
     $form->addField("password", "password", function($form)
     {
-        return $form->input("password", "password")."<br><small>".sprintf(T("Choose a secure password of at least %s characters"), C("esoTalk.minPasswordLength"))."</small>";
+        return $form->input("password", "password") . "<br><small>" . sprintf(T("Choose a secure password of at least %s characters"), C("esoTalk.minPasswordLength")) . "</small>";
     },
     function($form, $key, &$data)
     {
@@ -194,40 +210,48 @@ public function action_join()
     function($form, $key, &$data)
     {
         // Make sure the passwords match.
-        if ($form->getValue("password") != $form->getValue($key))
-            $form->error($key, T("message.passwordsDontMatch"));
+        if ($form->getValue("password") != $form->getValue($key)) {
+                    $form->error($key, T("message.passwordsDontMatch"));
+        }
     });
 
     $this->trigger("initJoin", array($form));
 
     // If the cancel button was pressed, return to where the user was before.
-    if ($form->isPostBack("cancel")) $this->redirect(URL(R("return")));
+    if ($form->isPostBack("cancel")) {
+        $this->redirect(URL(R("return")));
+    }
 
     // If the form has been submitted, validate it and add the member into the database.
     if ($form->validPostBack("submit")) {
 
         $data = array();
-        if ($form->validPostBack()) $form->runFieldCallbacks($data);
+        if ($form->validPostBack()) {
+            $form->runFieldCallbacks($data);
+        }
 
         if (!$form->errorCount()) {
 
             $data["account"] = ACCOUNT_MEMBER;
 
-            if (!C("esoTalk.registration.requireConfirmation")) $data["confirmed"] = true;
-            else $data["resetPassword"] = md5(uniqid(rand()));
+            if (!C("esoTalk.registration.requireConfirmation")) {
+                $data["confirmed"] = true;
+            } else {
+                $data["resetPassword"] = md5(uniqid(rand()));
+            }
 
             // Create the member.
             $model = ET::memberModel();
             $memberId = $model->create($data);
 
             // If there were validation errors, pass them to the form.
-            if ($model->errorCount()) $form->errors($model->errors());
-
-            else {
+            if ($model->errorCount()) {
+                $form->errors($model->errors());
+            } else {
 
                 // If we require the user to confirm their email, send them an email and show a message.
                 if (C("esoTalk.registration.requireConfirmation") == "email") {
-                    $this->sendConfirmationEmail($data["email"], $data["username"], $memberId.$data["resetPassword"]);
+                    $this->sendConfirmationEmail($data["email"], $data["username"], $memberId . $data["resetPassword"]);
                     $this->renderMessage(T("Success!"), T("message.confirmEmail"));
                 }
 
@@ -236,9 +260,7 @@ public function action_join()
                     $admin = ET::memberModel()->getById(C("esoTalk.rootAdmin"));
                     ET::activityModel()->create("unapproved", $admin, null, array("username" => $data["username"]));
                     $this->renderMessage(T("Success!"), T("message.waitForApproval"));
-                }
-
-                else {
+                } else {
                     ET::$session->login($data["username"], $form->getValue("password"));
                     $this->redirect(URL(""));
                 }
@@ -268,7 +290,7 @@ public function sendConfirmationEmail($email, $username, $hash)
 {
     sendEmail($email,
         sprintf(T("email.confirmEmail.subject"), $username),
-        sprintf(T("email.header"), $username).sprintf(T("email.confirmEmail.body"), C("esoTalk.forumTitle"), URL("user/confirm/".$hash, true))
+        sprintf(T("email.header"), $username) . sprintf(T("email.confirmEmail.body"), C("esoTalk.forumTitle"), URL("user/confirm/" . $hash, true))
     );
 }
 
@@ -282,10 +304,12 @@ public function sendConfirmationEmail($email, $username, $hash)
 public function action_confirm($hash = "")
 {
     // If email confirmation is not necessary, get out of here.
-    if (C("esoTalk.registration.requireConfirmation") != "email") return;
+    if (C("esoTalk.registration.requireConfirmation") != "email") {
+        return;
+    }
 
     // Split the hash into the member ID and hash.
-    $memberId = (int)substr($hash, 0, strlen($hash) - 32);
+    $memberId = (int) substr($hash, 0, strlen($hash) - 32);
     $hash = substr($hash, -32);
 
     // See if there is an unconfirmed user with this ID and password hash. If there is, confirm them and log them in.
@@ -328,7 +352,7 @@ public function action_sendConfirmation($username = "")
     // Get the requested member.
     $member = reset(ET::memberModel()->get(array("m.username" => $username, "m.confirmed" => false)));
     if ($member) {
-        $this->sendConfirmationEmail($member["email"], $member["username"], $member["memberId"].$member["resetPassword"]);
+        $this->sendConfirmationEmail($member["email"], $member["username"], $member["memberId"] . $member["resetPassword"]);
         $this->renderMessage(T("Success!"), T("message.confirmEmail"));
     }
     else $this->redirect(URL(""));
@@ -344,7 +368,9 @@ public function action_sendConfirmation($username = "")
 public function action_forgot()
 {
     // If the user is logged in, kick them out.
-    if (ET::$session->user) $this->redirect(URL(""));
+    if (ET::$session->user) {
+        $this->redirect(URL(""));
+    }
 
     // Set the title and make sure the page doesn't get indexed.
     $this->title = T("Forgot Password");
@@ -355,17 +381,18 @@ public function action_forgot()
     $form->action = URL("user/forgot");
 
     // If the cancel button was pressed, return to where the user was before.
-    if ($form->isPostBack("cancel")) redirect(URL(R("return")));
+    if ($form->isPostBack("cancel")) {
+        redirect(URL(R("return")));
+    }
 
     // If they've submitted their email to get a password reset link, email one to them!
     if ($form->validPostBack("submit")) {
 
         // Find the member with this email.
         $member = reset(ET::memberModel()->get(array("email" => $form->getValue("email"))));
-        if (!$member)
-            $form->error("email", T("message.emailDoesntExist"));
-
-        else {
+        if (!$member) {
+                    $form->error("email", T("message.emailDoesntExist"));
+        } else {
 
             // Update their record in the database with a special password reset hash.
             $hash = md5(uniqid(rand()));
@@ -374,7 +401,7 @@ public function action_forgot()
             // Send them email containing the link, and redirect to the home page.
             sendEmail($member["email"],
                 sprintf(T("email.forgotPassword.subject"), $member["username"]),
-                sprintf(T("email.header"), $member["username"]).sprintf(T("email.forgotPassword.body"), C("esoTalk.forumTitle"), URL("user/reset/".$member["memberId"].$hash, true))
+                sprintf(T("email.header"), $member["username"]) . sprintf(T("email.forgotPassword.body"), C("esoTalk.forumTitle"), URL("user/reset/" . $member["memberId"] . $hash, true))
             );
             $this->renderMessage(T("Success!"), T("message.passwordEmailSent"));
             return;
@@ -397,15 +424,19 @@ public function action_forgot()
  */
 public function action_reset($hashString = "")
 {
-    if (empty($hashString)) return;
+    if (empty($hashString)) {
+        return;
+    }
 
     // Split the hash into the member ID and hash.
-    $memberId = (int)substr($hashString, 0, strlen($hashString) - 32);
+    $memberId = (int) substr($hashString, 0, strlen($hashString) - 32);
     $hash = substr($hashString, -32);
 
     // Find the member with this password reset token. If it's an invalid token, take them back to the email form.
     $member = reset(ET::memberModel()->get(array("m.memberId" => $memberId, "resetPassword" => $hash)));
-    if (!$member) return;
+    if (!$member) {
+        return;
+    }
 
     // Construct a form.
     $form = ETFactory::make("form");
@@ -415,8 +446,9 @@ public function action_reset($hashString = "")
     if ($form->validPostBack("submit")) {
 
         // Make sure the passwords match. The model will do the rest of the validation.
-        if ($form->getValue("password") != $form->getValue("confirm"))
-            $form->error("confirm", T("message.passwordsDontMatch"));
+        if ($form->getValue("password") != $form->getValue("confirm")) {
+                    $form->error("confirm", T("message.passwordsDontMatch"));
+        }
 
         if (!$form->errorCount()) {
 
@@ -427,9 +459,9 @@ public function action_reset($hashString = "")
             ));
 
             // If there were validation errors, pass them to the form.
-            if ($model->errorCount()) $form->errors($model->errors());
-
-            else {
+            if ($model->errorCount()) {
+                $form->errors($model->errors());
+            } else {
                 $this->message(T("message.passwordChanged"));
                 $this->redirect(URL(""));
             }

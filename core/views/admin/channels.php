@@ -39,8 +39,10 @@ foreach ($data["channels"] as $channel):
 
 // If this channel is on the same depth as the last channel, just end the previous channel's <li>.
 if ($channel["depth"] == $curDepth) {
-    if ($counter > 0) echo "</li>";
-}
+    if ($counter > 0) {
+        echo "</li>";
+    }
+    }
 // If this channel is deeper than the last channel, start a new <ol>.
 elseif ($channel["depth"] > $curDepth) {
     echo "<ol>";

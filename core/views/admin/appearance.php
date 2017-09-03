@@ -42,7 +42,10 @@ foreach ($data["skins"] as $k => $skin): ?>
 
 <div class='preview'>
 <?php if (file_exists(PATH_SKINS . "/$k/preview.jpg")): ?><img src='<?php echo getResource("addons/skins/$k/preview.jpg"); ?>' alt='<?php echo $k; ?>'/>
-<?php else: ?><span><?php echo T("No preview"); ?></span><?php endif; ?>
+<?php else {
+    : ?><span><?php echo T("No preview");
+}
+?></span><?php endif; ?>
 </div>
 
 <div class='controls skinControls'>

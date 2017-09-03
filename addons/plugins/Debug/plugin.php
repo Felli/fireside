@@ -57,7 +57,9 @@ class ETPlugin_Debug extends ETPlugin {
         parent::init();
 
         // Turn debug mode on.
-        if (!ET::$session->isAdmin()) return;
+        if (!ET::$session->isAdmin()) {
+            return;
+        }
         ET::$config["esoTalk.debug"] = true;
     }
 
@@ -69,7 +71,9 @@ class ETPlugin_Debug extends ETPlugin {
      */
     public function handler_init()
     {
-        if (!ET::$session->isAdmin()) return;
+        if (!ET::$session->isAdmin()) {
+            return;
+        }
         ET::$controller->addCSSFile($this->resource("debug.css"), true);
         ET::$controller->addJSFile($this->resource("debug.js"), true);
     }
@@ -82,7 +86,9 @@ class ETPlugin_Debug extends ETPlugin {
      */
     public function handler_database_beforeQuery($sender, $query)
     {
-        if (is_object(ET::$session) and !ET::$session->isAdmin()) return;
+        if (is_object(ET::$session) and !ET::$session->isAdmin()) {
+            return;
+        }
 
         $this->queryStartTime = microtime(true);
         $this->backtrace = debug_backtrace();
@@ -96,12 +102,14 @@ class ETPlugin_Debug extends ETPlugin {
      */
     public function handler_database_afterQuery($sender, $result)
     {
-        if (is_object(ET::$session) and !ET::$session->isAdmin()) return;
+        if (is_object(ET::$session) and !ET::$session->isAdmin()) {
+            return;
+        }
 
         // The sixth item in the backtrace is typically the model. Screw being reliable.
         $item = $this->backtrace[6];
-        $method = isset($item["class"]) ? $item["class"]."::" : "";
-        $method .= $item["function"]."()";
+        $method = isset($item["class"]) ? $item["class"] . "::" : "";
+        $method .= $item["function"] . "()";
 
         // Store the query in our queries array.
         $this->queries[] = array($result->queryString, round(microtime(true) - $this->queryStartTime, 4), $method);
@@ -116,7 +124,9 @@ class ETPlugin_Debug extends ETPlugin {
     function handler_pageEnd($sender)
     {
         // Don't proceed if the user is not permitted to see the debug information!
-        if (!ET::$session->isAdmin()) return;
+        if (!ET::$session->isAdmin()) {
+            return;
+        }
 
         // Stop the page loading timer.
         $end = microtime(true);
@@ -124,23 +134,23 @@ class ETPlugin_Debug extends ETPlugin {
 
         // Output the debug area.
         echo "<div id='debug'>
-	<div id='debugHdr'><h2>".sprintf(T("Page loaded in %s seconds"), $time)."</h2></div>";
+	<div id='debugHdr'><h2>".sprintf(T("Page loaded in %s seconds"), $time) . "</h2></div>";
 
         // Include the geshi library so we can syntax-highlight MySQL queries.
         include "geshi/geshi.php";
 
-        echo "<h3><a href='#' onclick='$(\"#debugQueries\").slideToggle(\"fast\");return false'>".T("MySQL queries")." (<span id='debugQueriesCount'>".count($this->queries)."</span>)</a></h3>
+        echo "<h3><a href='#' onclick='$(\"#debugQueries\").slideToggle(\"fast\");return false'>" . T("MySQL queries") . " (<span id='debugQueriesCount'>" . count($this->queries) . "</span>)</a></h3>
 		<div id='debugQueries' class='section'>";
         foreach ($this->queries as $query) {
             $geshi = new GeSHi(trim($query[0]), "mysql");
             $geshi->set_header_type(GESHI_HEADER_PRE);
-            echo "<div><strong>".$query[2]."</strong> <span class='queryTime subText".($query[1] > 0.5 ? " warning" : "")."'>".$query[1]."s</span>".$geshi->parse_code()."</div>";
+            echo "<div><strong>" . $query[2] . "</strong> <span class='queryTime subText" . ($query[1] > 0.5 ? " warning" : "") . "'>" . $query[1] . "s</span>" . $geshi->parse_code() . "</div>";
         }
         $this->queries = array();
 
         // Output POST + GET + FILES information.
         echo "</div>
-		<h3><a href='#' onclick='$(\"#debugPostGetFiles\").slideToggle(\"fast\");return false'>".T("POST + GET + FILES information")."</a></h3>
+		<h3><a href='#' onclick='$(\"#debugPostGetFiles\").slideToggle(\"fast\");return false'>".T("POST + GET + FILES information") . "</a></h3>
 		<div id='debugPostGetFiles' class='section'>
 		<p style='white-space:pre' class='fixed' id='debugPost'>\$_POST = ";
         echo sanitizeHTML(print_r($_POST, true));
@@ -152,7 +162,7 @@ class ETPlugin_Debug extends ETPlugin {
 		</div>";
 
         // Output SESSION + COOKIE information.
-        echo "<h3><a href='#' onclick='$(\"#debugSessionCookie\").slideToggle(\"fast\");return false'>".T("SESSION + COOKIE information")."</a></h3>
+        echo "<h3><a href='#' onclick='$(\"#debugSessionCookie\").slideToggle(\"fast\");return false'>" . T("SESSION + COOKIE information") . "</a></h3>
 		<div id='debugSessionCookie' class='section'><p style='white-space:pre' class='fixed' id='debugSession'>\$_SESSION = ";
         echo sanitizeHTML(print_r($_SESSION, true));
         echo "</p><p style='white-space:pre' class='fixed' id='debugCookie'>\$_COOKIE = ";
